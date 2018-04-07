@@ -1,4 +1,4 @@
-package lava.text;
+package lava.instance;
 
 import java.text.ParseException;
 
@@ -6,14 +6,14 @@ import java.util.Date;
 
 
 
-public enum SimpleDateFormat {
+public enum SimpleDateFormatInstance {
 
 	
-	yyyyMMdd_cn("yyyyÄêMMÔÂddÈÕ"),yyyyMMddHHmmss_en("yyyy-MM-dd HH:mm:ss"),yyyyMMdd_en("yyyy-MM-dd")
+	yyyyMMdd_cn("yyyyå¹´MMæœˆddæ—¥"),yyyyMMddHHmmss_en("yyyy-MM-dd HH:mm:ss"),yyyyMMdd_en("yyyy-MM-dd")
 	,yyyyMMddTHHmmss_en("yyyy-MM-dd'T'HH:mm:ss")
 	;
 	
-	SimpleDateFormat(String pattern){
+	SimpleDateFormatInstance(String pattern){
 		this.simpleDateFormat=new java.text.SimpleDateFormat(pattern);
 	}
 	
@@ -43,7 +43,7 @@ public enum SimpleDateFormat {
 
 	public static Date tryParse(String str){
 		Date dt=null;
-		for(SimpleDateFormat dateTimeFormater:SimpleDateFormat.values()){
+		for(SimpleDateFormatInstance dateTimeFormater:SimpleDateFormatInstance.values()){
 			try{
 				dt=dateTimeFormater.parse(str);
 			}catch(Exception ex){continue;}

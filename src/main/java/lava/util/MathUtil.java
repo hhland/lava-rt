@@ -1,8 +1,8 @@
-package lava.lang;
+package lava.util;
 
-public enum Math {
+public class MathUtil {
 
-	;
+	
 	
 	public static <N extends Number> N avg(N... numbers){
 		Double v=0.00;

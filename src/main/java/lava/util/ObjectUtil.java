@@ -12,6 +12,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 public class ObjectUtil {
 
@@ -26,14 +27,12 @@ public class ObjectUtil {
 
 	@SafeVarargs
 	public static <T> boolean isEquals(T... objects) {
-		T object0 = objects[0];
-
-		for (int i = 1; i < objects.length; i++) {
-			T objecti = objects[i];
-			if (object0 == null && objecti == null)
-				continue;
-			else if (objecti != null && !objecti.equals(object0))
+		for (int i = 0,j=1; j < objects.length; j++) {
+			T objecti = objects[i],objectj=objects[j];
+			if (objecti != null && !objecti.equals(objectj))
 				return false;
+			else if (objecti == null && objectj == null)
+				continue;
 		}
 
 		return true;
@@ -65,6 +64,15 @@ public class ObjectUtil {
 
 		String[] targetValueRef() default {};
 
+	}
+	
+	public static float loadProperties(Properties properties,Object object) {
+		return 0;
+	}
+	
+	public static float loadProperties(Properties properties,Class cls) {
+		
+		return 0;
 	}
 
 	public static float copyFieldByMethod(Object source, Object target) {

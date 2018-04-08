@@ -1,6 +1,6 @@
-package lava.util;
+package lava.common;
 
-public class MathUtil {
+public class MathCommon {
 
 	
 	

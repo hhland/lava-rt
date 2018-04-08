@@ -1,4 +1,4 @@
-package lava.instance;
+package lava.rt.instance;
 
 import java.text.ParseException;
 
@@ -9,7 +9,7 @@ import java.util.Date;
 public enum SimpleDateFormatInstance {
 
 	
-	yyyyMMdd_cn("yyyy年MM月dd日"),yyyyMMddHHmmss_en("yyyy-MM-dd HH:mm:ss"),yyyyMMdd_en("yyyy-MM-dd")
+	yyyyMMdd_cn("yyyy年MM月dd�?"),yyyyMMddHHmmss_en("yyyy-MM-dd HH:mm:ss"),yyyyMMdd_en("yyyy-MM-dd")
 	,yyyyMMddTHHmmss_en("yyyy-MM-dd'T'HH:mm:ss")
 	;
 	

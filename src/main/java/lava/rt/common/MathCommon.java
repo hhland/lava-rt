@@ -1,4 +1,4 @@
-package lava.common;
+package lava.rt.common;
 
 public class MathCommon {
 

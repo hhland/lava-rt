@@ -1,4 +1,4 @@
-package lava.common;
+package lava.rt.common;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;

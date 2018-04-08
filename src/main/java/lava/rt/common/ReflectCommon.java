@@ -1,4 +1,4 @@
-package lava.common;
+package lava.rt.common;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

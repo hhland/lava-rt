@@ -48,15 +48,15 @@ public class ReflectCommon {
 	}
 	
 	public static float loadProperties(Properties properties,Object object) {
-		return loadProperties(properties, object.getClass(),object);
+		return load(properties, object.getClass(),object);
 	}
 	
 	public static float loadProperties(Properties properties,Class cls) {
 		
-		return loadProperties(properties,cls,null);
+		return load(properties,cls,null);
 	}
 	
-	protected static float loadProperties(Properties properties,Class cls,Object object) {
+	protected static float load(Properties properties,Class cls,Object object) {
 		float re=0,total=properties.size();
 		
 		Map<String,Field> keyFields=new HashMap<String,Field>();
@@ -91,6 +91,45 @@ public class ReflectCommon {
 		float prec=re/total;
 		return prec;
 	}
+	
+	
+	public static float loadMap(Map<String,String> map,Class cls,Object object) {
+		float re=0,total=map.keySet().size();
+		
+		Map<String,Field> keyFields=new HashMap<String,Field>();
+		
+		for(Class clsi=cls ;clsi!=Object.class;clsi=cls.getSuperclass()) {
+			Field[] fields=clsi.getDeclaredFields();
+			for(Field field :fields) {
+				String key=field.getName().toLowerCase();
+				keyFields.put(key, field);
+			}
+		}
+		
+		for(Iterator<String> it=map.keySet().iterator();it.hasNext();) {
+			String key=it.next().toString();
+			String value=map.get(key);
+			String fkey=key.replace('.', '_').toLowerCase();
+			if(keyFields.containsKey(fkey)) {
+				Field field=keyFields.get(fkey);
+				field.setAccessible(true);
+				try {
+					field.set(object, value);
+				} catch (IllegalArgumentException | IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					continue;
+				}
+				re++;
+			}
+			
+		}
+		
+		float prec=re/total;
+		return prec;
+	}
+	
+	
 
 	public static float copyFieldByMethod(Object source, Object target) {
 

@@ -4,6 +4,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -237,5 +238,32 @@ public class ReflectCommon {
 
 		return sourceAnnFields;
 	}
+	
+	public static boolean isThis0(Field field) {
+        return field.getName().equals("this$0");
+    }
+	
+	
+	
+	 //无限级内部类实例化
+    public static <T> T newInstance(Class<T> cls) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        T t = null;
+        String clsname = cls.getName();
+        int i = clsname.lastIndexOf("$");
+        if (i > -1) {
+            Constructor constr = cls.getConstructors()[0];
+            String pname = clsname.substring(0, i);
+            Class pcls = null;
+            try {
+                pcls = Class.forName(pname);
+            } catch (ClassNotFoundException ex) {
+                throw new IllegalArgumentException(ex);
+            }
+            t = (T) constr.newInstance(newInstance(pcls));
+        } else {
+            t = (T) cls.newInstance();
+        }
+        return t;
+    }
 
 }

@@ -1,5 +1,7 @@
 package lava.rt.common;
 
+import java.util.stream.Stream;
+
 public class LangCommon {
 
 	public static <T> boolean isIn(T obj1, T... objs) {
@@ -20,7 +22,6 @@ public class LangCommon {
 			else if (objecti == null && objectj == null)
 				continue;
 		}
-
 		return true;
 	}
 }

@@ -76,4 +76,16 @@ public class TextCommon {
     public static String firstCharToUpperCase(String str){
 		return str.substring(0,1).toUpperCase()+str.substring(1,str.length());
 	}
+    
+    public static List<String> subString(String value, String start, String end) {
+        List<String> vals = new ArrayList<String>();
+        String tempValue = value;
+        while (tempValue.contains(start) && tempValue.contains(end)) {
+            int startIndex = tempValue.indexOf(start);
+            int endIndex = tempValue.indexOf(end);
+            vals.add(tempValue.substring(startIndex + 1, endIndex));
+            tempValue = tempValue.substring(endIndex + 1);
+        }
+        return vals;
+    }
 }

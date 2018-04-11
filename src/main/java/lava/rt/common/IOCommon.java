@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -68,7 +69,7 @@ public class IOCommon {
 	   *      ����������������Ӧ���� name1=value1&name2=value2 ����ʽ��
 	   * @return ������Զ����Դ����Ӧ���
 	   */
-	  public String post(String url, String param) {
+	  public static String post(String url, Map<String, Object> paramMap) {
 	    PrintWriter out = null;
 	    BufferedReader in = null;
 	    String result = "";
@@ -84,9 +85,18 @@ public class IOCommon {
 	      // ����POST�������������������
 	      conn.setDoOutput(true);
 	      conn.setDoInput(true);
-	      // ��ȡURLConnection�����Ӧ�������
+	     
 	      out = new PrintWriter(conn.getOutputStream());
 	      // �����������
+	      String param="";
+	      
+	      for(Iterator<String> it=paramMap.keySet().iterator();it.hasNext();) {
+	    	  String key=it.next();
+	    	  Object valueObj=paramMap.get(key);
+	    	  String value=valueObj==null?"":valueObj.toString();
+	    	  param+=key+"="+value+"&";
+	      }
+	      
 	      out.print(param);
 	      // flush������Ļ���
 	      out.flush();

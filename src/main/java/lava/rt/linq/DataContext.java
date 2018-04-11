@@ -3,8 +3,9 @@ package lava.rt.linq;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map;
 
 import lava.rt.common.SqlCommon;
 
@@ -15,6 +16,8 @@ public abstract class DataContext {
 	public DataContext(Connection connection) {
 		this.connection=connection;
 	}
+	
+	protected final Map<String,String> SQL_CACHE=new HashMap<String,String>();
 	
 	public  <M> Table<M>  createTable(Class<M> cls,String pkName){
 		return new Table<M>(this, cls, pkName);
@@ -44,7 +47,7 @@ public abstract class DataContext {
 	} 
 	
 	
-	protected int executeUpdate(String sql) throws SQLException{
+	protected int executeUpdate(String sql,Object[][] param) throws SQLException{
 		return 0;
 	} 
 	

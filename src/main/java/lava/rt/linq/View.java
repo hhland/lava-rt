@@ -12,12 +12,13 @@ public   class View<M> {
 	protected DataContext dataContext;
 	
 	protected String tableName;
-	
+	protected Class<M> classM;
 	
 	
 	protected View (DataContext dataContext,Class<M> classM) {
 		this.dataContext=dataContext;
 		this.tableName=classM.getSimpleName();
+		this.classM=classM;
 	}
 	
 	

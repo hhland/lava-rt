@@ -9,7 +9,7 @@ public  class Table<M> extends View<M> {
 
 	protected String pkName;
 	
-	protected Table(DataContext dataContext,Class<M> classM,String pkName) {
+	public Table(DataContext dataContext,Class<M> classM,String pkName) {
 		super(dataContext,classM);
 		this.pkName=pkName;
 		

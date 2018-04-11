@@ -23,7 +23,7 @@ public final class DataContextSrcGener  {
 		this.connection=connection;
 	}
 	
-	public String toSrc(Class<? extends DataContext> cls) throws SQLException {
+	public String toSrc(Class<? extends DataContext> cls,String pkName) throws SQLException {
 		StringBuffer src=new StringBuffer("");
 		src.append("package "+cls.getPackage().getName()+"; \n\n");
 		
@@ -43,7 +43,7 @@ public final class DataContextSrcGener  {
 		
 		for(String table:tables) {
 			String tn=table.toUpperCase();
-			src.append("\t public final Table<"+tn+"> table"+tn+"=getTable("+tn+".class);\n");
+			src.append("\t public final Table<"+tn+"> table"+tn+"=createTable("+tn+".class,\""+pkName+"\");\n");
 		}
 		src.append("\n\n");
 		for(String table:tables) {
@@ -85,11 +85,11 @@ public final class DataContextSrcGener  {
 	    	
 	        
 	        context
-	    	.append("\t\t\t public  class "+tableName+" {")
+	    	.append("\t public  class "+tableName+" {")
 	    	.append("\n\n\n")
 	    	.append(this.genColsSrc())
 	    	
-	    	.append("\t\t\t } //end "+tableName)
+	    	.append("\t } //end "+tableName)
 	        .append("\n\n\n")
 	        ;
 	        return context;
@@ -106,14 +106,14 @@ public final class DataContextSrcGener  {
 		    	int colType=resultSetMetaData.getColumnType(i);
 		        String colClsName=ColumnStruct.toClass(colType).getSimpleName();
 		        
-		        sbFields.append("\t\t\t\t private " +colClsName+ " "+colName+ " ; \n " );
+		        sbFields.append("\t\t private " +colClsName+ " "+colName+ " ; \n " );
 		        
-		        sbGetSeter.append("\t\t\t\t public "+colClsName+" get"+colName+"(){ return this."+colName+"; } \n")
-		        .append("\t\t\t\t public void set"+colName+"("+colClsName+" "+ colName +" ){  this."+colName+"="+colName+"; } \n\n")
+		        sbGetSeter.append("\t\t public "+colClsName+" get"+colName+"(){ return this."+colName+"; } \n")
+		        .append("\t\t public void set"+colName+"("+colClsName+" "+ colName +" ){  this."+colName+"="+colName+"; } \n\n")
 		        ;
 			}
 			MethodInstance.close.invoke(preparedStatement,resultSetMetaData);
-			return sbFields+"\n\n\n"+sbGetSeter;
+			return sbFields+"\n"+sbGetSeter;
 		}
 		
 	}

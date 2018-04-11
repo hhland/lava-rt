@@ -1,13 +1,10 @@
 package lava.rt.linq;
 
-import java.math.BigDecimal;
+
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Types;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+
 
 import lava.rt.common.SqlCommon;
 
@@ -19,9 +16,13 @@ public abstract class DataContext {
 		this.connection=connection;
 	}
 	
-	public abstract <M> Table<M>  getTable(Class<M> cls);
+	public  <M> Table<M>  createTable(Class<M> cls,String pkName){
+		return new Table<M>(this, cls, pkName);
+	}
 	
-	public abstract <M> View<M>  getView(Class<M> cls);
+	public  <M> View<M>  createView(Class<M> cls){
+		return new View<M>(this, cls);
+	};
 	
 	
 	

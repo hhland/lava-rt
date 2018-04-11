@@ -3,85 +3,58 @@ package lava.rt.linq;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public abstract  class View<M> {
 
 	protected DataContext dataContext;
 	
-	protected Class<M> classM;
+	protected String tableName;
 	
-	protected String table,sql;
 	
-	protected List<String> joins=new ArrayList<String>()
-			,conditions=new ArrayList<String>()
-			,orderBys=new ArrayList<String>()
-			;
 	
 	protected View (DataContext dataContext,Class<M> classM) {
 		this.dataContext=dataContext;
-		this.classM=classM;
+		this.tableName=classM.getSimpleName();
 	}
 	
 	
-	
-	public View<M> from(String tableName) {
-		return this;
-	}
-	
-	public View<M> join(String...joins) {
-		return this;
-	}
-	
-	public View<M> where(String condition) {
-		return this;
-	}
-	
-	public View<M> and(String...conditions) {
-		return this;
-	}
-	
-	public View<M> or(String...conditions) {
-		return this;
-	}
-	
-	public View<M> orderBy(String...columns) {
-		return this;
-	}
-	
-	public View<M> groupBy(String...columns) {
-		return this;
-	}
-	
-	public void clear() {
-		
-	}
 	
     
     
-    protected void createSql(String method) {
-    	String sqlPattern="{0} from {1} #{join} #{where} #{orderby}";
-    	this.sql=MessageFormat.format(sqlPattern,method,table);
-    }
-	
-    public List<M> select(String...colunms) throws SQLException{
-		return null;
+    
+    public List<M> select(String where) throws SQLException{
+    	String pattern="select * from {0} ";
+    	String sql=MessageFormat.format(pattern, this.tableName)+where;
+		return dataContext.executeQueryList(sql);
 	}
     
-	public int count(String column) throws SQLException{
-		return 0;
+	
+	
+	public int count(String column,String where) throws SQLException{
+		String pattern="select count({0}) from {1} ";
+    	String sql=MessageFormat.format(pattern,column, this.tableName)+where;
+		return (int)dataContext.executeQueryArray(sql)[0][0];
 	}
 	
-	public float sum(String column) throws SQLException{
-		return 0;
+	public float sum(String column,String where) throws SQLException{
+		String pattern="select sum({0}) from {1} ";
+    	String sql=MessageFormat.format(pattern,column, this.tableName)+where;
+    	return (float)dataContext.executeQueryArray(sql)[0][0];
 	}
 	
-	public float min(String column) throws SQLException{
-		return 0;
+	public float min(String column,String where) throws SQLException{
+		String pattern="select min({0}) from {1} ";
+    	String sql=MessageFormat.format(pattern,column, this.tableName)+where;
+    	return (float)dataContext.executeQueryArray(sql)[0][0];
 	}
 	
-	public float max(String column) throws SQLException{
-		return 0;
+	public float max(String column,String where) throws SQLException{
+		String pattern="select max({0}) from {1} ";
+    	String sql=MessageFormat.format(pattern,column, this.tableName)+where;
+    	return (float)dataContext.executeQueryArray(sql)[0][0];
 	}
 	
 	

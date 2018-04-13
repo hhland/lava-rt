@@ -37,12 +37,12 @@ public  class Table<M> extends View<M> {
 
         for (Field f : classM.getDeclaredFields()) {
             String fname = f.getName();
-            if (ReflectCommon.isThis0(f) 
-            		 && fname.equalsIgnoreCase(pkName)) {
+            if (ReflectCommon.isThis0(f) || fname.equalsIgnoreCase(pkName))  {
                 continue;
             }
             insertFields.add(f);
         }
+        
 
         if (dataContext.SQL_CACHE.containsKey(sqlCacheKey)) {
             sql = dataContext.SQL_CACHE.get(sqlCacheKey);
@@ -94,13 +94,13 @@ public  class Table<M> extends View<M> {
 				pkField = classM.getDeclaredField(pkName);
 			} catch (NoSuchFieldException | SecurityException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new SQLException("pkField not found:"+pkName);
 			}
 	        List<Field> updateFields = new ArrayList<Field>();
 
 	        for (Field f : classM.getDeclaredFields()) {
 	            String fname = f.getName();
-	            if (ReflectCommon.isThis0(f) || fname.equalsIgnoreCase(pkField.getName()))  {
+	            if (ReflectCommon.isThis0(f) || fname.equalsIgnoreCase(pkName))  {
 	                continue;
 	            }
 	            updateFields.add(f);

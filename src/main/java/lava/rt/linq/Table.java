@@ -17,8 +17,8 @@ public  class Table<M> extends View<M> {
 
 	protected String pkName;
 	
-	public Table(DataContext dataContext,Class<M> classM,String pkName) {
-		super(dataContext,classM);
+	public Table(DataContext dataContext,Class<M> classM,String tableName,String pkName) {
+		super(dataContext,classM,tableName);
 		this.pkName=pkName;
 		
 	}

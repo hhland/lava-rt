@@ -19,12 +19,12 @@ public abstract class DataContext {
 	
 	protected final Map<String,String> SQL_CACHE=new HashMap<String,String>();
 	
-	public  <M> Table<M>  createTable(Class<M> cls,String pkName){
-		return new Table<M>(this, cls, pkName);
+	public  <M> Table<M>  createTable(Class<M> cls,String tableName,String pkName){
+		return new Table<M>(this, cls,tableName, pkName);
 	}
 	
-	public  <M> View<M>  createView(Class<M> cls){
-		return new View<M>(this, cls);
+	public  <M> View<M>  createView(Class<M> cls,String tableName){
+		return new View<M>(this, cls,tableName);
 	};
 	
 	

@@ -15,9 +15,9 @@ public   class View<M> {
 	protected Class<M> classM;
 	
 	
-	protected View (DataContext dataContext,Class<M> classM) {
+	protected View (DataContext dataContext,Class<M> classM,String tableName) {
 		this.dataContext=dataContext;
-		this.tableName=classM.getSimpleName();
+		this.tableName=tableName;
 		this.classM=classM;
 	}
 	

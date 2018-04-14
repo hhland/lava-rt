@@ -23,10 +23,18 @@ public  class Table<M> extends View<M> {
 		
 	}
 	
-	public M load(String pk) throws SQLException{
-		String pattern="select * from {0} where {1}= '{2}'";
-		String sql=MessageFormat.format(pattern, this.tableName,this.pkName,pk);
-		return dataContext.<M>executeQueryList(sql).get(0);
+	public M load(Object pk) throws SQLException{
+		String pattern="select * from {0} where {1}= {2}";
+		String pkVal=null;
+		if(pk instanceof String) {
+			pkVal="'"+pk+"'";
+		}else {
+			pkVal=pk.toString() ;
+		}
+		String sql=MessageFormat.format(pattern, this.tableName,this.pkName,
+				pkVal
+				);
+		return dataContext.<M>executeQueryList(sql,classM).get(0);
 	}
 	
 	public  int insert(M...models) throws SQLException {
@@ -40,6 +48,7 @@ public  class Table<M> extends View<M> {
             if (ReflectCommon.isThis0(f) || fname.equalsIgnoreCase(pkName))  {
                 continue;
             }
+            f.setAccessible(true);
             insertFields.add(f);
         }
         
@@ -74,7 +83,7 @@ public  class Table<M> extends View<M> {
 					
 					params[i][j] = field.get(obj);
 				} catch (Exception e) {
-					
+					e.printStackTrace();
 				}
                 
             }
@@ -103,6 +112,7 @@ public  class Table<M> extends View<M> {
 	            if (ReflectCommon.isThis0(f) || fname.equalsIgnoreCase(pkName))  {
 	                continue;
 	            }
+	            f.setAccessible(true);
 	            updateFields.add(f);
 	        }
 

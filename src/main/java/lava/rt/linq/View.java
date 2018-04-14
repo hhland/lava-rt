@@ -1,5 +1,6 @@
 package lava.rt.linq;
 
+import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ public   class View<M> {
     public List<M> select(String where) throws SQLException{
     	String pattern="select * from {0} ";
     	String sql=MessageFormat.format(pattern, this.tableName)+where;
-		return dataContext.executeQueryList(sql);
+		return dataContext.executeQueryList(sql,this.classM);
 	}
     
 	

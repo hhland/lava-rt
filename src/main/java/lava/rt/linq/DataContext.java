@@ -2,15 +2,21 @@ package lava.rt.linq;
 
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
 
+import lava.rt.common.ReflectCommon;
 import lava.rt.common.SqlCommon;
+import lava.rt.instance.MethodInstance;
 
 public abstract class DataContext {
 
@@ -68,24 +74,63 @@ public abstract class DataContext {
 	
 	
 	
-	protected  <M> int insert(M...m) throws SQLException {
-		return SqlCommon.insert(this.dataSource.getConnection(), m);
-	}
 	
 	
-	protected <M>  List<M> executeQueryList(String sql) throws SQLException{
+	
+	protected <M>  List<M> executeQueryList(String sql,Class<M> cls) throws SQLException{
+		Connection connection=this.dataSource.getConnection();
+		List<M> list=new ArrayList<M>();
+		PreparedStatement preparedStatement= connection.prepareStatement(sql);
 		
-		return null;
+		ResultSet resultSet=preparedStatement.executeQuery(sql);
+		
+		while(resultSet.next()) {
+			M m=null;
+			try {
+				m = ReflectCommon.newInstance(cls);
+			} catch (Exception e) {
+			} 
+			if(m==null) {
+				throw new SQLException("");
+			}
+			
+			list.add(m);
+		}
+		
+		return list;
 	} 
 	
     protected Object[][] executeQueryArray(String sql) throws SQLException{
+    	Connection connection=this.dataSource.getConnection();
+		List<Object[]> list=new ArrayList<Object[]>();
+		PreparedStatement preparedStatement= connection.prepareStatement(sql);
+		
+		ResultSet resultSet=preparedStatement.executeQuery(sql);
+		
+		while(resultSet.next()) {
+				
+			//list.add(m);
+		}
 		
 		return null;
 	} 
 	
 	
-	protected int executeUpdate(String sql,Object[][] param) throws SQLException{
-		return 0;
+	protected int executeUpdate(String sql,Object[][] params) throws SQLException{
+		Connection connection=this.dataSource.getConnection();
+		int re=0;
+		PreparedStatement preparedStatement= connection.prepareStatement(sql);
+		
+		for(Object[] param :params) {
+			
+			for(int i=0;i<param.length;i++) {
+				preparedStatement.setObject(i+1, param[i]);
+			}
+			re+=preparedStatement.executeUpdate();
+			preparedStatement.executeUpdate();
+		}
+		MethodInstance.close.invoke(preparedStatement,connection);
+		return re;
 	} 
 	
 	

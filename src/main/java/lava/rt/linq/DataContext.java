@@ -3,12 +3,15 @@ package lava.rt.linq;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -83,7 +86,15 @@ public abstract class DataContext {
 		PreparedStatement preparedStatement= connection.prepareStatement(sql);
 		
 		ResultSet resultSet=preparedStatement.executeQuery(sql);
+		ResultSetMetaData metaData=resultSet.getMetaData();
+		Map<String,Integer> meteDataMap=new HashMap<String,Integer>();
+		for(int i=1;i<=metaData.getColumnCount();i++) {
+			String key=metaData.getColumnName(i).toUpperCase();
+			meteDataMap.put(key, i);
+		}
 		
+		Map<String,Field> fieldMap=ReflectCommon.getFields(cls);
+		fieldMap.forEach((k,v)->v.setAccessible(true));
 		while(resultSet.next()) {
 			M m=null;
 			try {
@@ -91,11 +102,23 @@ public abstract class DataContext {
 			} catch (Exception e) {
 			} 
 			if(m==null) {
-				throw new SQLException("");
+				throw new SQLException(cls.getName()+ " can't be instance");
+			}
+			int c=0;
+			for(Iterator<String> it=fieldMap.keySet().iterator();c<metaData.getColumnCount()&&it.hasNext();) {
+				String columnName=it.next().toUpperCase();
+				if(!meteDataMap.containsKey(columnName))continue;
+				int columnIndex=meteDataMap.get(columnName);
+				Field field=fieldMap.get(columnName);
+				try {
+					field.set(m, resultSet.getObject(columnIndex));
+				} catch (Exception e) {continue;}
+				c++;
 			}
 			
 			list.add(m);
 		}
+		MethodInstance.close.invoke(resultSet,preparedStatement,connection);  
 		
 		return list;
 	} 
@@ -106,13 +129,17 @@ public abstract class DataContext {
 		PreparedStatement preparedStatement= connection.prepareStatement(sql);
 		
 		ResultSet resultSet=preparedStatement.executeQuery(sql);
-		
+		ResultSetMetaData metaData=resultSet.getMetaData();
+		int cc=metaData.getColumnCount();
 		while(resultSet.next()) {
-				
-			//list.add(m);
+			Object[] objects=new Object[cc];
+			for(int i=0;i<cc;i++) {
+				objects[i]=resultSet.getObject(i+1);
+			}
+			list.add(objects);
 		}
-		
-		return null;
+		MethodInstance.close.invoke(resultSet,preparedStatement,connection);  
+		return list.toArray(new Object[list.size()][cc]);
 	} 
 	
 	
@@ -126,10 +153,11 @@ public abstract class DataContext {
 			for(int i=0;i<param.length;i++) {
 				preparedStatement.setObject(i+1, param[i]);
 			}
-			re+=preparedStatement.executeUpdate();
-			preparedStatement.executeUpdate();
+			preparedStatement.addBatch();
 		}
+		int[] res= preparedStatement.executeBatch();
 		MethodInstance.close.invoke(preparedStatement,connection);
+		for(int r:res)re+=r;
 		return re;
 	} 
 	

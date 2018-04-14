@@ -47,16 +47,16 @@ public   class View<M> {
     	return (float)dataContext.executeQueryArray(sql)[0][0];
 	}
 	
-	public float min(String column,String where) throws SQLException{
+	public <T> T min(String column,String where) throws SQLException{
 		String pattern="select min({0}) from {1} ";
     	String sql=MessageFormat.format(pattern,column, this.tableName)+where;
-    	return (float)dataContext.executeQueryArray(sql)[0][0];
+    	return (T)dataContext.executeQueryArray(sql)[0][0];
 	}
 	
-	public float max(String column,String where) throws SQLException{
+	public <T> T max(String column,String where) throws SQLException{
 		String pattern="select max({0}) from {1} ";
     	String sql=MessageFormat.format(pattern,column, this.tableName)+where;
-    	return (float)dataContext.executeQueryArray(sql)[0][0];
+    	return (T)dataContext.executeQueryArray(sql)[0][0];
 	}
 	
 	

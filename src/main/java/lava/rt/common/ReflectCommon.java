@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Stream;
 
 public class ReflectCommon {
 
@@ -264,6 +265,29 @@ public class ReflectCommon {
             t = (T) cls.newInstance();
         }
         return t;
+    }
+    
+    
+    public static Map<String,Field> getFields(Class cls){
+    	Map<String,Field> fieldMap=new HashMap<String,Field>();
+    	
+    	for(Class cl=cls;!Object.class.equals(cl);cl=cl.getSuperclass()) {
+    		Field[] fields=cl.getFields();
+    		Stream.of(fields).filter(f-> !fieldMap.containsKey(f.getName()))
+    		.forEach(f->fieldMap.put(f.getName(), f) );    		
+    	}
+    	return fieldMap;
+    }
+    
+    public static Map<String,Field> getDeclaredFields(Class cls){
+    	Map<String,Field> fieldMap=new HashMap<String,Field>();
+    	
+    	for(Class cl=cls;!Object.class.equals(cl);cl=cl.getSuperclass()) {
+    		Field[] fields=cl.getDeclaredFields();
+    		Stream.of(fields).filter(f-> !fieldMap.containsKey(f.getName()))
+    		.forEach(f->fieldMap.put(f.getName(), f) );    		
+    	}
+    	return fieldMap;
     }
 
 }

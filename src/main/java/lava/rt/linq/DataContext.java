@@ -161,6 +161,28 @@ public abstract class DataContext {
 		return re;
 	} 
 	
+	protected int[]  executeInsert(String sql,Object[][] params) throws SQLException{
+		Connection connection=this.dataSource.getConnection();
+		int[] pks=new int[params.length];
+		PreparedStatement preparedStatement= connection.prepareStatement(sql);
+		
+		//for(Object[] param :params) {
+		for(int j=0;j<params.length;j++) {
+			Object[] param=params[j];
+			for(int i=0;i<param.length;i++) {
+				preparedStatement.setObject(i+1, param[i]);
+			}
+			preparedStatement.executeUpdate();
+			ResultSet resultSet= preparedStatement.getGeneratedKeys();
+			if(resultSet.next()) {
+				pks[j]=resultSet.getInt(1);
+			}
+			resultSet.close();
+		}
+		MethodInstance.close.invoke(preparedStatement,connection);
+		//for(int r:res)re+=r;
+		return pks;
+	} 
 	
 	
 }

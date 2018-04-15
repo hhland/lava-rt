@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import lava.rt.common.LangCommon;
 import lava.rt.common.ReflectCommon;
@@ -41,9 +42,18 @@ public  class Table<M> extends View<M> {
 		String sqlPattern = "insert into {0} ({1}) values ({2})", sql = "",
                 sqlCacheKey = classM.getName() + ":insert", cols = "", vals = "";
        
+		Field pkField=null;
+		try {
+			pkField = classM.getDeclaredField(pkName);
+		} catch (NoSuchFieldException | SecurityException e) {
+			// TODO Auto-generated catch block
+			throw new SQLException("pkField not found:"+pkName);
+		}
+		
         List<Field> insertFields = new ArrayList<Field>();
-
-        for (Field f : classM.getDeclaredFields()) {
+        
+        
+        for (Field f : ReflectCommon.getFields(classM).values()) {
             String fname = f.getName();
             if (ReflectCommon.isThis0(f) || fname.equalsIgnoreCase(pkName))  {
                 continue;
@@ -72,7 +82,9 @@ public  class Table<M> extends View<M> {
             dataContext.SQL_CACHE.put(sqlCacheKey, sql);
                 
         }
-        int insertsize = insertFields.size();
+        int re=0,insertsize = insertFields.size();
+        
+        
         Object[][] params = new Object[models.length][insertsize];
         for (int i = 0; i < models.length; i++) {
             M obj = models[i];
@@ -89,7 +101,19 @@ public  class Table<M> extends View<M> {
             }
         }
         
-        return dataContext.executeUpdate(sql, params);
+        int[] pks= dataContext.executeInsert(sql, params);
+        for(int i=0;i<pks.length;i++) {
+            int pk=pks[i];
+            M model=models[i];
+            try {
+				pkField.set(model, pk);
+			} catch (Exception e) {
+			}
+            re++;
+        }
+        
+        return re;
+        
 	}
 	
 	

@@ -1,16 +1,12 @@
 package lava.rt.linq;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
-
-import lava.rt.common.LangCommon;
 import lava.rt.common.ReflectCommon;
-import lava.rt.common.SqlCommon;
 import lava.rt.common.TextCommon;
 
 
@@ -20,7 +16,7 @@ public  class Table<M> extends View<M> {
 	
 	protected Field pkField;
 	
-	protected List<Field> insertFields =null,updateFields=null;
+	protected Field[] insertFields =null,updateFields=null;
 	
 	public Table(DataContext dataContext,Class<M> classM,String tableName,String pkName) throws NoSuchFieldException {
 		super(dataContext,classM,tableName);
@@ -29,19 +25,19 @@ public  class Table<M> extends View<M> {
 		pkField=ReflectCommon.getFields(classM).get(pkName);
 		pkField.setAccessible(true);
 		
-		insertFields = new ArrayList<Field>();
+		List<Field> linsertFields = new ArrayList<Field>();
 		for (Field f : ReflectCommon.getFields(classM).values()) {
             String fname = f.getName();
             if (ReflectCommon.isThis0(f) || fname.equalsIgnoreCase(pkName))  {
                 continue;
             }
             f.setAccessible(true);
-            insertFields.add(f);
+            linsertFields.add(f);
          }
+		insertFields=linsertFields.toArray(new Field[linsertFields.size()]);
 		
 		
-		
-	    updateFields = new ArrayList<Field>();
+		List<Field> lupdateFields = new ArrayList<Field>();
 
 	        for (Field f : ReflectCommon.getFields(classM).values()) {
 	            String fname = f.getName();
@@ -49,9 +45,9 @@ public  class Table<M> extends View<M> {
 	                continue;
 	            }
 	            f.setAccessible(true);
-	            updateFields.add(f);
+	            lupdateFields.add(f);
 	        }
-	        
+	        updateFields=lupdateFields.toArray(new Field[lupdateFields.size()]);      
 		
 	}
 	
@@ -97,7 +93,7 @@ public  class Table<M> extends View<M> {
             dataContext.SQL_CACHE.put(sqlCacheKey, sql);
                 
         }
-        int re=0,insertsize = insertFields.size();
+        int re=0,insertsize = insertFields.length;
         
         
         Object[][] params = new Object[models.length][insertsize];
@@ -105,7 +101,7 @@ public  class Table<M> extends View<M> {
         for (int i = 0; i < models.length; i++) {
             M obj = models[i];
             for (int j = 0; j < insertsize; j++) {
-                Field field = insertFields.get(j);
+                Field field = insertFields[j];
                 params[i][j] = field.get(obj);
             }
         }
@@ -149,13 +145,13 @@ public  class Table<M> extends View<M> {
 	               
 	            //}
 	            //key = TextCommon.trim(key, ",");
-	            key=TextCommon.repeat(" `{0}` =? ", ",", updateFields.size());
+	            key=TextCommon.repeat(" `{0}` =? ", ",", updateFields.length);
 	        	sql = MessageFormat.format(sqlPattern, this.tableName, key, this.pkName);
 	            
 	            dataContext.SQL_CACHE.put(sqlCacheKey, sql);
 	           
 	        }
-	        int updatesize = updateFields.size();
+	        int updatesize = updateFields.length;
 	        Object[][] params = new Object[models.length][updatesize + 1];
 	        try {
 	        for (int i = 0; i < models.length; i++) {
@@ -163,7 +159,7 @@ public  class Table<M> extends View<M> {
 	         
 	            
 	            	for (int j = 0; j < updatesize; j++) {
-		                Field field = updateFields.get(j);
+		                Field field = updateFields[j];
 		                params[i][j] = field.get(obj);
 		            }
 					params[i][updatesize] = pkField.get(obj);

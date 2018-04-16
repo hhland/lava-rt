@@ -12,7 +12,7 @@ import lava.rt.common.LangCommon;
 import lava.rt.common.ReflectCommon;
 import lava.rt.common.SqlCommon;
 import lava.rt.common.TextCommon;
-import lava.rt.common.SqlCommon.SqlTable;
+
 
 public  class Table<M> extends View<M> {
 
@@ -29,31 +29,8 @@ public  class Table<M> extends View<M> {
 		pkField=ReflectCommon.getFields(classM).get(pkName);
 		pkField.setAccessible(true);
 		
-	}
-	
-	public M load(Object pk) throws SQLException{
-		String pattern="select * from {0} where {1}= {2}";
-		String pkVal=null;
-		if(pk instanceof String) {
-			pkVal="'"+pk+"'";
-		}else {
-			pkVal=pk.toString() ;
-		}
-		String sql=MessageFormat.format(pattern, this.tableName,this.pkName,
-				pkVal
-				);
-		return dataContext.<M>executeQueryList(sql,classM).get(0);
-	}
-	
-	public  int insert(M...models) throws SQLException {
-		String sqlPattern = "insert into {0} ({1}) values ({2})", sql = "",
-                sqlCacheKey = classM.getName() + ":insert", cols = "", vals = "";
-       
-		
-		if(insertFields==null) {
-          insertFields = new ArrayList<Field>();
-        
-          for (Field f : ReflectCommon.getFields(classM).values()) {
+		insertFields = new ArrayList<Field>();
+		for (Field f : ReflectCommon.getFields(classM).values()) {
             String fname = f.getName();
             if (ReflectCommon.isThis0(f) || fname.equalsIgnoreCase(pkName))  {
                 continue;
@@ -61,9 +38,46 @@ public  class Table<M> extends View<M> {
             f.setAccessible(true);
             insertFields.add(f);
          }
-	}
-        
+		
+		
+		
+	    updateFields = new ArrayList<Field>();
 
+	        for (Field f : ReflectCommon.getFields(classM).values()) {
+	            String fname = f.getName();
+	            if (ReflectCommon.isThis0(f) || fname.equalsIgnoreCase(pkName))  {
+	                continue;
+	            }
+	            f.setAccessible(true);
+	            updateFields.add(f);
+	        }
+	        
+		
+	}
+	
+	public M load(int pk) throws SQLException{
+		String pattern="select * from {0} where {1}= {2}";
+		
+		String sql=MessageFormat.format(pattern, this.tableName,this.pkName,
+				pk
+				);
+		return dataContext.<M>executeQueryList(sql,classM).get(0);
+	}
+	
+	public M load(String pk) throws SQLException{
+		String pattern="select * from {0} where {1}= {2}";
+		String pkVal="'"+pk+"'";
+		String sql=MessageFormat.format(pattern, this.tableName,this.pkName,
+				pkVal
+				);
+		return dataContext.<M>executeQueryList(sql,classM).get(0);
+	}
+	
+	public  float insert(M...models) throws SQLException {
+		String sqlPattern = "insert into {0} ({1}) values ({2})", sql = "",
+                sqlCacheKey = classM.getName() + ":insert", cols = "", vals = "";
+       
+		
         if (dataContext.SQL_CACHE.containsKey(sqlCacheKey)) {
             sql = dataContext.SQL_CACHE.get(sqlCacheKey);
         } else {
@@ -116,23 +130,12 @@ public  class Table<M> extends View<M> {
 	}
 	
 	
-	public  int update(M...models) throws SQLException{
+	public  float update(M...models) throws SQLException{
 		
 			String sqlPattern = "update {0} set {1} where {2}=? ", key = "", sql = "",
 	                sqlCacheKey = classM.getName() + ":update";
 
-	        if(updateFields==null) {
-	         updateFields = new ArrayList<Field>();
-
-	        for (Field f : ReflectCommon.getFields(classM).values()) {
-	            String fname = f.getName();
-	            if (ReflectCommon.isThis0(f) || fname.equalsIgnoreCase(pkName))  {
-	                continue;
-	            }
-	            f.setAccessible(true);
-	            updateFields.add(f);
-	        }
-	        }
+	        
 
 	        if (dataContext.SQL_CACHE.containsKey(sqlCacheKey)) {
 	            sql = dataContext.SQL_CACHE.get(sqlCacheKey);
@@ -146,7 +149,7 @@ public  class Table<M> extends View<M> {
 	               
 	            //}
 	            //key = TextCommon.trim(key, ",");
-	            key=TextCommon.join(" `{0}` =? ", ",", updateFields.size());
+	            key=TextCommon.repeat(" `{0}` =? ", ",", updateFields.size());
 	        	sql = MessageFormat.format(sqlPattern, this.tableName, key, this.pkName);
 	            
 	            dataContext.SQL_CACHE.put(sqlCacheKey, sql);
@@ -177,7 +180,7 @@ public  class Table<M> extends View<M> {
 		
 	}
 	
-	public  int delete(M...models) throws SQLException{
+	public  float delete(M...models) throws SQLException{
 		String sqlPattern = "delete from {0} where {1}=? ", sql = "",
                 sqlCacheKey = classM.getName() + ":delete";
 
@@ -195,7 +198,6 @@ public  class Table<M> extends View<M> {
         for (int i = 0; i < dlength; i++) {
             M obj = models[i];
            params[i][0] = pkField.get(obj);
-			 
         }
         } catch (Exception e) {
 			// TODO Auto-generated catch block

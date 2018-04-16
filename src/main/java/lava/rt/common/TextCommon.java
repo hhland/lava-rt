@@ -90,7 +90,7 @@ public class TextCommon {
         return vals;
     }
     
-    public static String join(String value,String spar,int times) {
+    public static String repeat(String value,String spar,int times) {
     	String[] values=new String[times];
     	Stream.of(values).forEach(s->s=value);
     	return String.join(spar, values);

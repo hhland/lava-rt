@@ -150,21 +150,11 @@ public abstract class DataContext {
 	} 
 	
 	
-	protected int executeUpdate(String sql,Object[][] params) throws SQLException{
+	protected float executeUpdate(String sql,Object[][] params) throws SQLException{
 		Connection connection=this.dataSource.getConnection();
-		int re=0;
-		PreparedStatement preparedStatement= connection.prepareStatement(sql);
-		
-		for(Object[] param :params) {
-			
-			for(int i=0;i<param.length;i++) {
-				preparedStatement.setObject(i+1, param[i]);
-			}
-			preparedStatement.addBatch();
-		}
-		int[] res= preparedStatement.executeBatch();
-		MethodInstance.close.invoke(preparedStatement,connection);
-		for(int r:res)re+=r;
+		float re=0;
+		re=SqlCommon.executeBatch(connection, sql, params);
+		MethodInstance.close.invoke(connection);
 		return re;
 	} 
 	

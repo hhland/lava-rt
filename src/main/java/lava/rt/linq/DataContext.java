@@ -36,7 +36,14 @@ public abstract class DataContext {
 	protected final Map<String,String> SQL_CACHE=new HashMap<String,String>();
 	
 	public  <M> Table<M>  createTable(Class<M> cls,String tableName,String pkName){
-		return new Table<M>(this, cls,tableName, pkName);
+		Table<M> table=null;
+		try {
+			table= new Table<M>(this, cls,tableName, pkName);
+		} catch (NoSuchFieldException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return table;
 	}
 	
 	public  <M> View<M>  createView(Class<M> cls,String tableName){

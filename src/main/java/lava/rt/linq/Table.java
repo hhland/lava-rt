@@ -18,9 +18,16 @@ public  class Table<M> extends View<M> {
 
 	protected String pkName;
 	
-	public Table(DataContext dataContext,Class<M> classM,String tableName,String pkName) {
+	protected Field pkField;
+	
+	protected List<Field> insertFields =null,updateFields=null;
+	
+	public Table(DataContext dataContext,Class<M> classM,String tableName,String pkName) throws NoSuchFieldException {
 		super(dataContext,classM,tableName);
 		this.pkName=pkName;
+		
+		pkField=ReflectCommon.getFields(classM).get(pkName);
+		pkField.setAccessible(true);
 		
 	}
 	
@@ -42,25 +49,19 @@ public  class Table<M> extends View<M> {
 		String sqlPattern = "insert into {0} ({1}) values ({2})", sql = "",
                 sqlCacheKey = classM.getName() + ":insert", cols = "", vals = "";
        
-		Field pkField=null;
-		try {
-			pkField = classM.getDeclaredField(pkName);
-		} catch (NoSuchFieldException | SecurityException e) {
-			// TODO Auto-generated catch block
-			throw new SQLException("pkField not found:"+pkName);
-		}
 		
-        List<Field> insertFields = new ArrayList<Field>();
+		if(insertFields==null) {
+          insertFields = new ArrayList<Field>();
         
-        
-        for (Field f : ReflectCommon.getFields(classM).values()) {
+          for (Field f : ReflectCommon.getFields(classM).values()) {
             String fname = f.getName();
             if (ReflectCommon.isThis0(f) || fname.equalsIgnoreCase(pkName))  {
                 continue;
             }
             f.setAccessible(true);
             insertFields.add(f);
-        }
+         }
+	}
         
 
         if (dataContext.SQL_CACHE.containsKey(sqlCacheKey)) {
@@ -86,31 +87,29 @@ public  class Table<M> extends View<M> {
         
         
         Object[][] params = new Object[models.length][insertsize];
+        try {
         for (int i = 0; i < models.length; i++) {
             M obj = models[i];
             for (int j = 0; j < insertsize; j++) {
                 Field field = insertFields.get(j);
-               
-				try {
-					
-					params[i][j] = field.get(obj);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-                
+                params[i][j] = field.get(obj);
             }
         }
+        } catch (Exception e) {
+			e.printStackTrace();
+		}
         
         int[] pks= dataContext.executeInsert(sql, params);
+        try {
         for(int i=0;i<pks.length;i++) {
             int pk=pks[i];
             M model=models[i];
-            try {
-				pkField.set(model, pk);
-			} catch (Exception e) {
-			}
+            pkField.set(model, pk);
+			
             re++;
         }
+        } catch (Exception e) {
+		}
         
         return re;
         
@@ -122,22 +121,17 @@ public  class Table<M> extends View<M> {
 			String sqlPattern = "update {0} set {1} where {2}=? ", key = "", sql = "",
 	                sqlCacheKey = classM.getName() + ":update";
 
-	        Field pkField=null;
-			try {
-				pkField = classM.getDeclaredField(pkName);
-			} catch (NoSuchFieldException | SecurityException e) {
-				// TODO Auto-generated catch block
-				throw new SQLException("pkField not found:"+pkName);
-			}
-	        List<Field> updateFields = new ArrayList<Field>();
+	        if(updateFields==null) {
+	         updateFields = new ArrayList<Field>();
 
-	        for (Field f : classM.getDeclaredFields()) {
+	        for (Field f : ReflectCommon.getFields(classM).values()) {
 	            String fname = f.getName();
 	            if (ReflectCommon.isThis0(f) || fname.equalsIgnoreCase(pkName))  {
 	                continue;
 	            }
 	            f.setAccessible(true);
 	            updateFields.add(f);
+	        }
 	        }
 
 	        if (dataContext.SQL_CACHE.containsKey(sqlCacheKey)) {
@@ -159,22 +153,24 @@ public  class Table<M> extends View<M> {
 	        }
 	        int updatesize = updateFields.size();
 	        Object[][] params = new Object[models.length][updatesize + 1];
+	        try {
 	        for (int i = 0; i < models.length; i++) {
 	            M obj = models[i];
 	         
-	            try {
+	            
 	            	for (int j = 0; j < updatesize; j++) {
 		                Field field = updateFields.get(j);
 		                params[i][j] = field.get(obj);
 		            }
 					params[i][updatesize] = pkField.get(obj);
-				} catch (IllegalArgumentException | IllegalAccessException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				
 
 
 	        }
+	        } catch (IllegalArgumentException | IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
 			return dataContext.executeUpdate(sql, params);
 		
@@ -194,18 +190,16 @@ public  class Table<M> extends View<M> {
         }
         int dlength = models.length;
         Object[][] params = new Object[dlength][1];
+        try {
         for (int i = 0; i < dlength; i++) {
             M obj = models[i];
-            Field pkField;
-			try {
-				pkField = classM.getField(pkName);
-				params[i][1] = pkField.get(obj);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-            
+           params[i][0] = pkField.get(obj);
+			 
         }
+        } catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         return dataContext.executeUpdate(sql, params);
 	}
 }

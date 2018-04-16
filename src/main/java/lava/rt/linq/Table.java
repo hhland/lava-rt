@@ -139,14 +139,15 @@ public  class Table<M> extends View<M> {
 	        } else {
 
 	            
-	            for (Field field : updateFields) {
-	                String fname = field.getName();
+	           // for (Field field : updateFields) {
+	           //     String fname = field.getName();
 
-	                key += MessageFormat.format(" `{0}` =? ,", fname);
+	           //     key += MessageFormat.format(" `{0}` =? ,", fname);
 	               
-	            }
-	            key = TextCommon.trim(key, ",");
-	            sql = MessageFormat.format(sqlPattern, this.tableName, key, this.pkName);
+	            //}
+	            //key = TextCommon.trim(key, ",");
+	            key=TextCommon.join(" `{0}` =? ", ",", updateFields.size());
+	        	sql = MessageFormat.format(sqlPattern, this.tableName, key, this.pkName);
 	            
 	            dataContext.SQL_CACHE.put(sqlCacheKey, sql);
 	           

@@ -3,6 +3,7 @@ package lava.rt.common;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class TextCommon {
 
@@ -87,5 +88,11 @@ public class TextCommon {
             tempValue = tempValue.substring(endIndex + 1);
         }
         return vals;
+    }
+    
+    public static String join(String value,String spar,int times) {
+    	String[] values=new String[times];
+    	Stream.of(values).forEach(s->s=value);
+    	return String.join(spar, values);
     }
 }

@@ -92,7 +92,9 @@ public class TextCommon {
     
     public static String repeat(String value,String spar,int times) {
     	String[] values=new String[times];
-    	Stream.of(values).forEach(s->s=value);
+    	for(int i=0;i<values.length;i++) {
+    		values[i]=value;
+    	}
     	return String.join(spar, values);
     }
 }

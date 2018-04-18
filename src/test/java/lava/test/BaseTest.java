@@ -1,4 +1,4 @@
-package com.uhealin.lava.test;
+package lava.test;
 
 public abstract class BaseTest {
 

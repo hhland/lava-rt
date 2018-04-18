@@ -9,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -25,6 +26,9 @@ public abstract class DataContext {
 
 	
 	protected abstract Class thisClass() ;
+
+	protected DataContext() {
+	}
 	
 	public DataContext(DataSource dataSource) {
 		this.dataSource=dataSource;
@@ -100,13 +104,14 @@ public abstract class DataContext {
 			meteDataMap.put(key, i);
 		}
 		
-		Map<String,Field> fieldMap=ReflectCommon.getFields(cls);
+		Map<String,Field> fieldMap=ReflectCommon.getDeclaredFields(cls);
 		fieldMap.forEach((k,v)->v.setAccessible(true));
 		while(resultSet.next()) {
 			M m=null;
 			try {
 				m = ReflectCommon.newInstance(cls);
 			} catch (Exception e) {
+				e.printStackTrace();
 			} 
 			if(m==null) {
 				throw new SQLException(cls.getName()+ " can't be instance");
@@ -161,7 +166,7 @@ public abstract class DataContext {
 	protected int[]  executeInsert(String sql,Object[][] params) throws SQLException{
 		Connection connection=this.dataSource.getConnection();
 		int[] pks=new int[params.length];
-		PreparedStatement preparedStatement= connection.prepareStatement(sql);
+		PreparedStatement preparedStatement= connection.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
 		
 		//for(Object[] param :params) {
 		for(int j=0;j<params.length;j++) {

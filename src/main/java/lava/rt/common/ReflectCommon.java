@@ -79,13 +79,13 @@ public class ReflectCommon {
 				Field field=keyFields.get(fkey);
 				field.setAccessible(true);
 				try {
-					field.set(object, value);
-				} catch (IllegalArgumentException | IllegalAccessException e) {
+					re+=set(field,object, value);
+				} catch (IllegalArgumentException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 					continue;
 				}
-				re++;
+				
 			}
 			
 		}
@@ -245,6 +245,11 @@ public class ReflectCommon {
     }
 	
 	
+	public static boolean isArray(Field field) {
+        return field.getType().getName().startsWith("[L");
+    }
+	
+	
 	
 	 //无限级内部类实例化
     public static <T> T newInstance(Class<T> cls) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
@@ -253,6 +258,7 @@ public class ReflectCommon {
         int i = clsname.lastIndexOf("$");
         if (i > -1) {
             Constructor constr = cls.getConstructors()[0];
+            constr.setAccessible(true);
             String pname = clsname.substring(0, i);
             Class pcls = null;
             try {
@@ -288,6 +294,67 @@ public class ReflectCommon {
     		.forEach(f->fieldMap.put(f.getName(), f) );    		
     	}
     	return fieldMap;
+    }
+    
+    
+    public static float injection(Properties properties) {
+        float re=0,total=properties.size();
+        
+        for(Iterator<Object> it=properties.keySet().iterator();it.hasNext();) {
+        	String key=it.next().toString();
+        	String value= properties.get(key).toString();
+        	
+        	String fieldName=key.substring(key.lastIndexOf(".")+1)
+        			,className=key.substring(0,key.length()-fieldName.length()-1)
+        			;
+        	Class cls=null;
+        	Field field=null;
+        	try {
+				 cls=Class.forName(className);
+				 field=cls.getDeclaredField(fieldName);
+				 field.setAccessible(true);
+				 
+				 re+=set(field,null,value);
+			} finally {continue;}
+        }
+        
+        
+        float prec=re/total;
+        return prec;
+    }
+    
+    protected static int set(Field field,Object target,String value) {
+    	
+    	try {
+    	if(String.class.equals(field.getType())) {
+			 field.set(null, value); 
+		 }
+		 else if(int.class.equals(field.getType())||Integer.class.equals(field.getType())) {
+			 field.setInt(null, Integer.parseInt(value)); 
+		 }
+		 else if(float.class.equals(field.getType())||Float.class.equals(field.getType())) {
+			 field.setFloat(null, Float.parseFloat(value)); 
+		 }
+		 else if(double.class.equals(field.getType())||double.class.equals(field.getType())) {
+			 field.setDouble(null, Double.parseDouble(value)); 
+		 }
+		 else if(short.class.equals(field.getType())||Short.class.equals(field.getType())) {
+			 field.setDouble(null, Short.parseShort(value)); 
+		 }
+		 else if(boolean.class.equals(field.getType())||Boolean.class.equals(field.getType())) {
+			 
+			 field.setBoolean(null, Boolean.parseBoolean(value)); 
+		 }
+		 else if(isArray(field)) {
+		      String[] values=value.split(",");
+		      field.set(target,values);
+		 }else {
+			 return 0;
+		 }
+    	}catch(Exception e) {
+    		
+    	}
+    	return 1;
     }
 
 }

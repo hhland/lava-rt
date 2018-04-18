@@ -1,4 +1,4 @@
-package com.uhealin.lava.test.common;
+package lava.test.common;
 
 import static org.junit.Assert.*;
 
@@ -19,6 +19,10 @@ public class ReflectCommonTest {
 	
 	public static String test_a;
 	
+	public static String test_b;
+	
+	public static String[] test_arr;
+	
 	@Before
 	public void setUp() throws Exception {
 		properties=new Properties();
@@ -32,8 +36,15 @@ public class ReflectCommonTest {
 	@Test
 	public void test() {
 		float pred=ReflectCommon.loadProperties(properties, ReflectCommonTest.class);
-        assertEquals(0.5, pred,0);
+		 assertNotEquals(0, pred);
         assertEquals("vvvv", test_a);
+	}
+	
+	@Test
+	public void testInjection() {
+		float pred=ReflectCommon.injection(properties);
+        assertNotEquals(0, pred);
+        
 	}
 
 }

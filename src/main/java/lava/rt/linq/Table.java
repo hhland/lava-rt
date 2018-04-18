@@ -6,6 +6,8 @@ import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 import lava.rt.common.ReflectCommon;
 import lava.rt.common.TextCommon;
 
@@ -16,17 +18,21 @@ public  class Table<M> extends View<M> {
 	
 	protected Field pkField;
 	
+	protected Map<String,Field> fieldMap;
+	
 	protected Field[] insertFields =null,updateFields=null;
 	
 	public Table(DataContext dataContext,Class<M> classM,String tableName,String pkName) throws NoSuchFieldException {
 		super(dataContext,classM,tableName);
 		this.pkName=pkName;
 		
-		pkField=ReflectCommon.getFields(classM).get(pkName);
+		fieldMap=ReflectCommon.getDeclaredFields(classM);
+		
+		pkField=fieldMap.get(pkName);
 		pkField.setAccessible(true);
 		
 		List<Field> linsertFields = new ArrayList<Field>();
-		for (Field f : ReflectCommon.getFields(classM).values()) {
+		for (Field f : fieldMap.values()) {
             String fname = f.getName();
             if (ReflectCommon.isThis0(f) || fname.equalsIgnoreCase(pkName))  {
                 continue;
@@ -39,7 +45,7 @@ public  class Table<M> extends View<M> {
 		
 		List<Field> lupdateFields = new ArrayList<Field>();
 
-	        for (Field f : ReflectCommon.getFields(classM).values()) {
+	        for (Field f : fieldMap.values()) {
 	            String fname = f.getName();
 	            if (ReflectCommon.isThis0(f) || fname.equalsIgnoreCase(pkName))  {
 	                continue;
@@ -138,14 +144,14 @@ public  class Table<M> extends View<M> {
 	        } else {
 
 	            
-	           // for (Field field : updateFields) {
-	           //     String fname = field.getName();
+	            for (Field field : updateFields) {
+	                String fname = field.getName();
 
-	           //     key += MessageFormat.format(" `{0}` =? ,", fname);
+	                key += MessageFormat.format(" `{0}` =? ,", fname);
 	               
-	            //}
-	            //key = TextCommon.trim(key, ",");
-	            key=TextCommon.repeat(" `{0}` =? ", ",", updateFields.length);
+	            }
+	            key = TextCommon.trim(key, ",");
+	            //key=TextCommon.repeat(" `{0}` =? ", ",", updateFields.length);
 	        	sql = MessageFormat.format(sqlPattern, this.tableName, key, this.pkName);
 	            
 	            dataContext.SQL_CACHE.put(sqlCacheKey, sql);

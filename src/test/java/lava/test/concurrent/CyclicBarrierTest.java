@@ -1,4 +1,4 @@
-package com.uhealin.lava.test.concurrent;
+package lava.test.concurrent;
 
 import java.util.Map.Entry;
 import java.util.concurrent.BrokenBarrierException;
@@ -9,7 +9,7 @@ import java.util.concurrent.Executors;
 
 import org.junit.Test;
 
-import com.uhealin.lava.test.BaseTest;
+import lava.test.BaseTest;
 
 
 

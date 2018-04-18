@@ -1,11 +1,11 @@
-package com.uhealin.lava.test.concurrent;
+package lava.test.concurrent;
 
 import java.io.File;
 import java.util.concurrent.CountDownLatch;
 
 import org.junit.Test;
 
-import com.uhealin.lava.test.BaseTest;
+import lava.test.BaseTest;
 
 public class JoinCountDownLatchTest  extends BaseTest{
 

@@ -57,20 +57,38 @@ public  class Table<M> extends View<M> {
 		
 	}
 	
+	protected static final String load_pattern="select * from {0} where {1}= {2} "; 
 	public M load(int pk) throws SQLException{
-		String pattern="select * from {0} where {1}= {2}";
 		
-		String sql=MessageFormat.format(pattern, this.tableName,this.pkName,
+		
+		String sql=MessageFormat.format(load_pattern, this.tableName,this.pkName,
 				pk
 				);
 		return dataContext.<M>executeQueryList(sql,classM).get(0);
 	}
 	
 	public M load(String pk) throws SQLException{
-		String pattern="select * from {0} where {1}= {2}";
 		String pkVal="'"+pk+"'";
-		String sql=MessageFormat.format(pattern, this.tableName,this.pkName,
+		String sql=MessageFormat.format(load_pattern, this.tableName,this.pkName,
 				pkVal
+				);
+		return dataContext.<M>executeQueryList(sql,classM).get(0);
+	}
+	
+	protected static final String loadLast_pattern="select * from {0} where {1}= (select max({1}) from {0} )"; 
+	public M loadLast() throws SQLException{
+		
+		String sql=MessageFormat.format(loadLast_pattern, this.tableName,this.pkName
+				
+				);
+		return dataContext.<M>executeQueryList(sql,classM).get(0);
+	}
+	
+	protected static final String loadFirst_pattern="select * from {0} where {1}= (select min({1}) from {0} )"; 
+	public M loadFirst() throws SQLException{
+		
+		String sql=MessageFormat.format(loadFirst_pattern, this.tableName,this.pkName
+				
 				);
 		return dataContext.<M>executeQueryList(sql,classM).get(0);
 	}

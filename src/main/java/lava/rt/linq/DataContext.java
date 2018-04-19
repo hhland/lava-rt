@@ -1,6 +1,7 @@
 package lava.rt.linq;
 
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -86,7 +87,14 @@ public abstract class DataContext {
 	      return table;
 	};
 	
-	
+	@SuppressWarnings("unchecked")
+	public <M> M newModel(Class<M> mcls) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, SecurityException, NoSuchMethodException {
+		M m=null;
+		Constructor con=mcls.getConstructors()[0];
+		con.setAccessible(true);
+		m=(M)con.newInstance(this);
+		return m;
+	}
 	
 	
 	
@@ -109,7 +117,7 @@ public abstract class DataContext {
 		while(resultSet.next()) {
 			M m=null;
 			try {
-				m = ReflectCommon.newInstance(cls);
+				m = newModel(cls); //ReflectCommon.newInstance(cls);
 			} catch (Exception e) {
 				e.printStackTrace();
 			} 

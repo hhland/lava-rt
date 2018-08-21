@@ -1,8 +1,10 @@
 package lava.rt.async;
 
 import java.io.IOException;
+import java.nio.channels.Channel;
+import java.nio.channels.SelectionKey;
 
-public abstract class AsyncGenericQueryClient {
+public abstract class AsyncGenericQueryClient <CH extends Channel> {
 
 	/**
 	 * 由 Receiver 回调，当 Receiver 发现对应的 SocketChannel 有数据可读的时候，
@@ -12,13 +14,23 @@ public abstract class AsyncGenericQueryClient {
 要保证该函数尽可能快的完成就是了。
 	 * @throws IOException
 	 */
-	abstract void handleInput() throws  IOException;
+	public void handleInput(SelectionKey key) throws  IOException{
+		
+		if(!key.isValid())return;
+		
+		CH channel=(CH)key.channel();
+		
+		
+		
+	}
 	
 	
 	/*
 	 * 回调函数，可能由 Sender， Receiver 或者用户处理线程调用。该函数完成数据的发送逻辑。
 	 */
-	abstract void sendRequest() throws  IOException;
+	public void sendRequest(CH channel) throws  IOException{
+		
+	}
 	
 	/*
 	 * 回调函数，由 Receiver 调用。询问该 Client，数据接收工作是否已经完成，即

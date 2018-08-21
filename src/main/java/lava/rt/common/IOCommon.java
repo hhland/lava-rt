@@ -10,16 +10,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import lava.rt.instance.MethodInstance;
+
 
 
 public class IOCommon {
 
 	
-	public static String get(String url, String param) {
+	public static String get(String url) throws Exception{
 	    String result = "";
 	    BufferedReader in = null;
-	    try {
-	      String urlNameString = url + "?" + param;
+	    
+	      String urlNameString = url ;
 	      URL realUrl = new URL(urlNameString);
 	      
 	      URLConnection connection = realUrl.openConnection();
@@ -30,42 +32,22 @@ public class IOCommon {
 	          "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
 	      
 	      connection.connect();
-	     
-	      Map<String, List<String>> map = connection.getHeaderFields();
-	      
-	      for (String key : map.keySet()) {
-	        System.out.println(key + "--->" + map.get(key));
-	      }
-	      
 	      in = new BufferedReader(new InputStreamReader(
 	          connection.getInputStream()));
 	      String line;
 	      while ((line = in.readLine()) != null) {
 	        result += line; 
 	      }
-	    } catch (Exception e) {
-	      
-	      e.printStackTrace();
-	    }
-	  
-	    finally {
-	      try {
-	        if (in != null) {
-	          in.close();
-	        }
-	      } catch (Exception e2) {
-	        e2.printStackTrace();
-	      }
-	    }
-	    return result;
+	      MethodInstance.close.invoke(in);
+	      return result;
 	  }
 	 
 	 
-	  public static String post(String url, Map<String, Object> paramMap) {
+	  public static String post(String url, Map<String, Object> paramMap)throws Exception {
 	    PrintWriter out = null;
 	    BufferedReader in = null;
 	    String result = "";
-	    try {
+	    
 	      URL realUrl = new URL(url);
 	    
 	      URLConnection conn = realUrl.openConnection();
@@ -90,7 +72,6 @@ public class IOCommon {
 	      }
 	      
 	      out.print(param);
-	      
 	      out.flush();
 	     
 	      in = new BufferedReader(
@@ -99,24 +80,7 @@ public class IOCommon {
 	      while ((line = in.readLine()) != null) {
 	        result += line;
 	      }
-	    } catch (Exception e) {
-	     
-	      e.printStackTrace();
-	    }
-	   
-	    finally{
-	      try{
-	        if(out!=null){
-	          out.close();
-	        }
-	        if(in!=null){
-	          in.close();
-	        }
-	      }
-	      catch(IOException ex){
-	        ex.printStackTrace();
-	      }
-	    }
+	      MethodInstance.close.invoke(out,in);
 	    return result;
 	  }  
 }

@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -55,35 +56,34 @@ public abstract class DataContext {
 		return new View<M>(this, cls,tableName);
 	};
 	
-	public <M> Table<M>  getTable(Class<M> mcls){
+	public <M> Table<M>  getTable(Class<M> mcls)throws NullPointerException{
 	      Table<M> table=null;
 		  String fieldName="table"+mcls.getSimpleName();
-	      for(Class cls=thisClass();!Object.class.equals(cls);cls=cls.getSuperclass()) {
-	    	  try {
-				Field field=cls.getDeclaredField(fieldName);
+	     
+		  Field field=ReflectCommon.getDeclaredFields(thisClass()).get(fieldName); //cls.getDeclaredField(fieldName);
+			try {
 				table=(Table<M>)field.get(this);
-				break;
-			} catch (Exception e) {
-				continue;
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				String msg=MessageFormat.format("field:{0} can't find in class:{1}",fieldName,thisClass().getName() );
+				throw new NullPointerException(msg);
 			}
-	    	  
-	      }
 	      return table;
 	}
 	
-	public  <M> View<M>  getView(Class<M> mcls){
+	public  <M> View<M>  getView(Class<M> mcls) throws NullPointerException{
 		View<M> table=null;
 		  String fieldName="view"+mcls.getSimpleName();
-	      for(Class cls=thisClass();!Object.class.equals(cls);cls=cls.getSuperclass()) {
-	    	  try {
-				Field field=cls.getDeclaredField(fieldName);
+	     
+			Field field=ReflectCommon.getDeclaredFields(thisClass()).get(fieldName); //cls.getDeclaredField(fieldName);
+			try {
 				table=(View<M>)field.get(this);
-				break;
-			} catch (Exception e) {
-				continue;
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				String msg=MessageFormat.format("field:{0} can't find in class:{1}",fieldName,thisClass().getName() );
+				throw new NullPointerException(msg);
 			}
-	    	  
-	      }
+				
 	      return table;
 	};
 	
@@ -171,7 +171,7 @@ public abstract class DataContext {
 		return re;
 	} 
 	
-	protected int[]  executeInsert(String sql,Object[][] params) throws SQLException{
+	protected int[]  executeInsertReturnPk(String sql,Object[][] params) throws SQLException{
 		Connection connection=this.dataSource.getConnection();
 		int[] pks=new int[params.length];
 		PreparedStatement preparedStatement= connection.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
@@ -193,6 +193,28 @@ public abstract class DataContext {
 		//for(int r:res)re+=r;
 		return pks;
 	} 
+	
+
+	protected int  executeInsert(String sql,Object[][] params) throws SQLException{
+		Connection connection=this.dataSource.getConnection();
+		int re=0 ;
+		PreparedStatement preparedStatement= connection.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
+		
+		//for(Object[] param :params) {
+		for(int j=0;j<params.length;j++) {
+			Object[] param=params[j];
+			for(int i=0;i<param.length;i++) {
+				preparedStatement.setObject(i+1, param[i]);
+			}
+			re+=preparedStatement.executeUpdate();
+			
+			
+		}
+		MethodInstance.close.invoke(preparedStatement,connection);
+		//for(int r:res)re+=r;
+		return re;
+	} 
+	
 	
 	
 }

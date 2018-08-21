@@ -6,11 +6,11 @@ import java.lang.reflect.InvocationTargetException;
 public enum MethodInstance {
 
 	
-	close;
+	close,finalize;
 	
 	
-	public long invoke(Object...objects)  {
-	    long re=0;
+	public float invoke(Object...objects)  {
+	    float re=0;
 		for(Object object:objects) {
 			try {
 				object.getClass().getMethod(this.name()).invoke(object);
@@ -19,7 +19,7 @@ public enum MethodInstance {
 					| NoSuchMethodException | SecurityException e) {
 			}
 		}
-		long pred=re/objects.length;
+		float pred=re/objects.length;
 		return pred;
 	}
 }

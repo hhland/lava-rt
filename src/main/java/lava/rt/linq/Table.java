@@ -93,9 +93,10 @@ public  class Table<M> extends View<M> {
 		return dataContext.<M>executeQueryList(sql,classM).get(0);
 	}
 	
+	
 	public  float insert(M...models) throws SQLException {
 		String sqlPattern = "insert into {0} ({1}) values ({2})", sql = "",
-                sqlCacheKey = classM.getName() + ":insert", cols = "", vals = "";
+                sqlCacheKey = classM.getName() + ":insert", cols = pkName+",", vals = "?,";
        
 		
         if (dataContext.SQL_CACHE.containsKey(sqlCacheKey)) {
@@ -106,7 +107,62 @@ public  class Table<M> extends View<M> {
 
                 String fname = field.getName();
 
-                cols += " `"+fname+"`,";
+                cols += " "+fname+",";
+                vals += " ?,";
+
+            }
+            cols = TextCommon.trim(cols, ",");
+            vals = TextCommon.trim(vals, ",");
+            sql = MessageFormat.format(sqlPattern, tableName, cols, vals);
+           
+            dataContext.SQL_CACHE.put(sqlCacheKey, sql);
+                
+        }
+        int re=0,insertsize = insertFields.length;
+        
+        
+        Object[][] params = new Object[models.length][insertsize+1];
+        try {
+        for (int i = 0; i < models.length; i++) {
+            M obj = models[i];
+            params[i][0]=pkField.get(obj);
+            for (int j = 0; j < insertsize; j++) {
+                Field field = insertFields[j];
+                params[i][j+1] = field.get(obj);
+            }
+        }
+        } catch (Exception e) {
+			e.printStackTrace();
+		}
+        
+        
+        try {
+           re+=	dataContext.executeInsert(sql, params);
+        }catch(SQLException se){
+        	SQLException nse=new SQLException(se.getMessage()+"\n"+sql);
+        	throw nse;
+        }
+        
+        
+        return re;
+        
+	}
+	
+	
+	public  float insertReturnPk(M...models) throws SQLException {
+		String sqlPattern = "insert into {0} ({1}) values ({2})", sql = "",
+                sqlCacheKey = classM.getName() + ":insertReturnPk", cols = "", vals = "";
+       
+		
+        if (dataContext.SQL_CACHE.containsKey(sqlCacheKey)) {
+            sql = dataContext.SQL_CACHE.get(sqlCacheKey);
+        } else {
+
+            for (Field field : insertFields) {
+
+                String fname = field.getName();
+
+                cols += " "+fname+",";
                 vals += " ?,";
 
             }
@@ -133,7 +189,13 @@ public  class Table<M> extends View<M> {
 			e.printStackTrace();
 		}
         
-        int[] pks= dataContext.executeInsert(sql, params);
+        int[] pks=null; 
+        try {
+           pks=	dataContext.executeInsertReturnPk(sql, params);
+        }catch(SQLException se){
+        	SQLException nse=new SQLException(se.getMessage()+"\n"+sql);
+        	throw nse;
+        }
         try {
         for(int i=0;i<pks.length;i++) {
             int pk=pks[i];
@@ -165,7 +227,7 @@ public  class Table<M> extends View<M> {
 	            for (Field field : updateFields) {
 	                String fname = field.getName();
 
-	                key += MessageFormat.format(" `{0}` =? ,", fname);
+	                key += MessageFormat.format(" {0} =? ,", fname);
 	               
 	            }
 	            key = TextCommon.trim(key, ",");

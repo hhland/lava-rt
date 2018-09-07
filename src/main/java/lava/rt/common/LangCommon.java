@@ -1,8 +1,11 @@
 package lava.rt.common;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Stream;
 
-public class LangCommon {
+public   class LangCommon {
 
 	public static <T> boolean isIn(T obj1, T... objs) {
 		for (T obj : objs) {
@@ -26,5 +29,15 @@ public class LangCommon {
 	}
 	
 	
-	
+	public static  <T> Map<String, T>  toMap(Collection<T> ts){
+		
+		Map<String, T> tm=new HashMap<>();
+		
+		for(T t:ts) {
+			tm.put(t.toString(), t);
+		}
+		
+		return tm;
+		
+	}
 }

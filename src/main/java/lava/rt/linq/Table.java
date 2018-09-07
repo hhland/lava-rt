@@ -57,6 +57,8 @@ public  class Table<M> extends View<M> {
 		
 	}
 	
+	
+
 	protected static final String load_pattern="select * from {0} where {1}= {2} "; 
 	public M load(int pk) throws SQLException{
 		
@@ -94,7 +96,7 @@ public  class Table<M> extends View<M> {
 	}
 	
 	
-	public  float insert(M...models) throws SQLException {
+	public  int insert(M...models) throws SQLException {
 		String sqlPattern = "insert into {0} ({1}) values ({2})", sql = "",
                 sqlCacheKey = classM.getName() + ":insert", cols = pkName+",", vals = "?,";
        
@@ -212,7 +214,7 @@ public  class Table<M> extends View<M> {
 	}
 	
 	
-	public  float update(M...models) throws SQLException{
+	public  int update(M...models) throws SQLException{
 		
 			String sqlPattern = "update {0} set {1} where {2}=? ", key = "", sql = "",
 	                sqlCacheKey = classM.getName() + ":update";
@@ -258,11 +260,11 @@ public  class Table<M> extends View<M> {
 				e.printStackTrace();
 			}
 			
-			return dataContext.executeUpdate(sql, params);
+			return (int)dataContext.executeUpdate(sql, params);
 		
 	}
 	
-	public  float delete(M...models) throws SQLException{
+	public  int delete(M...models) throws SQLException{
 		String sqlPattern = "delete from {0} where {1}=? ", sql = "",
                 sqlCacheKey = classM.getName() + ":delete";
 
@@ -285,6 +287,16 @@ public  class Table<M> extends View<M> {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-        return dataContext.executeUpdate(sql, params);
+        return (int)dataContext.executeUpdate(sql, params);
+	}
+	
+	public Object getPk(M m) {
+		Object re=null;
+		try {
+			re=pkField.get(m);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return re;
 	}
 }

@@ -52,7 +52,7 @@ public class TextCommon {
         return v;
     }
     
-    public static List<java.lang.String> split(String text, String... spars) throws Exception {
+    public static List<String> split(String text, String... spars) throws Exception {
         String tempText = text;
         List<String> vals = new ArrayList<String>();
         for (int i = 0; i < spars.length; i++) {

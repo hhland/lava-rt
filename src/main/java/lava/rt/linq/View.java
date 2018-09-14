@@ -27,36 +27,51 @@ public   class View<M> {
     
     
     
-    public List<M> select(String where) throws SQLException{
+    public List<M> select(String where,Object...params) throws SQLException{
     	String pattern="select * from {0} ";
     	String sql=MessageFormat.format(pattern, this.tableName)+where;
-		return dataContext.executeQueryList(sql,this.classM);
+    	if(dataContext.DEBUG) {
+    		dataContext.log(this.classM, sql);
+    	}
+		return dataContext.executeQueryList(sql,this.classM,params);
 	}
     
 	
 	
-	public int count(String column,String where) throws SQLException{
+	public int count(String column,String where,Object...params) throws SQLException{
 		String pattern="select count({0}) from {1} ";
     	String sql=MessageFormat.format(pattern,column, this.tableName)+where;
-		return (int)dataContext.executeQueryArray(sql)[0][0];
+    	if(dataContext.DEBUG) {
+    		dataContext.log(this.classM, sql);
+    	}
+    	return (int)dataContext.executeQueryArray(sql,params)[0][0];
 	}
 	
-	public float sum(String column,String where) throws SQLException{
+	public float sum(String column,String where,Object...params) throws SQLException{
 		String pattern="select sum({0}) from {1} ";
     	String sql=MessageFormat.format(pattern,column, this.tableName)+where;
-    	return (float)dataContext.executeQueryArray(sql)[0][0];
+    	if(dataContext.DEBUG) {
+    		dataContext.log(this.classM, sql);
+    	}
+    	return (float)dataContext.executeQueryArray(sql,params)[0][0];
 	}
 	
-	public <T> T min(String column,String where) throws SQLException{
+	public <T> T min(String column,String where,Object...params) throws SQLException{
 		String pattern="select min({0}) from {1} ";
     	String sql=MessageFormat.format(pattern,column, this.tableName)+where;
-    	return (T)dataContext.executeQueryArray(sql)[0][0];
+    	if(dataContext.DEBUG) {
+    		dataContext.log(this.classM, sql);
+    	}
+    	return (T)dataContext.executeQueryArray(sql,params)[0][0];
 	}
 	
-	public <T> T max(String column,String where) throws SQLException{
+	public <T> T max(String column,String where,Object...params) throws SQLException{
 		String pattern="select max({0}) from {1} ";
     	String sql=MessageFormat.format(pattern,column, this.tableName)+where;
-    	return (T)dataContext.executeQueryArray(sql)[0][0];
+    	if(dataContext.DEBUG) {
+    		dataContext.log(this.classM, sql);
+    	}
+    	return (T)dataContext.executeQueryArray(sql,params)[0][0];
 	}
 	
 	

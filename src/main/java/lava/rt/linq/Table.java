@@ -22,7 +22,7 @@ public  class Table<M> extends View<M> {
 	
 	protected Field[] insertFields =null,updateFields=null;
 	
-	public Table(DataContext dataContext,Class<M> classM,String tableName,String pkName) throws NoSuchFieldException {
+	public Table(DataContext dataContext,Class<M> classM,String tableName,String pkName)  {
 		super(dataContext,classM,tableName);
 		this.pkName=pkName;
 		
@@ -66,6 +66,9 @@ public  class Table<M> extends View<M> {
 		String sql=MessageFormat.format(load_pattern, this.tableName,this.pkName,
 				pk
 				);
+		if(dataContext.DEBUG) {
+    		dataContext.log(this.classM, sql);
+    	}
 		return dataContext.<M>executeQueryList(sql,classM).get(0);
 	}
 	
@@ -74,6 +77,9 @@ public  class Table<M> extends View<M> {
 		String sql=MessageFormat.format(load_pattern, this.tableName,this.pkName,
 				pkVal
 				);
+		if(dataContext.DEBUG) {
+    		dataContext.log(this.classM, sql);
+    	}
 		return dataContext.<M>executeQueryList(sql,classM).get(0);
 	}
 	
@@ -83,6 +89,9 @@ public  class Table<M> extends View<M> {
 		String sql=MessageFormat.format(loadLast_pattern, this.tableName,this.pkName
 				
 				);
+		if(dataContext.DEBUG) {
+    		dataContext.log(this.classM, sql);
+    	}
 		return dataContext.<M>executeQueryList(sql,classM).get(0);
 	}
 	
@@ -92,6 +101,9 @@ public  class Table<M> extends View<M> {
 		String sql=MessageFormat.format(loadFirst_pattern, this.tableName,this.pkName
 				
 				);
+		if(dataContext.DEBUG) {
+    		dataContext.log(this.classM, sql);
+    	}
 		return dataContext.<M>executeQueryList(sql,classM).get(0);
 	}
 	
@@ -120,6 +132,9 @@ public  class Table<M> extends View<M> {
             dataContext.SQL_CACHE.put(sqlCacheKey, sql);
                 
         }
+        if(dataContext.DEBUG) {
+    		dataContext.log(this.classM, sql);
+    	}
         int re=0,insertsize = insertFields.length;
         
         
@@ -175,6 +190,9 @@ public  class Table<M> extends View<M> {
             dataContext.SQL_CACHE.put(sqlCacheKey, sql);
                 
         }
+        if(dataContext.DEBUG) {
+    		dataContext.log(this.classM, sql);
+    	}
         int re=0,insertsize = insertFields.length;
         
         
@@ -239,6 +257,9 @@ public  class Table<M> extends View<M> {
 	            dataContext.SQL_CACHE.put(sqlCacheKey, sql);
 	           
 	        }
+	        if(dataContext.DEBUG) {
+	    		dataContext.log(this.classM, sql);
+	    	}
 	        int updatesize = updateFields.length;
 	        Object[][] params = new Object[models.length][updatesize + 1];
 	        try {
@@ -276,6 +297,10 @@ public  class Table<M> extends View<M> {
             dataContext.SQL_CACHE.put(sqlCacheKey, sql);
            
         }
+        if(dataContext.DEBUG) {
+        	
+    		dataContext.log(this.classM, sql);
+    	}
         int dlength = models.length;
         Object[][] params = new Object[dlength][1];
         try {

@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 
@@ -26,8 +27,11 @@ import lava.rt.instance.MethodInstance;
 
 public abstract class DataContext {
 
+	public static boolean DEBUG=false;
 	
 	protected abstract Class thisClass() ;
+	
+	
 
 	protected DataContext() {
 	}
@@ -41,14 +45,19 @@ public abstract class DataContext {
 	
 	protected final Map<String,String> SQL_CACHE=new HashMap<String,String>();
 	
+	public void log(Class cls,String msg) {
+		System.out.println("log("+cls.getSimpleName()+"):"+msg);
+	}
+	
+	public void log(Class cls,Exception ex) {
+		System.out.println("Exception("+cls.getSimpleName()+"):"+ex.getMessage());
+	}
+	
 	public  <M> Table<M>  createTable(Class<M> cls,String tableName,String pkName){
 		Table<M> table=null;
-		try {
-			table= new Table<M>(this, cls,tableName, pkName);
-		} catch (NoSuchFieldException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
+	    table= new Table<M>(this, cls,tableName, pkName);
+		
 		return table;
 	}
 	
@@ -99,12 +108,15 @@ public abstract class DataContext {
 	
 	
 	
-	protected <M>  List<M> executeQueryList(String sql,Class<M> cls) throws SQLException{
+	protected <M>  List<M> executeQueryList(String sql,Class<M> cls,Object...params) throws SQLException{
 		Connection connection=this.dataSource.getConnection();
 		List<M> list=new ArrayList<M>();
 		PreparedStatement preparedStatement= connection.prepareStatement(sql);
+		for(int i=0;i<params.length;i++) {
+			preparedStatement.setObject(i+1,params[i] );
+		}
 		
-		ResultSet resultSet=preparedStatement.executeQuery(sql);
+		ResultSet resultSet=preparedStatement.executeQuery();
 		ResultSetMetaData metaData=resultSet.getMetaData();
 		Map<String,Integer> meteDataMap=new HashMap<String,Integer>();
 		for(int i=1;i<=metaData.getColumnCount();i++) {
@@ -138,17 +150,19 @@ public abstract class DataContext {
 			
 			list.add(m);
 		}
-		MethodInstance.close.invoke(resultSet,preparedStatement,connection);  
+		MethodInstance.close.invoke(resultSet,preparedStatement);  
 		
 		return list;
 	} 
 	
-    protected Object[][] executeQueryArray(String sql) throws SQLException{
+    protected Object[][] executeQueryArray(String sql,Object...params) throws SQLException{
     	Connection connection=this.dataSource.getConnection();
 		List<Object[]> list=new ArrayList<Object[]>();
 		PreparedStatement preparedStatement= connection.prepareStatement(sql);
-		
-		ResultSet resultSet=preparedStatement.executeQuery(sql);
+		for(int i=0;i<params.length;i++) {
+			preparedStatement.setObject(i+1,params[i] );
+		}
+		ResultSet resultSet=preparedStatement.executeQuery();
 		ResultSetMetaData metaData=resultSet.getMetaData();
 		int cc=metaData.getColumnCount();
 		while(resultSet.next()) {
@@ -165,6 +179,7 @@ public abstract class DataContext {
 	
 	protected float executeUpdate(String sql,Object[][] params) throws SQLException{
 		Connection connection=this.dataSource.getConnection();
+		
 		float re=0;
 		re=SqlCommon.executeBatch(connection, sql, params);
 		MethodInstance.close.invoke(connection);
@@ -214,7 +229,6 @@ public abstract class DataContext {
 		//for(int r:res)re+=r;
 		return re;
 	} 
-	
 	
 	
 }

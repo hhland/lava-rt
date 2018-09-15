@@ -73,6 +73,16 @@ public   class View<M> {
     	}
     	return (T)dataContext.executeQueryArray(sql,params)[0][0];
 	}
+
+
+
+
+
+
+	@Override
+	public String toString() {
+		return tableName;
+	}
 	
 	
 	

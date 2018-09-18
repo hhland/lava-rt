@@ -10,7 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import lava.rt.instance.MethodInstance;
+
 
 
 
@@ -38,7 +38,7 @@ public class IOCommon {
 	      while ((line = in.readLine()) != null) {
 	        result += line; 
 	      }
-	      MethodInstance.close.invoke(in);
+	      ReflectCommon.close(in);
 	      return result;
 	  }
 	 
@@ -80,7 +80,7 @@ public class IOCommon {
 	      while ((line = in.readLine()) != null) {
 	        result += line;
 	      }
-	      MethodInstance.close.invoke(out,in);
+	      ReflectCommon.close(out,in);
 	    return result;
 	  }  
 }

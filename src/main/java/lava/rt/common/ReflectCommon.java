@@ -281,5 +281,18 @@ public class ReflectCommon {
     	}
     	return 1;
     }
+    
+    
+    public static void close(Object...objs) {
+    	for(Object obj :objs) {
+    		try {
+				obj.getClass().getMethod("close").invoke(obj);
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+					| NoSuchMethodException | SecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    	}
+    }
 
 }

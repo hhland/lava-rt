@@ -1,11 +1,17 @@
 package lava.rt.linq;
 
+import java.util.Date;
+
+import lava.rt.common.TextCommon;
+
 public class Column {
 
 	private String column;
 	
+	
 	public Column(String column) {
 		this.column=column;
+		
 	}
 	
 	public String eq(Object val) {return sql_eq(true,column,val);}
@@ -22,6 +28,16 @@ public class Column {
 	public <T> String notBetween(T from,T to) {return sql_between(false,column,from,to);}
 	public String like(String val) {return sql_like(true, column,val);}
 	public String notLike(String val) {return sql_like(false, column,val);}	
+	
+	public String asc() {
+		return " "+column + " asc";
+	}
+	
+	public String desc() {
+		return " "+column + " desc";
+	}
+	
+	
 
 	@Override
 	public String toString() {
@@ -31,56 +47,59 @@ public class Column {
 	
 	
 	
-	protected static String sql_eq(boolean bl,String column,Object val) {
+	protected  String sql_eq(boolean bl,String column,Object val) {
 		String str=sql_val(val);
-		return column+ (bl?"":"!")+ " = "+ str;
+		return " "+column+ (bl?"":"!")+ " = "+ str;
 	}
 	
 	protected static String sql_like(boolean bl,String column,String val) {
 		String str="";
 		if(val==null) str="?";
 		else str="'"+val+"'";
-		return column+ (bl?" ":" not")+ " like "+ str;
+		return " "+column+ (bl?" ":" not")+ " like "+ str;
 	}
 	
 	
-	protected static String sql_lt(boolean bl,String column,Object val) {
+	protected  String sql_lt(boolean bl,String column,Object val) {
 		String str=sql_val(val);
-		return column+ (bl?" ":" !")+ " < "+ str;
+		return " "+column+ (bl?" ":" !")+ " < "+ str;
 	}
 	
-	protected static String sql_gt(boolean bl,String column,Object val) {
+	protected  String sql_gt(boolean bl,String column,Object val) {
 		String str=sql_val(val);
-		return column+ (bl?" ":" !")+ " > "+ str;
+		return " "+column+ (bl?" ":" !")+ " > "+ str;
 	}
 	
-	protected static <T> String sql_between(boolean bl,String column,T from,T to) {
+	protected  <T> String sql_between(boolean bl,String column,T from,T to) {
 		String fromStr=sql_val(from),toStr=sql_val(to);
-		return column+ (bl?" ":" not")+ " between "+ fromStr+ " and " +toStr;
+		return " "+column+ (bl?" ":" not")+ " between "+ fromStr+ " and " +toStr;
 	}
 	
-	protected static <T> String sql_in(boolean bl,String column,T...vals) {
+	protected  <T> String sql_in(boolean bl,String column,T...vals) {
 		String[] strs=new String[vals.length] ;
 		for(int i=0;i<strs.length;i++) {
 			strs[i]=sql_val(vals[i]);
 		}
-		return column+ (bl?" in ":" not in ")+ " ( "+String.join(",", strs)+" )";
+		return " "+column+ (bl?" in ":" not in ")+ " ( "+String.join(",", strs)+" )";
 	}
 	
 	
 	
 	protected static String sql_isnull(boolean bl,String column) {
-		return column+ (bl?" is ":" is not ")+ " null ";
+		return " "+column+ (bl?" is ":" is not ")+ " null ";
 	}
 	
 	
 	
-	private static String sql_val(Object val) {
+	private  String sql_val(Object val) {
 		String str="";
 		if(val==null) str="?";
 		else if(val instanceof String) str="'"+val.toString()+"'";
+		
 		else str=val.toString();
 		return str;
 	}
+	
+	
 	
 }

@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import lava.rt.instance.MethodInstance;
+
 
 public class SqlCommon {
 
@@ -31,7 +31,7 @@ public class SqlCommon {
 			preparedStatement.addBatch();
 		}
 		int[] res= preparedStatement.executeBatch();
-		MethodInstance.close.invoke(preparedStatement);
+		ReflectCommon.close(preparedStatement);
 		for(int r:res)re+=r;
 		float prec=re/params.length;
 		return prec;
@@ -47,7 +47,7 @@ public class SqlCommon {
 			}
 			
 		re= preparedStatement.executeUpdate();
-		MethodInstance.close.invoke(preparedStatement);
+		ReflectCommon.close(preparedStatement);
 		return re;
 	} 
 	

@@ -97,4 +97,13 @@ public class TextCommon {
     	}
     	return String.join(spar, values);
     }
+    
+    public static String join(String delimiter,Object...vals) {
+    	String[] strs=new String[vals.length];
+		for(int i=0;i<strs.length;i++) {
+			strs[i]=vals[i].toString();
+		}
+		return String.join(delimiter, strs);
+    }
+    
 }

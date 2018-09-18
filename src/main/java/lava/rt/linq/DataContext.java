@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -23,7 +24,7 @@ import javax.sql.DataSource;
 
 import lava.rt.common.ReflectCommon;
 import lava.rt.common.SqlCommon;
-import lava.rt.instance.MethodInstance;
+
 
 public abstract class DataContext {
 
@@ -150,12 +151,12 @@ public abstract class DataContext {
 			
 			list.add(m);
 		}
-		MethodInstance.close.invoke(resultSet,preparedStatement);  
+		ReflectCommon.close(resultSet,preparedStatement);  
 		
 		return list;
 	} 
 	
-    protected Object[][] executeQueryArray(String sql,Object...params) throws SQLException{
+    public Object[][] executeQueryArray(String sql,Object...params) throws SQLException{
     	Connection connection=this.dataSource.getConnection();
 		List<Object[]> list=new ArrayList<Object[]>();
 		PreparedStatement preparedStatement= connection.prepareStatement(sql);
@@ -172,17 +173,17 @@ public abstract class DataContext {
 			}
 			list.add(objects);
 		}
-		MethodInstance.close.invoke(resultSet,preparedStatement,connection);  
+		ReflectCommon.close(resultSet,preparedStatement,connection);  
 		return list.toArray(new Object[list.size()][cc]);
 	} 
 	
 	
-	protected float executeUpdate(String sql,Object[][] params) throws SQLException{
+	public float executeUpdate(String sql,Object[][] params) throws SQLException{
 		Connection connection=this.dataSource.getConnection();
 		
 		float re=0;
 		re=SqlCommon.executeBatch(connection, sql, params);
-		MethodInstance.close.invoke(connection);
+		ReflectCommon.close(connection);
 		return re;
 	} 
 	
@@ -204,7 +205,7 @@ public abstract class DataContext {
 			}
 			resultSet.close();
 		}
-		MethodInstance.close.invoke(preparedStatement,connection);
+		ReflectCommon.close(preparedStatement,connection);
 		//for(int r:res)re+=r;
 		return pks;
 	} 
@@ -225,11 +226,13 @@ public abstract class DataContext {
 			
 			
 		}
-		MethodInstance.close.invoke(preparedStatement,connection);
+		ReflectCommon.close(preparedStatement,connection);
 		//for(int r:res)re+=r;
 		return re;
 	} 
 	
-	
+	protected String sql_val(Date val) {
+		return "to_date('2011-07-01','yyyy-MM-dd')";
+	}
 	
 }

@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.nio.channels.Channel;
 import java.nio.channels.SelectionKey;
 
-public abstract class AsyncGenericQueryClient <CH extends Channel> {
+public abstract class AsyncQueryClient <CH extends Channel> {
 
 	/**
 	 * 由 Receiver 回调，当 Receiver 发现对应的 SocketChannel 有数据可读的时候，
@@ -14,23 +14,13 @@ public abstract class AsyncGenericQueryClient <CH extends Channel> {
 要保证该函数尽可能快的完成就是了。
 	 * @throws IOException
 	 */
-	public void handleInput(SelectionKey key) throws  IOException{
-		
-		if(!key.isValid())return;
-		
-		CH channel=(CH)key.channel();
-		
-		
-		
-	}
+	public abstract void handleInput(SelectionKey key) throws  IOException;
 	
 	
 	/*
 	 * 回调函数，可能由 Sender， Receiver 或者用户处理线程调用。该函数完成数据的发送逻辑。
 	 */
-	public void sendRequest(CH channel) throws  IOException{
-		
-	}
+	public abstract void sendRequest(CH channel) throws  IOException;
 	
 	/*
 	 * 回调函数，由 Receiver 调用。询问该 Client，数据接收工作是否已经完成，即
@@ -38,12 +28,16 @@ public abstract class AsyncGenericQueryClient <CH extends Channel> {
 经接收完成，二是将对数据进行处理，因为缓冲区要腾出来供下次请求使用，
 数据的解析工作要放在这里执行。
 	 */
-	abstract void finishResponse();
+	public void finishResponse() {
+		
+	}
 	
 	/*
 	 * 回调函数，由 Receiver 调用。 Client 类是个状态相关的类，具体实例化的时候，
 你可能会设置一些状态数据，这里允许你对状态数据清零，以备下次使用。
 	 */
-	abstract void reset();
+	public void reset() {
+		
+	}
 	
 }

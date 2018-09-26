@@ -67,7 +67,7 @@ public  class Table<M> extends View<M> {
 				pk
 				);
 		if(dataContext.DEBUG) {
-    		dataContext.log(this.classM, sql);
+    		dataContext.LOGGER.log(this.classM, sql);
     	}
 		return dataContext.<M>executeQueryList(sql,classM).get(0);
 	}
@@ -78,7 +78,7 @@ public  class Table<M> extends View<M> {
 				pkVal
 				);
 		if(dataContext.DEBUG) {
-    		dataContext.log(this.classM, sql);
+    		dataContext.LOGGER.log(this.classM, sql);
     	}
 		return dataContext.<M>executeQueryList(sql,classM).get(0);
 	}
@@ -90,7 +90,7 @@ public  class Table<M> extends View<M> {
 				
 				);
 		if(dataContext.DEBUG) {
-    		dataContext.log(this.classM, sql);
+    		dataContext.LOGGER.log(this.classM, sql);
     	}
 		return dataContext.<M>executeQueryList(sql,classM).get(0);
 	}
@@ -102,13 +102,13 @@ public  class Table<M> extends View<M> {
 				
 				);
 		if(dataContext.DEBUG) {
-    		dataContext.log(this.classM, sql);
+    		dataContext.LOGGER.log(this.classM, sql);
     	}
 		return dataContext.<M>executeQueryList(sql,classM).get(0);
 	}
 	
 	
-	public  int insert(M...models) throws SQLException {
+	public <E extends M> int insert(E...entrys) throws SQLException {
 		String sqlPattern = "insert into {0} ({1}) values ({2})", sql = "",
                 sqlCacheKey = classM.getName() + ":insert", cols = pkName+",", vals = "?,";
        
@@ -133,15 +133,15 @@ public  class Table<M> extends View<M> {
                 
         }
         if(dataContext.DEBUG) {
-    		dataContext.log(this.classM, sql);
+    		dataContext.LOGGER.log(this.classM, sql);
     	}
         int re=0,insertsize = insertFields.length;
         
         
-        Object[][] params = new Object[models.length][insertsize+1];
+        Object[][] params = new Object[entrys.length][insertsize+1];
         try {
-        for (int i = 0; i < models.length; i++) {
-            M obj = models[i];
+        for (int i = 0; i < entrys.length; i++) {
+            M obj = entrys[i];
             params[i][0]=pkField.get(obj);
             for (int j = 0; j < insertsize; j++) {
                 Field field = insertFields[j];
@@ -166,7 +166,7 @@ public  class Table<M> extends View<M> {
 	}
 	
 	
-	public  float insertReturnPk(M...models) throws SQLException {
+	public <E extends M> float insertReturnPk(E...entrys) throws SQLException {
 		String sqlPattern = "insert into {0} ({1}) values ({2})", sql = "",
                 sqlCacheKey = classM.getName() + ":insertReturnPk", cols = "", vals = "";
        
@@ -191,15 +191,15 @@ public  class Table<M> extends View<M> {
                 
         }
         if(dataContext.DEBUG) {
-    		dataContext.log(this.classM, sql);
+    		dataContext.LOGGER.log(this.classM, sql);
     	}
         int re=0,insertsize = insertFields.length;
         
         
-        Object[][] params = new Object[models.length][insertsize];
+        Object[][] params = new Object[entrys.length][insertsize];
         try {
-        for (int i = 0; i < models.length; i++) {
-            M obj = models[i];
+        for (int i = 0; i < entrys.length; i++) {
+            M obj = entrys[i];
             for (int j = 0; j < insertsize; j++) {
                 Field field = insertFields[j];
                 params[i][j] = field.get(obj);
@@ -219,7 +219,7 @@ public  class Table<M> extends View<M> {
         try {
         for(int i=0;i<pks.length;i++) {
             int pk=pks[i];
-            M model=models[i];
+            M model=entrys[i];
             pkField.set(model, pk);
 			
             re++;
@@ -232,7 +232,7 @@ public  class Table<M> extends View<M> {
 	}
 	
 	
-	public  int update(M...models) throws SQLException{
+	public <E extends M> int update(E...entrys) throws SQLException{
 		
 			String sqlPattern = "update {0} set {1} where {2}=? ", key = "", sql = "",
 	                sqlCacheKey = classM.getName() + ":update";
@@ -258,13 +258,13 @@ public  class Table<M> extends View<M> {
 	           
 	        }
 	        if(dataContext.DEBUG) {
-	    		dataContext.log(this.classM, sql);
+	    		dataContext.LOGGER.log(this.classM, sql);
 	    	}
 	        int updatesize = updateFields.length;
-	        Object[][] params = new Object[models.length][updatesize + 1];
+	        Object[][] params = new Object[entrys.length][updatesize + 1];
 	        try {
-	        for (int i = 0; i < models.length; i++) {
-	            M obj = models[i];
+	        for (int i = 0; i < entrys.length; i++) {
+	            M obj = entrys[i];
 	         
 	            
 	            	for (int j = 0; j < updatesize; j++) {
@@ -285,7 +285,7 @@ public  class Table<M> extends View<M> {
 		
 	}
 	
-	public  int delete(M...models) throws SQLException{
+	public <E extends M> int delete(E...entrys) throws SQLException{
 		String sqlPattern = "delete from {0} where {1}=? ", sql = "",
                 sqlCacheKey = classM.getName() + ":delete";
 
@@ -299,13 +299,13 @@ public  class Table<M> extends View<M> {
         }
         if(dataContext.DEBUG) {
         	
-    		dataContext.log(this.classM, sql);
+    		dataContext.LOGGER.log(this.classM, sql);
     	}
-        int dlength = models.length;
+        int dlength = entrys.length;
         Object[][] params = new Object[dlength][1];
         try {
         for (int i = 0; i < dlength; i++) {
-            M obj = models[i];
+            M obj = entrys[i];
            params[i][0] = pkField.get(obj);
         }
         } catch (Exception e) {
@@ -315,15 +315,7 @@ public  class Table<M> extends View<M> {
         return (int)dataContext.executeUpdate(sql, params);
 	}
 	
-	public Object getPk(M m) {
-		Object re=null;
-		try {
-			re=pkField.get(m);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return re;
-	}
+	
 	
 	
 }

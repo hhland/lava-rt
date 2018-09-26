@@ -32,7 +32,17 @@ public abstract class DataContext {
 	
 	protected abstract Class thisClass() ;
 	
-	
+
+	public static Logger LOGGER=new Logger() {
+		
+		public void log(Class cls,String msg) {
+			System.out.println("log("+cls.getSimpleName()+"):"+msg);
+		}
+		
+		public void log(Class cls,Exception ex) {
+			System.out.println("Exception("+cls.getSimpleName()+"):"+ex.getMessage());
+		}
+	};
 
 	protected DataContext() {
 	}
@@ -43,18 +53,14 @@ public abstract class DataContext {
 	
 	private DataSource dataSource;
 	
+
+	
 	
 	protected final Map<String,String> SQL_CACHE=new HashMap<String,String>();
 	
-	public void log(Class cls,String msg) {
-		System.out.println("log("+cls.getSimpleName()+"):"+msg);
-	}
 	
-	public void log(Class cls,Exception ex) {
-		System.out.println("Exception("+cls.getSimpleName()+"):"+ex.getMessage());
-	}
 	
-	public  <M> Table<M>  createTable(Class<M> cls,String tableName,String pkName){
+	public  <M extends Entry> Table<M>  createTable(Class<M> cls,String tableName,String pkName){
 		Table<M> table=null;
 		
 	    table= new Table<M>(this, cls,tableName, pkName);
@@ -66,7 +72,7 @@ public abstract class DataContext {
 		return new View<M>(this, cls,tableName);
 	};
 	
-	public <M> Table<M>  getTable(Class<M> mcls)throws NullPointerException{
+	public <M extends Entry> Table<M>  getTable(Class<M> mcls)throws NullPointerException{
 	      Table<M> table=null;
 		  String fieldName="table"+mcls.getSimpleName();
 	     
@@ -231,8 +237,12 @@ public abstract class DataContext {
 		return re;
 	} 
 	
-	protected String sql_val(Date val) {
-		return "to_date('2011-07-01','yyyy-MM-dd')";
-	}
 	
+	public interface Logger{
+		
+		 void log(Class cls,String msg);
+		
+		 void log(Class cls,Exception ex);
+		
+	}
 }

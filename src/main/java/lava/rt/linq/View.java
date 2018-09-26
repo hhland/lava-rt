@@ -31,7 +31,7 @@ public   class View<M> {
     	String pattern="select * from {0} ";
     	String sql=MessageFormat.format(pattern, this.tableName)+where;
     	if(dataContext.DEBUG) {
-    		dataContext.log(this.classM, sql);
+    		dataContext.LOGGER.log(this.classM, sql);
     	}
 		return dataContext.executeQueryList(sql,this.classM,params);
 	}
@@ -42,7 +42,7 @@ public   class View<M> {
 		String pattern="select count({0}) from {1} ";
     	String sql=MessageFormat.format(pattern,column, this.tableName)+where;
     	if(dataContext.DEBUG) {
-    		dataContext.log(this.classM, sql);
+    		dataContext.LOGGER.log(this.classM, sql);
     	}
     	return (int)dataContext.executeQueryArray(sql,params)[0][0];
 	}
@@ -51,7 +51,7 @@ public   class View<M> {
 		String pattern="select sum({0}) from {1} ";
     	String sql=MessageFormat.format(pattern,column, this.tableName)+where;
     	if(dataContext.DEBUG) {
-    		dataContext.log(this.classM, sql);
+    		dataContext.LOGGER.log(this.classM, sql);
     	}
     	return (float)dataContext.executeQueryArray(sql,params)[0][0];
 	}
@@ -60,7 +60,7 @@ public   class View<M> {
 		String pattern="select min({0}) from {1} ";
     	String sql=MessageFormat.format(pattern,column, this.tableName)+where;
     	if(dataContext.DEBUG) {
-    		dataContext.log(this.classM, sql);
+    		dataContext.LOGGER.log(this.classM, sql);
     	}
     	return (T)dataContext.executeQueryArray(sql,params)[0][0];
 	}
@@ -69,7 +69,7 @@ public   class View<M> {
 		String pattern="select max({0}) from {1} ";
     	String sql=MessageFormat.format(pattern,column, this.tableName)+where;
     	if(dataContext.DEBUG) {
-    		dataContext.log(this.classM, sql);
+    		dataContext.LOGGER.log(this.classM, sql);
     	}
     	return (T)dataContext.executeQueryArray(sql,params)[0][0];
 	}

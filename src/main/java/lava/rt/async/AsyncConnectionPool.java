@@ -9,21 +9,28 @@ import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.spi.SelectorProvider;
+import java.sql.ClientInfoStatus;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
-public abstract  class  AsyncGenericConnectionPool<R extends AsyncRequest> {
+public abstract  class  AsyncConnectionPool<R extends AsyncRequest> {
 
+	
+	ExecutorService pool=Executors.newFixedThreadPool(2);
+	
  	protected Selector selector;
 	protected SelectableChannel channel;
  	protected Thread receiver=new Receiver(),sender=new Sender();
 	
-	public AsyncGenericConnectionPool(SelectableChannel channel) throws IOException {
+	public AsyncConnectionPool(SelectableChannel channel) throws IOException {
 		super();
 		selector=Selector.open();
 		this.channel=channel;
-		receiver.start();
-		sender.start();
+		
 	}
 
 
@@ -36,8 +43,16 @@ public abstract  class  AsyncGenericConnectionPool<R extends AsyncRequest> {
 	
 	
 	public void run() throws IOException {
+		pool.execute(receiver);
+		pool.execute(sender);
 		
 		
+	}
+	
+	
+    public void stop() throws IOException {
+		
+		pool.shutdown();
 		
 	}
 	
@@ -51,20 +66,30 @@ public abstract  class  AsyncGenericConnectionPool<R extends AsyncRequest> {
 				  int readyChannels=0;
 				try {
 					readyChannels = selector.select();
+				
+				  if(readyChannels == 0) continue;
+				  
+				  Iterator<SelectionKey> keyIterator = selector.selectedKeys().iterator();
+				  while(keyIterator.hasNext()) {
+				    SelectionKey key = keyIterator.next();
+				    R request=(R)key.attachment();
+				    AsyncQueryClient client=request.getClient();
+				    if (key.isReadable()&&request.isValid()) {
+				        // a channel is ready for readin
+				    	client.reset();
+						client.handleInput(key);
+						client.finishResponse();
+				    }
+				    
+				    	keyIterator.remove();	
+				    
+				    
+				  }
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				  if(readyChannels == 0) continue;
-				  Set selectedKeys = selector.selectedKeys();
-				  Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
-				  while(keyIterator.hasNext()) {
-				    SelectionKey key = keyIterator.next();
-				    if (key.isReadable()) {
-				        // a channel is ready for reading
-				    }
-				    keyIterator.remove();
-				  }
+				  
 				}
 		}
 		
@@ -79,21 +104,25 @@ public abstract  class  AsyncGenericConnectionPool<R extends AsyncRequest> {
 				  int readyChannels=0;
 				try {
 					readyChannels = selector.select();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				
 				  if(readyChannels == 0) continue;
 				  Set selectedKeys = selector.selectedKeys();
 				  Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
 				  while(keyIterator.hasNext()) {
 				    SelectionKey key = keyIterator.next();
-				     if (key.isWritable()) {
+				    R request=(R)key.attachment(); 
+				    if (key.isWritable()&&request.isValid()) {
 				        // a channel is ready for writing
-				    	
+				    	 
+					     request.getClient().sendRequest(key.channel());	
 				    }
 				    keyIterator.remove();
 				  }
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				  
 				}
 		}
 	}

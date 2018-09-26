@@ -49,7 +49,7 @@ public class ReflectCommon {
 		
 		Map<String,Field> keyFields=new HashMap<String,Field>();
 		
-		for(Class clsi=cls ;clsi!=Object.class;clsi=cls.getSuperclass()) {
+		for(Class clsi:getClass(cls).values()) {
 			Field[] fields=clsi.getDeclaredFields();
 			for(Field field :fields) {
 				String key=field.getName().toLowerCase();
@@ -202,7 +202,7 @@ public class ReflectCommon {
     public static Map<String,Field> getFields(Class cls){
     	Map<String,Field> fieldMap=new HashMap<String,Field>();
     	
-    	for(Class cl=cls;!Object.class.equals(cl);cl=cl.getSuperclass()) {
+    	for(Class cl :getClass(cls).values()) {
     		Field[] fields=cl.getFields();
     		Stream.of(fields).filter(f-> !fieldMap.containsKey(f.getName()))
     		.forEach(f->fieldMap.put(f.getName(), f) );    		
@@ -213,7 +213,7 @@ public class ReflectCommon {
     public static Map<String,Field> getDeclaredFields(Class cls){
     	Map<String,Field> fieldMap=new HashMap<String,Field>();
     	
-    	for(Class cl=cls;!Object.class.equals(cl);cl=cl.getSuperclass()) {
+    	for(Class cl:getClass(cls).values()) {
     		Field[] fields=cl.getDeclaredFields();
     		Stream.of(fields).filter(f-> !fieldMap.containsKey(f.getName()))
     		.forEach(f->fieldMap.put(f.getName(), f) );    		
@@ -221,6 +221,15 @@ public class ReflectCommon {
     	return fieldMap;
     }
     
+    
+    public static Map<String,Class> getClass(Class cls){
+    	Map<String,Class> re=new HashMap<String,Class>();
+    	
+    	for(Class cl=cls;!Object.class.equals(cl);cl=cl.getSuperclass()) {
+    		re.put(cl.getName(), cl);	
+    	}
+    	return re;
+    }
     
     public static float injection(Properties properties) {
         float re=0,total=properties.size();

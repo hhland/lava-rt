@@ -53,6 +53,7 @@ public abstract class DataContextSrcGener   {
 	
 	public String toSrc(Class<? extends DataContext> cls,String databaseName,String...justTables) throws SQLException {
 		StringBuffer src=new StringBuffer("");
+		
 		src.append("package "+cls.getPackage().getName()+"; \n\n");
 		
 		for(ColumnStruct columnStruct : ColumnStruct.values()) {
@@ -182,7 +183,7 @@ public abstract class DataContextSrcGener   {
 	    	.append(""+Entry.class.getSimpleName())
 	    	
 	    	.append(" {\n\n")
-	    	.append("\t\t private static final long serialVersionUID = 1L; ")
+	    	//.append("\t\t private static final long serialVersionUID = 1L; ")
 	    	.append("\n\n")
 	    	.append(this.genColsSrc())
 	    	.append("\n\n")

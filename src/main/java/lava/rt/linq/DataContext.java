@@ -60,7 +60,7 @@ public abstract class DataContext {
 	
 	
 	
-	public  <M extends Entry> Table<M>  createTable(Class<M> cls,String tableName,String pkName){
+	public  <M> Table<M>  createTable(Class<M> cls,String tableName,String pkName){
 		Table<M> table=null;
 		
 	    table= new Table<M>(this, cls,tableName, pkName);
@@ -72,7 +72,7 @@ public abstract class DataContext {
 		return new View<M>(this, cls,tableName);
 	};
 	
-	public <M extends Entry> Table<M>  getTable(Class<M> mcls)throws NullPointerException{
+	public <M> Table<M>  getTable(Class<M> mcls)throws NullPointerException{
 	      Table<M> table=null;
 		  String fieldName="table"+mcls.getSimpleName();
 	     
@@ -104,7 +104,7 @@ public abstract class DataContext {
 	};
 	
 	@SuppressWarnings("unchecked")
-	public <M> M newModel(Class<M> mcls) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, SecurityException, NoSuchMethodException {
+	protected <M> M newModel(Class<M> mcls) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, SecurityException, NoSuchMethodException {
 		M m=null;
 		Constructor con=mcls.getConstructors()[0];
 		con.setAccessible(true);
@@ -237,6 +237,35 @@ public abstract class DataContext {
 		return re;
 	} 
 	
+	
+	public <E > int insert(E...entrys) throws SQLException{
+		int re=0;
+		Class<E> cls=(Class<E>)entrys[0].getClass();
+		Table<E> table= this.getTable(cls);
+	
+		re= table.insert(entrys);
+		
+		return re;
+	}
+	
+	public <E> int update(E...entrys) throws SQLException{
+		int re=0;
+		Class<E> cls=(Class<E>)entrys[0].getClass();
+		Table<E> table= this.getTable(cls);
+		re= table.update(entrys);
+		
+		return re;
+	}
+	
+	public <E > int delete(E...entrys) throws SQLException{
+		int re=0;
+		Class<E> cls=(Class<E>)entrys[0].getClass();
+		Table<E> table= this.getTable(cls);
+		
+		re= table.delete(entrys);
+		
+		return re;
+	}
 	
 	public interface Logger{
 		

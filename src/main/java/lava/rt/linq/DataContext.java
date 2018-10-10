@@ -162,33 +162,20 @@ public abstract class DataContext {
 		return list;
 	} 
 	
-    public Object[][] executeQueryArray(String sql,Object...params) throws SQLException{
+    protected Object[][] executeQueryArray(String sql,Object...params) throws SQLException{
     	Connection connection=this.dataSource.getConnection();
-		List<Object[]> list=new ArrayList<Object[]>();
-		PreparedStatement preparedStatement= connection.prepareStatement(sql);
-		for(int i=0;i<params.length;i++) {
-			preparedStatement.setObject(i+1,params[i] );
-		}
-		ResultSet resultSet=preparedStatement.executeQuery();
-		ResultSetMetaData metaData=resultSet.getMetaData();
-		int cc=metaData.getColumnCount();
-		while(resultSet.next()) {
-			Object[] objects=new Object[cc];
-			for(int i=0;i<cc;i++) {
-				objects[i]=resultSet.getObject(i+1);
-			}
-			list.add(objects);
-		}
-		ReflectCommon.close(resultSet,preparedStatement,connection);  
-		return list.toArray(new Object[list.size()][cc]);
+    	Object[][] re=SqlCommon.executeQueryArray(connection, sql, params);
+		ReflectCommon.close(connection);  
+		return re;
 	} 
 	
 	
-	public float executeUpdate(String sql,Object[][] params) throws SQLException{
+    protected int executeUpdate(String sql,Object... param) throws SQLException{
 		Connection connection=this.dataSource.getConnection();
 		
-		float re=0;
-		re=SqlCommon.executeBatch(connection, sql, params);
+		int re=0;
+		re+=executeUpdate(sql, param);
+		
 		ReflectCommon.close(connection);
 		return re;
 	} 
@@ -217,23 +204,10 @@ public abstract class DataContext {
 	} 
 	
 
-	protected int  executeInsert(String sql,Object[][] params) throws SQLException{
+	protected int  executeBatch(String sql,Object[]...params) throws SQLException{
 		Connection connection=this.dataSource.getConnection();
-		int re=0 ;
-		PreparedStatement preparedStatement= connection.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
-		
-		//for(Object[] param :params) {
-		for(int j=0;j<params.length;j++) {
-			Object[] param=params[j];
-			for(int i=0;i<param.length;i++) {
-				preparedStatement.setObject(i+1, param[i]);
-			}
-			re+=preparedStatement.executeUpdate();
-			
-			
-		}
-		ReflectCommon.close(preparedStatement,connection);
-		//for(int r:res)re+=r;
+		int re= SqlCommon.executeBatch(connection, sql, params);
+		ReflectCommon.close(connection);
 		return re;
 	} 
 	

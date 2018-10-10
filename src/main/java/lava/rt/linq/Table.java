@@ -153,12 +153,13 @@ public  class Table<M> extends View<M> {
 		}
         
         
-        try {
-           re+=	dataContext.executeInsert(sql, params);
-        }catch(SQLException se){
-        	SQLException nse=new SQLException(se.getMessage()+"\n"+sql);
-        	throw nse;
-        }
+       
+        if(params.length>1) {
+				re=dataContext.executeBatch(sql, params);
+		}else {
+				re=dataContext.executeUpdate(sql, params[0]);
+		}
+        
         
         
         return re;
@@ -280,8 +281,13 @@ public  class Table<M> extends View<M> {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
-			return (int)dataContext.executeUpdate(sql, params);
+	        int re=0;
+			if(params.length>1) {
+				re=dataContext.executeBatch(sql, params);
+			}else {
+				re=dataContext.executeUpdate(sql, params[0]);
+			}
+			return re;
 		
 	}
 	

@@ -159,7 +159,7 @@ public class ReflectCommon {
     public static Map<String,Field> getFields(Class cls){
     	Map<String,Field> fieldMap=new HashMap<String,Field>();
     	
-    	for(Class cl :getClass(cls).values()) {
+    	for(Class cl :getClasses(cls).values()) {
     		Field[] fields=cl.getFields();
     		Stream.of(fields).filter(f-> !fieldMap.containsKey(f.getName()))
     		.forEach(f->fieldMap.put(f.getName(), f) );    		
@@ -170,7 +170,7 @@ public class ReflectCommon {
     public static Map<String,Field> getDeclaredFields(Class cls){
     	Map<String,Field> fieldMap=new HashMap<String,Field>();
     	
-    	for(Class cl:getClass(cls).values()) {
+    	for(Class cl:getClasses(cls).values()) {
     		Field[] fields=cl.getDeclaredFields();
     		Stream.of(fields).filter(f-> !fieldMap.containsKey(f.getName()))
     		.forEach(f->fieldMap.put(f.getName(), f) );    		
@@ -179,7 +179,7 @@ public class ReflectCommon {
     }
     
     
-    public static Map<String,Class> getClass(Class cls){
+    public static Map<String,Class> getClasses(Class cls){
     	Map<String,Class> re=new HashMap<String,Class>();
     	
     	for(Class cl=cls;!Object.class.equals(cl);cl=cl.getSuperclass()) {

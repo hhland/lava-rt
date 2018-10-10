@@ -8,6 +8,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -19,9 +21,9 @@ import java.util.Map;
 
 public class SqlCommon {
 
-	public static float executeBatch(Connection connection,String sql,Object[][] params) throws SQLException{
+	public static int executeBatch(Connection connection,String sql,Object[]... params) throws SQLException{
 		
-		float re=0;
+		int re=0;
 		PreparedStatement preparedStatement= connection.prepareStatement(sql);
 		
 		for(Object[] param :params) {
@@ -29,12 +31,15 @@ public class SqlCommon {
 				preparedStatement.setObject(i+1, param[i]);
 			}
 			preparedStatement.addBatch();
+			re++;
 		}
 		int[] res= preparedStatement.executeBatch();
+		for(int i:res) {
+			re+=i;
+		}
 		ReflectCommon.close(preparedStatement);
-		for(int r:res)re+=r;
-		float prec=re/params.length;
-		return prec;
+		
+		return re;
 	} 
 	
       public static int executeUpdate(Connection connection,String sql,Object...params) throws SQLException{
@@ -50,5 +55,27 @@ public class SqlCommon {
 		ReflectCommon.close(preparedStatement);
 		return re;
 	} 
+      
+      
+      public static Object[][] executeQueryArray(Connection connection,String sql,Object...params) throws SQLException{
+      	
+  		List<Object[]> list=new ArrayList<Object[]>();
+  		PreparedStatement preparedStatement= connection.prepareStatement(sql);
+  		for(int i=0;i<params.length;i++) {
+  			preparedStatement.setObject(i+1,params[i] );
+  		}
+  		ResultSet resultSet=preparedStatement.executeQuery();
+  		ResultSetMetaData metaData=resultSet.getMetaData();
+  		int cc=metaData.getColumnCount();
+  		while(resultSet.next()) {
+  			Object[] objects=new Object[cc];
+  			for(int i=0;i<cc;i++) {
+  				objects[i]=resultSet.getObject(i+1);
+  			}
+  			list.add(objects);
+  		}
+  		ReflectCommon.close(resultSet,preparedStatement,connection);  
+  		return list.toArray(new Object[list.size()][cc]);
+  	} 
 	
 }

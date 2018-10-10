@@ -214,6 +214,7 @@ public abstract class DataContext {
 	
 	public <E > int insert(E...entrys) throws SQLException{
 		int re=0;
+		if(entrys.length==0)return re;
 		Class<E> cls=(Class<E>)entrys[0].getClass();
 		Table<E> table= this.getTable(cls);
 	
@@ -224,6 +225,7 @@ public abstract class DataContext {
 	
 	public <E> int update(E...entrys) throws SQLException{
 		int re=0;
+		if(entrys.length==0)return re;
 		Class<E> cls=(Class<E>)entrys[0].getClass();
 		Table<E> table= this.getTable(cls);
 		re= table.update(entrys);
@@ -233,6 +235,7 @@ public abstract class DataContext {
 	
 	public <E > int delete(E...entrys) throws SQLException{
 		int re=0;
+		if(entrys.length==0)return re;
 		Class<E> cls=(Class<E>)entrys[0].getClass();
 		Table<E> table= this.getTable(cls);
 		

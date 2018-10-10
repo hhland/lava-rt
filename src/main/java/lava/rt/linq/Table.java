@@ -109,6 +109,7 @@ public  class Table<M> extends View<M> {
 	
 	
 	public <E extends M> int insert(E...entrys) throws SQLException {
+		if(entrys.length==0)return 0;
 		String sqlPattern = "insert into {0} ({1}) values ({2})", sql = "",
                 sqlCacheKey = classM.getName() + ":insert", cols = pkName+",", vals = "?,";
        
@@ -167,7 +168,8 @@ public  class Table<M> extends View<M> {
 	}
 	
 	
-	public <E extends M> float insertReturnPk(E...entrys) throws SQLException {
+	public <E extends M> int insertReturnPk(E...entrys) throws SQLException {
+		if(entrys.length==0)return 0;
 		String sqlPattern = "insert into {0} ({1}) values ({2})", sql = "",
                 sqlCacheKey = classM.getName() + ":insertReturnPk", cols = "", vals = "";
        
@@ -234,7 +236,7 @@ public  class Table<M> extends View<M> {
 	
 	
 	public <E extends M> int update(E...entrys) throws SQLException{
-		
+		   if(entrys.length==0)return 0;
 			String sqlPattern = "update {0} set {1} where {2}=? ", key = "", sql = "",
 	                sqlCacheKey = classM.getName() + ":update";
 
@@ -292,6 +294,7 @@ public  class Table<M> extends View<M> {
 	}
 	
 	public <E extends M> int delete(E...entrys) throws SQLException{
+		if(entrys.length==0)return 0;
 		String sqlPattern = "delete from {0} where {1}=? ", sql = "",
                 sqlCacheKey = classM.getName() + ":delete";
 
@@ -318,7 +321,14 @@ public  class Table<M> extends View<M> {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-        return (int)dataContext.executeUpdate(sql, params);
+        
+        int re=0;
+		if(params.length>1) {
+			re=dataContext.executeBatch(sql, params);
+		}else {
+			re=dataContext.executeUpdate(sql, params[0]);
+		}
+        return re;
 	}
 	
 	

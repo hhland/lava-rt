@@ -4,7 +4,12 @@ import java.io.Serializable;
 
 public abstract class Entry implements Serializable,Cloneable {
 
-	 protected abstract Class<? extends Entry> thisClass();
+	 /**
+	 * 
+	 */
+	private static final long serialVersionUID = -9158756242122179498L;
+
+	protected abstract Class<Entry> thisClass();
      public abstract Object getPk();
      
      @Override

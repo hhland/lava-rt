@@ -83,29 +83,7 @@ public  class Table<M> extends View<M> {
 		return dataContext.<M>executeQueryList(sql,classM).get(0);
 	}
 	
-	protected static final String loadLast_pattern="select * from {0} where {1}= (select max({1}) from {0} )"; 
-	public M loadLast() throws SQLException{
-		
-		String sql=MessageFormat.format(loadLast_pattern, this.tableName,this.pkName
-				
-				);
-		if(dataContext.DEBUG) {
-    		dataContext.LOGGER.log(this.classM, sql);
-    	}
-		return dataContext.<M>executeQueryList(sql,classM).get(0);
-	}
 	
-	protected static final String loadFirst_pattern="select * from {0} where {1}= (select min({1}) from {0} )"; 
-	public M loadFirst() throws SQLException{
-		
-		String sql=MessageFormat.format(loadFirst_pattern, this.tableName,this.pkName
-				
-				);
-		if(dataContext.DEBUG) {
-    		dataContext.LOGGER.log(this.classM, sql);
-    	}
-		return dataContext.<M>executeQueryList(sql,classM).get(0);
-	}
 	
 	
 	public <E extends M> int insert(E...entrys) throws SQLException {
@@ -332,6 +310,10 @@ public  class Table<M> extends View<M> {
 	}
 	
 	
-	
+	public int truncate() throws SQLException {
+		String sql="truncate table "+tableName;
+		int re=dataContext.executeUpdate(sql);
+		return re;
+	}
 	
 }

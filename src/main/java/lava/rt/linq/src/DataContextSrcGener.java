@@ -29,19 +29,7 @@ import lava.rt.linq.View;
 
 public abstract class DataContextSrcGener   {
 
-	public static String COLUMN_METHOD="		public String eq(Object val) {return sql_eq(true,name(),val);}\r\n" + 
-			"		public String notEq(Object val) {return sql_eq(false,name(),val);}\r\n" + 
-			"		public String lt(Object val) {return sql_lt(true,name(),val);}\r\n" + 
-			"		public String notLt(Object val) {return sql_lt(false,name(),val);}\r\n" + 
-			"		public String gt(Object val) {return sql_gt(true,name(),val);}\r\n" + 
-			"		public String notGt(Object val) {return sql_gt(false,name(),val);}\r\n" + 
-			"		public String isNull() {return sql_isnull(true,name());}\r\n" + 
-			"		public String isNotNull() {return sql_isnull(false,name());}\r\n" + 
-			"		public <T> String in(T... vals) {return sql_in(true,name(),vals);}\r\n" + 
-			"		public <T> String notIn(T...vals) {return sql_in(false,name(),vals);}\r\n" + 
-			"		public <T> String between(T from,T to) {return sql_between(true,name(),from,to);}\r\n" + 
-			"		public String like(String val) {return sql_like(true, name(),val);}\r\n" + 
-			"		public String notLike(String val) {return sql_like(false, name(),val);}";
+	
 	
 	protected Connection connection;
 	

@@ -106,7 +106,7 @@ public abstract class DataContextSrcGener   {
 		
 		src.append("\n\n");
 		
-		tables.addAll(views);
+		//tables.addAll(views);
 		for(String table:tables) {
 			String pkName=null;
 			String tn=table.toUpperCase();
@@ -114,6 +114,13 @@ public abstract class DataContextSrcGener   {
 				pkName=tablesPks.get(tn);
 			}
 			TableSrc tableSrc=new TableSrc(tn,pkName);
+			src.append(tableSrc.toSrc());
+		}
+		
+		for(String table:views) {
+			
+			String tn=table.toUpperCase();
+			TableSrc tableSrc=new TableSrc(tn,null);
 			src.append(tableSrc.toSrc());
 		}
 		
@@ -187,17 +194,18 @@ public abstract class DataContextSrcGener   {
 			StringBuffer src=new StringBuffer("");
 			src.append("\t\t@"+Override.class.getSimpleName()+"\n")
 			.append("\t\tpublic boolean equals(Object obj) {return this.toString().equals(obj.toString());} \n\n")
-		    ;
-			if(pkName!=null) {
-			src.append("\t\t@"+Override.class.getSimpleName()+"\n")
-			.append("\t\tpublic String toString() {return this.getClass().getName()+\":"+tableName+":\"+this.getPk();}")
-			.append("\n\n")
-			.append("\t\t@"+Override.class.getSimpleName()+"\n")
-			.append("\t\tpublic String getPk() {return this."+pkName+";}")
-			
 			.append("\n\n")
 			.append("\t\t@"+Override.class.getSimpleName()+"\n")
 			.append("\t\tpublic Class<? extends Entry> thisClass() {return this.getClass() ;}")
+		    ;
+			if(pkName!=null) {
+			src.append("\n\n").append("\t\t@"+Override.class.getSimpleName()+"\n")
+			.append("\t\tpublic String toString() {return this.getClass().getName()+\":"+tableName+":\"+this."+pkName+";}")
+			.append("\n\n")
+			//.append("\t\t@"+Override.class.getSimpleName()+"\n")
+			//.append("\t\tpublic Object getPk() {return this."+pkName+";}")
+			
+			
 			;}
 			return src.toString();
 		}

@@ -139,13 +139,25 @@ public class ReflectCommon {
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
 					| NoSuchMethodException | SecurityException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				  
 			}
     	}
     }
     
     
-    
+    public static Object invoke(Object target,String methodName,Object...params) throws Exception {
+		Object ret=null;
+		Class[] parameterTypes=new Class[params.length];
+		for(int i=0;i<parameterTypes.length;i++) {
+			parameterTypes[i]=params[i].getClass();
+		}
+		
+	    Method method= target.getClass().getDeclaredMethod(methodName, parameterTypes);
+		method.setAccessible(true);
+		ret=method.invoke(target, params);
+		
+		return ret;
+	}
     
     
     public static Map<String,Class<?>> getClasses(Package pack) {
@@ -216,7 +228,7 @@ public class ReflectCommon {
 										} catch (ClassNotFoundException e) {
 											// log
 											// .error("添加用户自定义视图类错误 找不到此类的.class文件");
-											e.printStackTrace();
+											  
 										}
 									}
 								}
@@ -224,12 +236,12 @@ public class ReflectCommon {
 						}
 					} catch (IOException e) {
 						// log.error("在扫描用户定义视图时从jar包获取文件出错");
-						e.printStackTrace();
+						  
 					}
 				}
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			  
 		}
 
 		return classes;
@@ -267,7 +279,7 @@ public class ReflectCommon {
 					classes.put(cls.getName(),cls);
 				} catch (ClassNotFoundException e) {
 					// log.error("添加用户自定义视图类错误 找不到此类的.class文件");
-					e.printStackTrace();
+					  
 				}
 			}
 		}

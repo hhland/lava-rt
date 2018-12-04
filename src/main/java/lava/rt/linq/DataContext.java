@@ -36,11 +36,11 @@ public abstract class DataContext {
 	public static Logger LOGGER=new Logger() {
 		
 		public void log(Class cls,String msg) {
-			System.out.println("log("+cls.getSimpleName()+"):"+msg);
+			   ;
 		}
 		
 		public void log(Class cls,Exception ex) {
-			System.out.println("Exception("+cls.getSimpleName()+"):"+ex.getMessage());
+			   ;
 		}
 	};
 
@@ -138,7 +138,7 @@ public abstract class DataContext {
 			try {
 				m = newModel(cls); //ReflectCommon.newInstance(cls);
 			} catch (Exception e) {
-				e.printStackTrace();
+				  
 			} 
 			if(m==null) {
 				throw new SQLException(cls.getName()+ " can't be instance");
@@ -174,7 +174,7 @@ public abstract class DataContext {
 		Connection connection=this.dataSource.getConnection();
 		
 		int re=0;
-		re+=executeUpdate(sql, param);
+		re+=SqlCommon.executeUpdate(connection, sql, param);
 		
 		ReflectCommon.close(connection);
 		return re;
@@ -205,10 +205,12 @@ public abstract class DataContext {
 	
 
 	protected int  executeBatch(String sql,Object[]...params) throws SQLException{
-		Connection connection=this.dataSource.getConnection();
-		int re= SqlCommon.executeBatch(connection, sql, params);
-		ReflectCommon.close(connection);
-		return re;
+		int ret=0;
+		try(Connection connection=this.dataSource.getConnection()){
+		
+			ret= SqlCommon.executeBatch(connection, sql, params);
+		}finally {}
+		return ret;
 	} 
 	
 	

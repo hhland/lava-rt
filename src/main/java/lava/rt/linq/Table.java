@@ -128,7 +128,7 @@ public  class Table<M> extends View<M> {
             }
         }
         } catch (Exception e) {
-			e.printStackTrace();
+			  
 		}
         
         
@@ -187,7 +187,7 @@ public  class Table<M> extends View<M> {
             }
         }
         } catch (Exception e) {
-			e.printStackTrace();
+			  
 		}
         
         int[] pks=null; 
@@ -259,7 +259,7 @@ public  class Table<M> extends View<M> {
 	        }
 	        } catch (IllegalArgumentException | IllegalAccessException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				  
 			}
 	        int re=0;
 			if(params.length>1) {
@@ -297,7 +297,7 @@ public  class Table<M> extends View<M> {
         }
         } catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			  
 		}
         
         int re=0;

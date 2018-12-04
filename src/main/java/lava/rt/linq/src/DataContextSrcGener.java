@@ -8,9 +8,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.MessageFormat;
-import java.util.Date;
+import java.sql.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -222,6 +223,7 @@ public abstract class DataContextSrcGener   {
 				columnNames.add(colName);
 		    	int colType=resultSetMetaData.getColumnType(i);
 		    	Class colClass=ColumnStruct.toClass(colType);
+		    	
 		        String colClsName=colClass.getSimpleName();
 		        
 		        sbFields.append("\t\t private " +colClsName+ " "+colName+ " ; \n " );
@@ -261,11 +263,12 @@ public abstract class DataContextSrcGener   {
 	
 	
 	public enum ColumnStruct{
-		STRING(String.class,Types.VARCHAR,Types.CHAR,Types.NVARCHAR,Types.LONGNVARCHAR,Types.NCHAR,Types.LONGVARCHAR)
+		STRING(String.class,Types.VARCHAR,Types.CHAR,Types.NVARCHAR,Types.LONGNVARCHAR,Types.NCHAR,Types.LONGVARCHAR,Types.CLOB)
 		,INT(Integer.class,Types.INTEGER,Types.SMALLINT,Types.BIGINT,Types.TINYINT)
 		,FLOAT(Float.class,Types.FLOAT)
 		,DOUBLE(Double.class,Types.DOUBLE)
-		,DATE(Date.class,Types.DATE,Types.TIME,Types.TIMESTAMP)
+		,DATE(Date.class,Types.DATE)
+		,DATETIME(Timestamp.class,Types.TIMESTAMP,Types.TIME)
 		,DECIMAL(BigDecimal.class,Types.DECIMAL,Types.NUMERIC)
 		,BIN(Byte.class,Types.LONGVARBINARY,Types.BIT)
 		,BOOLEAN(Boolean.class,Types.BOOLEAN)
@@ -294,9 +297,7 @@ public abstract class DataContextSrcGener   {
 					}
 				}
 			}
-			if(cls==null) {
-				cls=cls;
-			}
+			
 			return cls;
 		}
 	}

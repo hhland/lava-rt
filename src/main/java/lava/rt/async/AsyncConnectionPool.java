@@ -87,7 +87,7 @@ public abstract  class  AsyncConnectionPool<R extends AsyncRequest> {
 				  }
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					  
 				}
 				  
 				}
@@ -120,7 +120,7 @@ public abstract  class  AsyncConnectionPool<R extends AsyncRequest> {
 				  }
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					  
 				}
 				  
 				}

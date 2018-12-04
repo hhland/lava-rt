@@ -43,7 +43,7 @@ public class PropertiesCommon {
 					re+=set(field,object, value);
 				} catch (IllegalArgumentException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					  
 					continue;
 				}
 				

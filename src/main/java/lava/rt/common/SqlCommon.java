@@ -74,7 +74,7 @@ public class SqlCommon {
   			}
   			list.add(objects);
   		}
-  		ReflectCommon.close(resultSet,preparedStatement,connection);  
+  		ReflectCommon.close(resultSet,preparedStatement);  
   		return list.toArray(new Object[list.size()][cc]);
   	} 
 	

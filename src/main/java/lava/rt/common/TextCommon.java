@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 
 public class TextCommon {
 
-	public static boolean isNullOrEmpty( String... strings) {
+	public static boolean isBlank( String... strings) {
 		for (String string :strings) {
 			if(string!=null&&string.trim().length()>0)
 				return false;

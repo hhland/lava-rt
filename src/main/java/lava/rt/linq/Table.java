@@ -59,28 +59,23 @@ public  class Table<M> extends View<M> {
 	
 	
 
-	protected static final String load_pattern="select * from {0} where {1}= {2} "; 
-	public M load(int pk) throws SQLException{
-		
-		
-		String sql=MessageFormat.format(load_pattern, this.tableName,this.pkName,
-				pk
-				);
-		if(dataContext.DEBUG) {
-    		dataContext.LOGGER.log(this.classM, sql);
-    	}
-		return dataContext.<M>executeQueryList(sql,classM).get(0);
-	}
 	
-	public M load(String pk) throws SQLException{
-		String pkVal="'"+pk+"'";
-		String sql=MessageFormat.format(load_pattern, this.tableName,this.pkName,
-				pkVal
+	
+	public M load(Object pk) throws SQLException{
+	
+		String sql=MessageFormat.format("select * from {0} where {1}= ? ", this.tableName,this.pkName
 				);
 		if(dataContext.DEBUG) {
     		dataContext.LOGGER.log(this.classM, sql);
     	}
-		return dataContext.<M>executeQueryList(sql,classM).get(0);
+		List<M> entrys=dataContext.<M>executeQueryList(sql,classM,pk);
+		M ret=null;
+		if(entrys.size()==1) {
+			ret=entrys.get(0);
+		}else if(entrys.size()>1||entrys.size()==0) {
+			throw new SQLException("there is has "+entrys.size()+" entrys in ["+tableName+"] has pk ["+pk+"]");
+		}
+		return ret;
 	}
 	
 	
@@ -146,8 +141,8 @@ public  class Table<M> extends View<M> {
 	}
 	
 	
-	public <E extends M> int insertReturnPk(E...entrys) throws SQLException {
-		if(entrys.length==0)return 0;
+	public <E extends M> int insertReturnPk(E entry) throws SQLException {
+		
 		String sqlPattern = "insert into {0} ({1}) values ({2})", sql = "",
                 sqlCacheKey = classM.getName() + ":insertReturnPk", cols = "", vals = "";
        
@@ -176,37 +171,22 @@ public  class Table<M> extends View<M> {
     	}
         int re=0,insertsize = insertFields.length;
         
+        Object[] param=new Object[insertsize];
+       
         
-        Object[][] params = new Object[entrys.length][insertsize];
+        int pk=0; 
         try {
-        for (int i = 0; i < entrys.length; i++) {
-            M obj = entrys[i];
-            for (int j = 0; j < insertsize; j++) {
+          for (int j = 0; j < insertsize; j++) {
                 Field field = insertFields[j];
-                params[i][j] = field.get(obj);
-            }
-        }
-        } catch (Exception e) {
-			  
-		}
-        
-        int[] pks=null; 
-        try {
-           pks=	dataContext.executeInsertReturnPk(sql, params);
+                param[j] = field.get(entry);
+           }
+           pk=	dataContext.executeInsertReturnPk(sql, param);
+           pkField.set(entry, pk);
         }catch(SQLException se){
         	SQLException nse=new SQLException(se.getMessage()+"\n"+sql);
         	throw nse;
-        }
-        try {
-        for(int i=0;i<pks.length;i++) {
-            int pk=pks[i];
-            M model=entrys[i];
-            pkField.set(model, pk);
-			
-            re++;
-        }
-        } catch (Exception e) {
-		}
+        }catch (Exception e) {}
+        
         
         return re;
         
@@ -252,7 +232,7 @@ public  class Table<M> extends View<M> {
 		                Field field = updateFields[j];
 		                params[i][j] = field.get(obj);
 		            }
-					params[i][updatesize] = pkField.get(obj);
+					params[i][updatesize] = getPk(obj);
 				
 
 
@@ -293,7 +273,7 @@ public  class Table<M> extends View<M> {
         try {
         for (int i = 0; i < dlength; i++) {
             M obj = entrys[i];
-           params[i][0] = pkField.get(obj);
+           params[i][0] = getPk(obj);
         }
         } catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -314,6 +294,15 @@ public  class Table<M> extends View<M> {
 		String sql="truncate table "+tableName;
 		int re=dataContext.executeUpdate(sql);
 		return re;
+	}
+	
+	
+	public <E extends M> Object getPk(E entry) {
+		Object ret=null;
+		try {
+			ret= pkField.get(entry);
+		} catch (IllegalArgumentException | IllegalAccessException e) {}
+		return ret;
 	}
 	
 }

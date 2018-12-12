@@ -116,7 +116,7 @@ public abstract class DataContext {
 	
 	
 	protected <M>  List<M> executeQueryList(String sql,Class<M> cls,Object...params) throws SQLException{
-		Connection connection=this.dataSource.getConnection();
+		Connection connection=getConnection();
 		List<M> list=new ArrayList<M>();
 		PreparedStatement preparedStatement= connection.prepareStatement(sql);
 		for(int i=0;i<params.length;i++) {
@@ -171,79 +171,79 @@ public abstract class DataContext {
 	
 	
     protected int executeUpdate(String sql,Object... param) throws SQLException{
-		Connection connection=this.dataSource.getConnection();
-		
+		Connection connection=getConnection();
 		int re=0;
 		re+=SqlCommon.executeUpdate(connection, sql, param);
-		
-		ReflectCommon.close(connection);
 		return re;
 	} 
 	
-	protected int[]  executeInsertReturnPk(String sql,Object[][] params) throws SQLException{
-		Connection connection=this.dataSource.getConnection();
-		int[] pks=new int[params.length];
+	protected int  executeInsertReturnPk(String sql,Object... param) throws SQLException{
+		int pk=0;
+		Connection connection=getConnection();
 		PreparedStatement preparedStatement= connection.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
+			
 		
-		//for(Object[] param :params) {
-		for(int j=0;j<params.length;j++) {
-			Object[] param=params[j];
-			for(int i=0;i<param.length;i++) {
+		for(int i=0;i<param.length;i++) {
 				preparedStatement.setObject(i+1, param[i]);
-			}
-			preparedStatement.executeUpdate();
-			ResultSet resultSet= preparedStatement.getGeneratedKeys();
-			if(resultSet.next()) {
-				pks[j]=resultSet.getInt(1);
-			}
-			resultSet.close();
 		}
-		ReflectCommon.close(preparedStatement,connection);
-		//for(int r:res)re+=r;
-		return pks;
+		preparedStatement.executeUpdate();
+		ResultSet resultSet= preparedStatement.getGeneratedKeys();
+		if(resultSet.next()) {
+				pk=resultSet.getInt(1);
+		}
+		ReflectCommon.close(resultSet,preparedStatement);
+		return pk;
 	} 
 	
 
 	protected int  executeBatch(String sql,Object[]...params) throws SQLException{
 		int ret=0;
-		try(Connection connection=this.dataSource.getConnection()){
-		
-			ret= SqlCommon.executeBatch(connection, sql, params);
-		}finally {}
+		Connection connection=getConnection();    
+	    connection.setAutoCommit(false);
+		ret= SqlCommon.executeBatch(connection, sql, params);
+		connection.commit();
 		return ret;
 	} 
 	
 	
-	public <E > int insert(E...entrys) throws SQLException{
+	public  int insert(Object...entrys) throws SQLException{
 		int re=0;
 		if(entrys.length==0)return re;
-		Class<E> cls=(Class<E>)entrys[0].getClass();
-		Table<E> table= this.getTable(cls);
+		for(Object entry:entrys) {
+			Class cls=entry.getClass();
+			Table table= this.getTable(cls);
+			re+= table.insert(entry);
+		}
+		return re;
+	}
 	
-		re= table.insert(entrys);
+	public  int update(Object...entrys) throws SQLException{
+		int re=0;
+		if(entrys.length==0)return re;
+		for(Object entry:entrys) {
+			Class cls=entry.getClass();
+			Table table= this.getTable(cls);
+			re+= table.update(entry);
+		}
+		
 		
 		return re;
 	}
 	
-	public <E> int update(E...entrys) throws SQLException{
+	public  int delete(Object...entrys) throws SQLException{
 		int re=0;
 		if(entrys.length==0)return re;
-		Class<E> cls=(Class<E>)entrys[0].getClass();
-		Table<E> table= this.getTable(cls);
-		re= table.update(entrys);
-		
+		for(Object entry:entrys) {
+			Class cls=entry.getClass();
+			Table table= this.getTable(cls);
+			re+= table.delete(entry);
+		}
 		return re;
 	}
 	
-	public <E > int delete(E...entrys) throws SQLException{
-		int re=0;
-		if(entrys.length==0)return re;
-		Class<E> cls=(Class<E>)entrys[0].getClass();
-		Table<E> table= this.getTable(cls);
-		
-		re= table.delete(entrys);
-		
-		return re;
+	public Connection getConnection() throws SQLException {
+		Connection ret=this.dataSource.getConnection();
+		return ret;
 	}
 	
 	public interface Logger{

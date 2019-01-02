@@ -77,5 +77,28 @@ public class SqlCommon {
   		ReflectCommon.close(resultSet,preparedStatement);  
   		return list.toArray(new Object[list.size()][cc]);
   	} 
+      
+      
+      public static List<Map<String, Object>> executeQueryListMap(Connection connection, String sql, Object... params) throws SQLException {
+
+  		List<Map<String, Object>> list = new ArrayList<>();
+  		PreparedStatement preparedStatement = connection.prepareStatement(sql);
+  		for (int i = 0; i < params.length; i++) {
+  			preparedStatement.setObject(i + 1, params[i]);
+  		}
+  		ResultSet resultSet = preparedStatement.executeQuery();
+  		ResultSetMetaData metaData = resultSet.getMetaData();
+  		int cc = metaData.getColumnCount();
+  		Map<String, Object> rowMap = null;
+  		while (resultSet.next()) {
+  			rowMap = new HashMap<>();
+  			for (int i = 0; i < cc; i++) {
+  				rowMap.put(metaData.getColumnName(i + 1), resultSet.getObject(i + 1));
+  			}
+  			list.add(rowMap);
+  		}
+  		ReflectCommon.close(resultSet, preparedStatement);
+  		return list;
+  	}
 	
 }

@@ -17,14 +17,12 @@ public abstract class Entry implements Serializable,Cloneable {
     
      
     
-	 public String toJson() {
-		 return "";
-	 }
 	 
 
-	 public String toXml() {
-		 return "";
-	 }
+
+
+
+	
      
      
 }

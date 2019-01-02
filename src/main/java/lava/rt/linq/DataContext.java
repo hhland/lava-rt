@@ -163,12 +163,13 @@ public abstract class DataContext {
 	} 
 	
     protected Object[][] executeQueryArray(String sql,Object...params) throws SQLException{
-    	Connection connection=this.dataSource.getConnection();
+    	Connection connection=getConnection();
     	Object[][] re=SqlCommon.executeQueryArray(connection, sql, params);
 		ReflectCommon.close(connection);  
 		return re;
 	} 
 	
+    
 	
     protected int executeUpdate(String sql,Object... param) throws SQLException{
 		Connection connection=getConnection();

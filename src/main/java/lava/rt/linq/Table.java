@@ -72,8 +72,8 @@ public  class Table<M> extends View<M> {
 		M ret=null;
 		if(entrys.size()==1) {
 			ret=entrys.get(0);
-		}else if(entrys.size()>1||entrys.size()==0) {
-			throw new SQLException("there is has "+entrys.size()+" entrys in ["+tableName+"] has pk ["+pk+"]");
+		}else  {
+			throw new SQLException("there has not only 1 but "+entrys.size()+" entrys in ["+tableName+"] has ["+pk+"]");
 		}
 		return ret;
 	}
@@ -123,7 +123,7 @@ public  class Table<M> extends View<M> {
             }
         }
         } catch (Exception e) {
-			  
+			  throw new SQLException(e);
 		}
         
         
@@ -185,7 +185,9 @@ public  class Table<M> extends View<M> {
         }catch(SQLException se){
         	SQLException nse=new SQLException(se.getMessage()+"\n"+sql);
         	throw nse;
-        }catch (Exception e) {}
+        }catch (Exception e) {
+        	throw new SQLException(e);
+        }
         
         
         return re;
@@ -237,9 +239,9 @@ public  class Table<M> extends View<M> {
 
 
 	        }
-	        } catch (IllegalArgumentException | IllegalAccessException e) {
+	        } catch (Exception e) {
 				// TODO Auto-generated catch block
-				  
+				  throw new SQLException(e);
 			}
 	        int re=0;
 			if(params.length>1) {
@@ -270,15 +272,12 @@ public  class Table<M> extends View<M> {
     	}
         int dlength = entrys.length;
         Object[][] params = new Object[dlength][1];
-        try {
+        
         for (int i = 0; i < dlength; i++) {
             M obj = entrys[i];
            params[i][0] = getPk(obj);
         }
-        } catch (Exception e) {
-			// TODO Auto-generated catch block
-			  
-		}
+        
         
         int re=0;
 		if(params.length>1) {

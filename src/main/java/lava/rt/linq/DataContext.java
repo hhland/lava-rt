@@ -202,7 +202,7 @@ public abstract class DataContext {
 		Connection connection=getConnection();    
 	    connection.setAutoCommit(false);
 		ret= SqlCommon.executeBatch(connection, sql, params);
-		connection.commit();
+		
 		return ret;
 	} 
 	

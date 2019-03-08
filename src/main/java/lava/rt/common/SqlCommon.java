@@ -13,9 +13,13 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import lava.rt.sqlparser.SingleSqlParserFactory;
+import lava.rt.sqlparser.SqlSegment;
 
 
 
@@ -55,6 +59,14 @@ public class SqlCommon {
 		ReflectCommon.close(preparedStatement);
 		return re;
 	} 
+      
+      
+      public static int executeUpdate(Collection collection,String sql) throws SQLException{
+  		
+  		int re=0;
+  		
+  		return re;
+  	  } 
       
       
       public static Object[][] executeQueryArray(Connection connection,String sql,Object...params) throws SQLException{
@@ -101,4 +113,46 @@ public class SqlCommon {
   		return list;
   	}
 	
+      
+     
+      public static <E> List<E> select(Collection<E> collection,String sql) throws SQLException{
+    		
+    	    List<E> re=new ArrayList<E>(collection);
+    		
+    		return re;
+    	  }
+      
+      
+      
+      protected static List<SqlSegment> parsedSql(String sql)
+      {
+          sql=sql.trim();
+          sql=sql.toLowerCase();
+          sql=sql.replaceAll("\\s{1,}", " ");
+          sql=""+sql+" ENDOFSQL";
+          //System.out.println(sql);
+          return SingleSqlParserFactory.generateParser(sql).RetrunSqlSegments();
+      }
+      
+      
+     
+      
+      
+      public static void main(String[] args) {
+          // TODO Auto-generated method stub
+         //String test="select  a from  b " +
+             //    "\n"+"where      a=b";
+         //test=test.replaceAll("\\s{1,}", " ");
+         //System.out.println(test);
+         //程序的入口
+          String testSql="select c1,c2,c3     from    t1,t2 where condi3=3 "+"\n"+"    or condi4=5 order by o1,o2";
+          
+          List<SqlSegment> results=parsedSql(testSql);
+          for(SqlSegment result:results) {
+            System.out.println(result);
+          }
+         //List<SqlSegment> result=test.getParsedSqlList(testSql);//保存解析结果
+      }
+      
+     
 }

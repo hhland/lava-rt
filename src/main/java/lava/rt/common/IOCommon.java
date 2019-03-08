@@ -4,11 +4,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 
 
@@ -16,8 +18,20 @@ import java.util.Map;
 
 public class IOCommon {
 
+	protected static String toQueryString(Entry<String, Object>... params) {
+		
+		 String ret="";
+		
+		for(Entry<String, Object> _param:params) {
+	    	  String key=_param.getKey();
+	    	  Object valueObj=_param.getValue();
+	    	  String value=valueObj==null?"":valueObj.toString();
+	    	  ret+=key+"="+value+"&";
+	      }
+		return ret;
+	}
 	
-	public static String get(String url) throws Exception{
+	public static String get(String url, Entry<String, Object>... params) throws Exception{
 	    String result = "";
 	    BufferedReader in = null;
 	    
@@ -43,7 +57,8 @@ public class IOCommon {
 	  }
 	 
 	 
-	  public static String post(String url, Map<String, Object> paramMap)throws Exception {
+	  public static String post(String url, Entry<String, Object>... params)throws Exception {
+		
 	    PrintWriter out = null;
 	    BufferedReader in = null;
 	    String result = "";
@@ -62,15 +77,7 @@ public class IOCommon {
 	     
 	      out = new PrintWriter(conn.getOutputStream());
 	      
-	      String param="";
-	      
-	      for(Iterator<String> it=paramMap.keySet().iterator();it.hasNext();) {
-	    	  String key=it.next();
-	    	  Object valueObj=paramMap.get(key);
-	    	  String value=valueObj==null?"":valueObj.toString();
-	    	  param+=key+"="+value+"&";
-	      }
-	      
+	      String param=toQueryString(params);
 	      out.print(param);
 	      out.flush();
 	     
@@ -83,4 +90,11 @@ public class IOCommon {
 	      ReflectCommon.close(out,in);
 	    return result;
 	  }  
+	  
+	  
+	 
+
+
+
+		 
 }

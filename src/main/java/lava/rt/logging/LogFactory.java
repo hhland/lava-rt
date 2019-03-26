@@ -3,7 +3,7 @@ package lava.rt.logging;
 import java.util.HashMap;
 import java.util.Map;
 
-import lava.rt.connectionpool.impl.AsyncServerStatus;
+import lava.rt.pool.impl.AsyncServerStatus;
 
 public class LogFactory {
 

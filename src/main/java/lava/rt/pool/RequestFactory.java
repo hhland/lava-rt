@@ -1,4 +1,4 @@
-package lava.rt.connectionpool;
+package lava.rt.pool;
 
 public interface RequestFactory {
 	

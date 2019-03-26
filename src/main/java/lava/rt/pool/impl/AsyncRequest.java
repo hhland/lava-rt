@@ -1,8 +1,8 @@
-package lava.rt.connectionpool.impl;
+package lava.rt.pool.impl;
 
 import java.lang.ref.WeakReference;
 
-import lava.rt.connectionpool.Request;
+import lava.rt.pool.Request;
 
 
 

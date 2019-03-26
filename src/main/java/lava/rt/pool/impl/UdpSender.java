@@ -1,15 +1,15 @@
-package lava.rt.connectionpool.impl;
+package lava.rt.pool.impl;
 
 import lava.rt.logging.Log;
 import lava.rt.logging.LogFactory;
 
-public class AsyncSender implements Runnable{
+public class UdpSender implements Runnable{
 
-	private static final Log log = LogFactory.getLog(AsyncSender.class);
+	private static final Log log = LogFactory.getLog(UdpSender.class);
 	
 	private String generation = "(ThreadErr)"; 
 	private volatile Thread _thread = null;
-	AsyncGenericConnectionPool pool;
+	UdpGenericConnectionPool pool;
 	
 	private long yieldTime = 50;
 	private long minSleepTime = 500;
@@ -19,7 +19,7 @@ public class AsyncSender implements Runnable{
 	private long requestCount = 0;
 	private Object requestCountLock = new Object();
 	
-	private boolean needRestart = false;
+	private volatile boolean needRestart = false;
 	
 	private static int GENERATION = 0;
 	private static Object GENERATION_LOCK = new Object();
@@ -32,7 +32,7 @@ public class AsyncSender implements Runnable{
 	}
 	
 	
-	AsyncSender( AsyncGenericConnectionPool sc ){
+	UdpSender( UdpGenericConnectionPool sc ){
 		this.pool = sc;
 	}
 	
@@ -81,7 +81,7 @@ public class AsyncSender implements Runnable{
 	 */
 	public void startThread(){
 		sleepTime = minSleepTime;
-		this.generation = pool.getServerConfig().name+"(Sender" + newGeneration() + ")";
+		this.generation = pool.serverConfig.name+"(Sender" + newGeneration() + ")";
 		_thread = new Thread(this, this.generation);
 		_thread.start();
 	}
@@ -109,18 +109,17 @@ public class AsyncSender implements Runnable{
 			boolean doneSomething = false;
 			do{
 				
-				AsyncServerStatus[] sss = null;
+				UdpServerStatus[] sss = null;
 				sss = pool.getAllStatus();
 				if (sss == null) {
 					break;
 				}
-				
 				for (int i = 0; i < sss.length; i++) {
 					long now = System.currentTimeMillis();
 					if( log.isTraceEnabled() ){
 						log.trace(generation + "CheckServer:"+i+" ,time:"+now);
 					}
-					AsyncServerStatus ss = sss[i];
+					UdpServerStatus ss = sss[i];
 					if (ss == null){
 						if( log.isTraceEnabled() ){
 							log.trace(generation + "CheckServer:"+i+",ServerStatus is NULL, toContinue");
@@ -135,7 +134,7 @@ public class AsyncSender implements Runnable{
 						}
 						int status = ss.innerSendRequest();
 						if( log.isTraceEnabled() ){
-							log.trace(generation + "CheckServer:"+i+",innerSendRequest() returns " + status);
+							log.trace(generation + "CheckServer:"+i+",innerSendRequest() returns " + status + ", free:" + ss.freeChannelList.size());
 						}
 
 						if (status == 1) {
@@ -149,7 +148,7 @@ public class AsyncSender implements Runnable{
 						}
 					}
 					if( log.isTraceEnabled() ){
-						log.trace(generation +"SenderServerEnd:"+i+" ,time:"+(System.currentTimeMillis()-now) );
+						log.trace(generation +"SenderServerEnd:"+i+" ,time:"+(System.currentTimeMillis()-now) +", hasFree:" + (!doneSomething));
 					}
 					Thread.yield();
 				}
@@ -218,9 +217,9 @@ public class AsyncSender implements Runnable{
 	 * @param request
 	 * @return
 	 */
-	int senderSendRequest( AsyncRequest request){
+	int senderSendRequest( UdpRequest request ){
 		
-		AsyncServerStatus ss = request.getServer();
+		UdpServerStatus ss = request.getServer();
 		
 		assert( ss != null );
 		
@@ -235,7 +234,7 @@ public class AsyncSender implements Runnable{
 			}
 			checkSenderThread();
 		}
-		
+		request.setConnectionErrorStatus(ret);
 		return ret;
 	}
 

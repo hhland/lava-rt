@@ -1,8 +1,9 @@
 package lava.rt.logging;
 
 import java.io.IOException;
+import java.nio.BufferOverflowException;
 
-import lava.rt.connectionpool.impl.UdpGenericQueryClient;
+import lava.rt.pool.impl.UdpGenericQueryClient;
 
 public class Log {
 
@@ -76,6 +77,16 @@ public class Log {
 	}
 
 	public void debug(Object info) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void trace(Object info, Exception e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void error(Object info) {
 		// TODO Auto-generated method stub
 		
 	}

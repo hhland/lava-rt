@@ -18,11 +18,11 @@ import java.util.Map.Entry;
 
 public class IOCommon {
 
-	protected static String toQueryString(Entry<String, Object>... params) {
+	protected static String toQueryString( Map<String, Object> paramMap) {
 		
 		 String ret="";
 		
-		for(Entry<String, Object> _param:params) {
+		for(Entry<String, Object> _param:paramMap.entrySet()) {
 	    	  String key=_param.getKey();
 	    	  Object valueObj=_param.getValue();
 	    	  String value=valueObj==null?"":valueObj.toString();
@@ -31,7 +31,7 @@ public class IOCommon {
 		return ret;
 	}
 	
-	public static String get(String url, Entry<String, Object>... params) throws Exception{
+	public static String get(String url) throws Exception{
 	    String result = "";
 	    BufferedReader in = null;
 	    
@@ -57,7 +57,7 @@ public class IOCommon {
 	  }
 	 
 	 
-	  public static String post(String url, Entry<String, Object>... params)throws Exception {
+	  public static String post(String url, Map<String, Object> paramMap)throws Exception {
 		
 	    PrintWriter out = null;
 	    BufferedReader in = null;
@@ -77,7 +77,7 @@ public class IOCommon {
 	     
 	      out = new PrintWriter(conn.getOutputStream());
 	      
-	      String param=toQueryString(params);
+	      String param=toQueryString(paramMap);
 	      out.print(param);
 	      out.flush();
 	     

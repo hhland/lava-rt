@@ -2,7 +2,7 @@
  * Created on 2006-11-24
  *
  */
-package lava.rt.connectionpool.impl;
+package lava.rt.pool.impl;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -11,9 +11,9 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.regex.Pattern;
 
-import lava.rt.connectionpool.ConnectionPool;
-import lava.rt.connectionpool.RequestFactory;
 import lava.rt.logging.Log;
+import lava.rt.pool.ConnectionPool;
+import lava.rt.pool.RequestFactory;
 
 
 /**
@@ -41,8 +41,7 @@ public abstract class UdpGenericConnectionPool extends ConnectionPool {
 	protected UdpReceiver recver;
 	protected UdpSender sender;
 	
-	protected Object recverLock = new Object();
-	protected Object senderLock = new Object();
+	
 	
 	// ���Ӷ����factory
 	protected UdpClientFactory factory;

@@ -1,4 +1,4 @@
-package lava.rt.connectionpool.impl;
+package lava.rt.pool.impl;
 
 public interface AsyncClientFactory {
 

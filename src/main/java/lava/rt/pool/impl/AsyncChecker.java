@@ -1,9 +1,9 @@
-package lava.rt.connectionpool.impl;
+package lava.rt.pool.impl;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class AsyncChecker implements Runnable {
+class AsyncChecker implements Runnable {
 
 	protected AsyncGenericConnectionPool pool = null;
 	protected Thread _thread = null;

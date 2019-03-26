@@ -1,5 +1,5 @@
 
-package lava.rt.connectionpool.impl;
+package lava.rt.pool.impl;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -10,8 +10,8 @@ import java.util.Date;
 import java.util.Random;
 import java.util.regex.Pattern;
 
-import lava.rt.connectionpool.ConnectionPool;
 import lava.rt.logging.Log;
+import lava.rt.pool.ConnectionPool;
 
 
 

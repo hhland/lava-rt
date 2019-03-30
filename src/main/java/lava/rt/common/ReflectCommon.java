@@ -13,14 +13,14 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Set;
+
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Stream;
+import sun.misc.Unsafe;
 
+@SuppressWarnings("restriction")
 public class ReflectCommon {
 
 	
@@ -29,7 +29,19 @@ public class ReflectCommon {
 	
 	
 	
-    
+    public static Unsafe getUnsafe() {
+    	Unsafe ret=null;
+		try {
+			Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
+			theUnsafe.setAccessible(true);
+	        ret= (Unsafe) theUnsafe.get(null);
+		} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
+        return ret;
+    }
 	
 
 	

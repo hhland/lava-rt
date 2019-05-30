@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 public class PropertiesCommon {
@@ -22,22 +23,14 @@ public class PropertiesCommon {
 	protected static float load(Properties properties,Class cls,Object object) {
 		float re=0,total=properties.size();
 		
-		Map<String,Field> keyFields=new HashMap<String,Field>();
-		
-		for(Class clsi:ReflectCommon.getClasses(cls).values()) {
-			Field[] fields=clsi.getDeclaredFields();
-			for(Field field :fields) {
-				String key=field.getName().toLowerCase();
-				keyFields.put(key, field);
-			}
-		}
+		Map<String,Field> keyFields=ReflectCommon.getDeclaredFields(cls);
 		
 		for(Iterator<Object> it=properties.keySet().iterator();it.hasNext();) {
 			String key=it.next().toString();
 			String value=properties.getProperty(key);
-			String fkey=key.replace('.', '_').toLowerCase();
-			if(keyFields.containsKey(fkey)) {
-				Field field=keyFields.get(fkey);
+			
+			if(keyFields.containsKey(key)) {
+				Field field=keyFields.get(key);
 				field.setAccessible(true);
 				try {
 					re+=set(field,object, value);
@@ -56,8 +49,8 @@ public class PropertiesCommon {
 	}
 	
 	
-	public static float injection(Properties properties) {
-        float re=0,total=properties.size();
+	public static int injection(Properties properties) {
+        int re=0,total=properties.size();
         
         for(Iterator<Object> it=properties.keySet().iterator();it.hasNext();) {
         	String key=it.next().toString();
@@ -77,13 +70,11 @@ public class PropertiesCommon {
 			} finally {continue;}
         }
         
-        
-        float prec=re/total;
-        return prec;
+        return re;
     }
 	
 	
-protected static int set(Field field,Object target,String value) {
+    protected static int set(Field field,Object target,String value) {
     	
     	try {
     	if(String.class.equals(field.getType())) {
@@ -95,7 +86,7 @@ protected static int set(Field field,Object target,String value) {
 		 else if(float.class.equals(field.getType())||Float.class.equals(field.getType())) {
 			 field.setFloat(null, Float.parseFloat(value)); 
 		 }
-		 else if(double.class.equals(field.getType())||double.class.equals(field.getType())) {
+		 else if(double.class.equals(field.getType())||Double.class.equals(field.getType())) {
 			 field.setDouble(null, Double.parseDouble(value)); 
 		 }
 		 else if(short.class.equals(field.getType())||Short.class.equals(field.getType())) {
@@ -115,6 +106,23 @@ protected static int set(Field field,Object target,String value) {
     		
     	}
     	return 1;
+    }
+    
+    
+    public static String toTemplate(Class... clss) {
+    	StringBuffer ret=new StringBuffer("");
+    	for(Class cls :clss) {
+    	
+    		Map<String,Field> keyFields=ReflectCommon.getDeclaredFields(cls);
+    	    for(Entry<String, Field> ent: keyFields.entrySet()) {
+    	    	ret
+    	    	.append(cls.getName())
+    	    	.append(".")
+    	    	.append(ent.getKey())
+    	    	.append("=\n\n");
+    	    }
+    	}
+    	return ret.toString();
     }
     
 }

@@ -42,9 +42,9 @@ public abstract class DataContextSrcGener   {
 	
 	public String toSrc(Class<? extends DataContext> cls,String databaseName,String...justTables) throws SQLException {
 		StringBuffer src=new StringBuffer("");
-		
-		src.append("package "+cls.getPackage().getName()+"; \n\n");
-		
+		if(cls.getPackage()!=null) {
+		 src.append("package "+cls.getPackage().getName()+"; \n\n");
+		}
 		for(ColumnStruct columnStruct : ColumnStruct.values()) {
 			String fieldClsName=columnStruct.fieldCls.getName();
 			if(fieldClsName.startsWith("[L")) {
@@ -215,9 +215,13 @@ public abstract class DataContextSrcGener   {
 			// TODO Auto-generated method stub
 			StringBuffer sbFields=new StringBuffer(),sbGetSeter=new StringBuffer();
 			String sql=MessageFormat.format("select * from {0} where 1=2",tableName );
+			try(
 			PreparedStatement preparedStatement= connection.prepareStatement(sql);
-			ResultSetMetaData resultSetMetaData= preparedStatement.executeQuery().getMetaData();
-			for (int i = 1; i <= resultSetMetaData.getColumnCount(); i++) {
+					ResultSet resultSet=preparedStatement.executeQuery();
+			){
+				ResultSetMetaData resultSetMetaData= resultSet.getMetaData();
+			  for (int i = 1; i <= resultSetMetaData.getColumnCount(); i++) {
+			
 				String colName=resultSetMetaData.getColumnName(i)
 						.trim().toUpperCase().replace(" ", "_");
 				columnNames.add(colName);
@@ -225,14 +229,20 @@ public abstract class DataContextSrcGener   {
 		    	Class colClass=ColumnStruct.toClass(colType);
 		    	
 		        String colClsName=colClass.getSimpleName();
+		        String propName0="",propName1="";
+				for(String _colName:colName.split("_")) {
+					propName0+=_colName.substring(0, 1)+_colName.substring(1).toLowerCase();
+					
+				}
+				propName1=propName0.substring(0,1).toLowerCase()+propName0.substring(1);
 		        
 		        sbFields.append("\t\t private " +colClsName+ " "+colName+ " ; \n " );
 		        
-		        sbGetSeter.append("\t\t public "+colClsName+" get"+colName+"(){ return this."+colName+"; } \n")
-		        .append("\t\t public void set"+colName+"("+colClsName+" "+ colName +" ){  this."+colName+"="+colName+"; } \n")
+		        sbGetSeter.append("\t\t public "+colClsName+" get"+propName0+"(){ return this."+colName+"; } \n")
+		        .append("\t\t public void set"+propName0+"("+colClsName+" "+ propName1 +" ){  this."+colName+"="+propName1+"; } \n")
 		        ;
 			}
-			close(preparedStatement,resultSetMetaData);
+			}catch(Exception ex) {}
 			return sbFields+"\n"+sbGetSeter;
 		}
 		

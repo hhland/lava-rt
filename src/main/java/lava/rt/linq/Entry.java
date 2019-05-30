@@ -2,7 +2,7 @@ package lava.rt.linq;
 
 import java.io.Serializable;
 
-public abstract class Entry implements Serializable,Cloneable {
+public abstract class Entry  {
 
 	
 
@@ -11,11 +11,7 @@ public abstract class Entry implements Serializable,Cloneable {
 
 
      
-     @Override
-	 public boolean equals(Object obj) {return this.toString().equals(obj.toString());}
-	
-    
-     
+  
     
 	 
 

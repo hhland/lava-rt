@@ -1,39 +1,58 @@
 package lava.rt.linq;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-public   class View<M> {
+import javax.sql.PooledConnection;
 
-	protected DataContext dataContext;
+import lava.rt.common.ReflectCommon;
+import lava.rt.pool.ListPool;
+
+public   class  View<M extends Entry> {
+
+	protected final DataContext dataContext;
 	
-	protected String tableName;
-	protected Class<M> classM;
+	protected final String tableName;
+	protected final Class<M> entryClass;
+	protected final Map<String,Field> fieldMap;
 	
 	
-	protected View (DataContext dataContext,Class<M> classM,String tableName) {
+	
+	protected View (DataContext dataContext,Class<M> entryClass,String tableName) {
 		this.dataContext=dataContext;
 		this.tableName=tableName;
-		this.classM=classM;
+		this.entryClass=entryClass;
+		this.fieldMap=ReflectCommon.getDeclaredFields(entryClass);
+		fieldMap.forEach((k,v)->v.setAccessible(true));
+		
+		
 	}
 	
 	
+	protected M newEntry( )  {
+		M ret=null;
+		try {
+			ret=this.entryClass.getConstructor().newInstance();
+		} catch (Exception e) {} 
+		return ret;
+	}
 	
-    
     
     
     public List<M> select(String where,Object...params) throws SQLException{
     	String pattern="select * from {0} ";
     	String sql=MessageFormat.format(pattern, this.tableName)+where;
     	if(dataContext.DEBUG) {
-    		dataContext.LOGGER.log(this.classM, sql);
+    		dataContext.LOGGER.log(this.entryClass, sql);
     	}
-		return dataContext.executeQueryList(sql,this.classM,params);
+		return dataContext.executeQueryList(sql,this.entryClass,params);
 	}
     
 	
@@ -42,7 +61,7 @@ public   class View<M> {
 		String pattern="select count({0}) from {1} ";
     	String sql=MessageFormat.format(pattern,column, this.tableName)+where;
     	if(dataContext.DEBUG) {
-    		dataContext.LOGGER.log(this.classM, sql);
+    		dataContext.LOGGER.log(this.entryClass, sql);
     	}
     	return (int)dataContext.executeQueryArray(sql,params)[0][0];
 	}
@@ -51,7 +70,7 @@ public   class View<M> {
 		String pattern="select sum({0}) from {1} ";
     	String sql=MessageFormat.format(pattern,column, this.tableName)+where;
     	if(dataContext.DEBUG) {
-    		dataContext.LOGGER.log(this.classM, sql);
+    		dataContext.LOGGER.log(this.entryClass, sql);
     	}
     	return (float)dataContext.executeQueryArray(sql,params)[0][0];
 	}
@@ -60,7 +79,7 @@ public   class View<M> {
 		String pattern="select min({0}) from {1} ";
     	String sql=MessageFormat.format(pattern,column, this.tableName)+where;
     	if(dataContext.DEBUG) {
-    		dataContext.LOGGER.log(this.classM, sql);
+    		dataContext.LOGGER.log(this.entryClass, sql);
     	}
     	return (T)dataContext.executeQueryArray(sql,params)[0][0];
 	}
@@ -69,7 +88,7 @@ public   class View<M> {
 		String pattern="select max({0}) from {1} ";
     	String sql=MessageFormat.format(pattern,column, this.tableName)+where;
     	if(dataContext.DEBUG) {
-    		dataContext.LOGGER.log(this.classM, sql);
+    		dataContext.LOGGER.log(this.entryClass, sql);
     	}
     	return (T)dataContext.executeQueryArray(sql,params)[0][0];
 	}

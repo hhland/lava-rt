@@ -12,21 +12,20 @@ import lava.rt.common.ReflectCommon;
 import lava.rt.common.TextCommon;
 
 
-public  class Table<M> extends View<M> {
+public  class Table<M extends Entry> extends View<M> {
 
-	protected String pkName;
+	protected final String pkName;
 	
-	protected Field pkField;
+	protected final Field pkField;
 	
-	protected Map<String,Field> fieldMap;
 	
-	protected Field[] insertFields =null,updateFields=null;
 	
-	public Table(DataContext dataContext,Class<M> classM,String tableName,String pkName)  {
-		super(dataContext,classM,tableName);
+	protected final Field[] insertFields,updateFields;
+	
+	public Table(DataContext dataContext,Class<M> entryClass,String tableName,String pkName)  {
+		super(dataContext,entryClass,tableName);
 		this.pkName=pkName;
 		
-		fieldMap=ReflectCommon.getDeclaredFields(classM);
 		
 		pkField=fieldMap.get(pkName);
 		pkField.setAccessible(true);
@@ -66,9 +65,9 @@ public  class Table<M> extends View<M> {
 		String sql=MessageFormat.format("select * from {0} where {1}= ? ", this.tableName,this.pkName
 				);
 		if(dataContext.DEBUG) {
-    		dataContext.LOGGER.log(this.classM, sql);
+    		dataContext.LOGGER.log(this.entryClass, sql);
     	}
-		List<M> entrys=dataContext.<M>executeQueryList(sql,classM,pk);
+		List<M> entrys=dataContext.<M>executeQueryList(sql,entryClass,pk);
 		M ret=null;
 		if(entrys.size()==1) {
 			ret=entrys.get(0);
@@ -81,14 +80,14 @@ public  class Table<M> extends View<M> {
 	
 	
 	
-	public <E extends M> int insert(E...entrys) throws SQLException {
+	public <E extends M> int insert(E[] entrys) throws SQLException {
 		if(entrys.length==0)return 0;
 		String sqlPattern = "insert into {0} ({1}) values ({2})", sql = "",
-                sqlCacheKey = classM.getName() + ":insert", cols = pkName+",", vals = "?,";
+                sqlCacheKey = entryClass.getName() + ":insert", cols = pkName+",", vals = "?,";
        
 		
-        if (dataContext.SQL_CACHE.containsKey(sqlCacheKey)) {
-            sql = dataContext.SQL_CACHE.get(sqlCacheKey);
+        if (dataContext.sqlMap.containsKey(sqlCacheKey)) {
+            sql = dataContext.sqlMap.get(sqlCacheKey);
         } else {
 
             for (Field field : insertFields) {
@@ -103,11 +102,11 @@ public  class Table<M> extends View<M> {
             vals = TextCommon.trim(vals, ",");
             sql = MessageFormat.format(sqlPattern, tableName, cols, vals);
            
-            dataContext.SQL_CACHE.put(sqlCacheKey, sql);
+            dataContext.sqlMap.put(sqlCacheKey, sql);
                 
         }
         if(dataContext.DEBUG) {
-    		dataContext.LOGGER.log(this.classM, sql);
+    		dataContext.LOGGER.log(this.entryClass, sql);
     	}
         int re=0,insertsize = insertFields.length;
         
@@ -141,14 +140,14 @@ public  class Table<M> extends View<M> {
 	}
 	
 	
-	public <E extends M> int insertReturnPk(E entry) throws SQLException {
+	public <E extends M> int insert(E entry) throws SQLException {
 		
 		String sqlPattern = "insert into {0} ({1}) values ({2})", sql = "",
-                sqlCacheKey = classM.getName() + ":insertReturnPk", cols = "", vals = "";
+                sqlCacheKey = entryClass.getName() + ":insertReturnPk", cols = "", vals = "";
        
 		
-        if (dataContext.SQL_CACHE.containsKey(sqlCacheKey)) {
-            sql = dataContext.SQL_CACHE.get(sqlCacheKey);
+        if (dataContext.sqlMap.containsKey(sqlCacheKey)) {
+            sql = dataContext.sqlMap.get(sqlCacheKey);
         } else {
 
             for (Field field : insertFields) {
@@ -163,11 +162,11 @@ public  class Table<M> extends View<M> {
             vals = TextCommon.trim(vals, ",");
             sql = MessageFormat.format(sqlPattern, tableName, cols, vals);
            
-            dataContext.SQL_CACHE.put(sqlCacheKey, sql);
+            dataContext.sqlMap.put(sqlCacheKey, sql);
                 
         }
         if(dataContext.DEBUG) {
-    		dataContext.LOGGER.log(this.classM, sql);
+    		dataContext.LOGGER.log(this.entryClass, sql);
     	}
         int re=0,insertsize = insertFields.length;
         
@@ -198,12 +197,12 @@ public  class Table<M> extends View<M> {
 	public <E extends M> int update(E...entrys) throws SQLException{
 		   if(entrys.length==0)return 0;
 			String sqlPattern = "update {0} set {1} where {2}=? ", key = "", sql = "",
-	                sqlCacheKey = classM.getName() + ":update";
+	                sqlCacheKey = entryClass.getName() + ":update";
 
 	        
 
-	        if (dataContext.SQL_CACHE.containsKey(sqlCacheKey)) {
-	            sql = dataContext.SQL_CACHE.get(sqlCacheKey);
+	        if (dataContext.sqlMap.containsKey(sqlCacheKey)) {
+	            sql = dataContext.sqlMap.get(sqlCacheKey);
 	        } else {
 
 	            
@@ -217,11 +216,11 @@ public  class Table<M> extends View<M> {
 	            //key=TextCommon.repeat(" `{0}` =? ", ",", updateFields.length);
 	        	sql = MessageFormat.format(sqlPattern, this.tableName, key, this.pkName);
 	            
-	            dataContext.SQL_CACHE.put(sqlCacheKey, sql);
+	            dataContext.sqlMap.put(sqlCacheKey, sql);
 	           
 	        }
 	        if(dataContext.DEBUG) {
-	    		dataContext.LOGGER.log(this.classM, sql);
+	    		dataContext.LOGGER.log(this.entryClass, sql);
 	    	}
 	        int updatesize = updateFields.length;
 	        Object[][] params = new Object[entrys.length][updatesize + 1];
@@ -256,19 +255,19 @@ public  class Table<M> extends View<M> {
 	public <E extends M> int delete(E...entrys) throws SQLException{
 		if(entrys.length==0)return 0;
 		String sqlPattern = "delete from {0} where {1}=? ", sql = "",
-                sqlCacheKey = classM.getName() + ":delete";
+                sqlCacheKey = entryClass.getName() + ":delete";
 
-        if (dataContext.SQL_CACHE.containsKey(sqlCacheKey)) {
-            sql = dataContext.SQL_CACHE.get(sqlCacheKey);
+        if (dataContext.sqlMap.containsKey(sqlCacheKey)) {
+            sql = dataContext.sqlMap.get(sqlCacheKey);
         } else {
             sql = MessageFormat.format(sqlPattern, tableName, pkName);
            
-            dataContext.SQL_CACHE.put(sqlCacheKey, sql);
+            dataContext.sqlMap.put(sqlCacheKey, sql);
            
         }
         if(dataContext.DEBUG) {
         	
-    		dataContext.LOGGER.log(this.classM, sql);
+    		dataContext.LOGGER.log(this.entryClass, sql);
     	}
         int dlength = entrys.length;
         Object[][] params = new Object[dlength][1];

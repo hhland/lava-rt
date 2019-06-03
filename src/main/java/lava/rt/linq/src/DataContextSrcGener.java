@@ -1,6 +1,11 @@
 package lava.rt.linq.src;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.Serializable;
+import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -38,6 +43,16 @@ public abstract class DataContextSrcGener   {
 	
 	public DataContextSrcGener(Connection connection) {
 		this.connection=connection;
+	}
+	
+	public void toFile(File srcFile,Class<? extends DataContext> cls,String databaseName,String...justTables) throws SQLException, IOException {
+		String src=toSrc(cls, databaseName, justTables);
+		srcFile.delete();
+		srcFile.createNewFile();
+		srcFile.setWritable(true);
+		try(FileWriter fw=new FileWriter(srcFile)){
+			fw.write(src);
+		}
 	}
 	
 	public String toSrc(Class<? extends DataContext> cls,String databaseName,String...justTables) throws SQLException {
@@ -86,13 +101,15 @@ public abstract class DataContextSrcGener   {
 			
 			String pkName="ID";
 			
-			String tn=table.toUpperCase();
+			String tn=table.toUpperCase()
+					,cn=toClassName(tn)
+					;
 			if(views.contains(tn))continue;
 			
 			if(tablesPks.containsKey(tn)) {
 				pkName=tablesPks.get(tn);
 			}
-			src.append("\t public final Table<"+tn+"> table"+tn+"=createTable("+tn+".class,\""+table+"\",\""+pkName+"\");\n");
+			src.append("\t public final Table<"+cn+"> "+tn+"=createTable("+cn+".class,\""+table+"\",\""+pkName+"\");\n");
 		}
 		
 		src.append("\n\n");
@@ -100,9 +117,11 @@ public abstract class DataContextSrcGener   {
 		for(String table:views) {
 			
 			
-			String tn=table.toUpperCase();
+			String tn=table.toUpperCase()
+					,cn=toClassName(tn)
+					;
 			
-			src.append("\t public final View<"+tn+"> view"+tn+"=createView("+tn+".class,\""+table+"\");\n");
+			src.append("\t public final View<"+cn+"> "+tn+"=createView("+cn+".class,\""+table+"\");\n");
 		}
 		
 		src.append("\n\n");
@@ -156,11 +175,12 @@ public abstract class DataContextSrcGener   {
 	
 	public class TableSrc{
 		
-		public String tableName,pkName;
+		public String tableName,pkName,className;
 		
 		public TableSrc(String tableName,String pkName) {
 			this.tableName=tableName;
 			this.pkName=pkName;
+			this.className=DataContextSrcGener.toClassName(tableName);
 		}
 		
 		public StringBuffer toSrc() throws SQLException{
@@ -175,7 +195,7 @@ public abstract class DataContextSrcGener   {
 	        
 	        context
 	       
-	    	.append("\t public  class "+tableName+" extends ")
+	    	.append("\t public  class "+className+" extends ")
 	    	.append(""+Entry.class.getSimpleName())
 	    	
 	    	.append(" {\n\n")
@@ -193,7 +213,8 @@ public abstract class DataContextSrcGener   {
 		
 		private String genOveriderSrc() {
 			StringBuffer src=new StringBuffer("");
-			src.append("\t\t@"+Override.class.getSimpleName()+"\n")
+			src
+			.append("\t\t@"+Override.class.getSimpleName()+"\n")
 			.append("\t\tpublic boolean equals(Object obj) {return this.toString().equals(obj.toString());} \n\n")
 			.append("\n\n")
 			.append("\t\t@"+Override.class.getSimpleName()+"\n")
@@ -229,11 +250,7 @@ public abstract class DataContextSrcGener   {
 		    	Class colClass=ColumnStruct.toClass(colType);
 		    	
 		        String colClsName=colClass.getSimpleName();
-		        String propName0="",propName1="";
-				for(String _colName:colName.split("_")) {
-					propName0+=_colName.substring(0, 1)+_colName.substring(1).toLowerCase();
-					
-				}
+		        String propName0=DataContextSrcGener.toClassName(colName),
 				propName1=propName0.substring(0,1).toLowerCase()+propName0.substring(1);
 		        
 		        sbFields.append("\t\t private " +colClsName+ " "+colName+ " ; \n " );
@@ -247,27 +264,7 @@ public abstract class DataContextSrcGener   {
 		}
 		
 		
-		private String genColsEnum() throws SQLException {
-			// TODO Auto-generated method stub
-			StringBuffer sbFields=new StringBuffer();
-			String sql=MessageFormat.format("select * from {0} where 1=2",tableName );
-			PreparedStatement preparedStatement= connection.prepareStatement(sql);
-			ResultSetMetaData resultSetMetaData= preparedStatement.executeQuery().getMetaData();
-			for (int i = 1; i <= resultSetMetaData.getColumnCount(); i++) {
-				String colName=resultSetMetaData.getColumnName(i)
-						.trim().toUpperCase().replace(" ", "_");
-		    	int colType=resultSetMetaData.getColumnType(i);
-		    	Class colClass=ColumnStruct.toClass(colType);
-		        String colClsName=colClass.getSimpleName();
-		        
-		        sbFields.append("\t\t "+colName+" =new Column(\""+colName+"\"),\n");
-		        
-		        
-			}
-			
-			close(preparedStatement,resultSetMetaData);
-			return TextCommon.trim(sbFields.toString(),",");
-		}
+		
 	}
 	
 	
@@ -324,13 +321,11 @@ public abstract class DataContextSrcGener   {
 	    return ret;
 	}
 	
-	protected int close(Object... objs) {
-		int ret=0;
-		for(Object obj:objs) {
-			try {
-				obj.getClass().getMethod("close").invoke(obj);
-				ret++;
-			} catch (Exception e) {}
+	public static String toClassName(String name) {
+		String ret="";
+		for(String _colName:name.split("_")) {
+			ret+=_colName.substring(0, 1).toUpperCase()+_colName.substring(1).toLowerCase();
+			
 		}
 		return ret;
 	}

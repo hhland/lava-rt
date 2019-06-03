@@ -1,24 +1,24 @@
 package lava.rt.linq;
 
 
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.MessageFormat;
+
 import java.util.ArrayList;
-import java.util.Date;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
+
 
 import javax.sql.DataSource;
 
@@ -33,6 +33,10 @@ public abstract class DataContext {
 	protected abstract Class thisClass() ;
 	
 	private final  Map<String,Field> fieldMap;
+	
+	private final Map<Class,Table> tableMap=new HashMap<>();
+	
+	private final Map<Class,View>  viewMap=new HashMap<>();
 
 	public static Logger LOGGER=new Logger() {
 		
@@ -64,49 +68,27 @@ public abstract class DataContext {
 	
 	
 	public  <M extends Entry> Table<M>  createTable(Class<M> cls,String tableName,String pkName){
-		Table<M> table=null;
-		
-	    table= new Table<M>(this, cls,tableName, pkName);
-		
+		Table<M> table=new Table<M>(this, cls,tableName, pkName);
+		tableMap.put(cls, table);
 		return table;
 	}
 	
 	public  <M extends Entry> View<M>  createView(Class<M> cls,String tableName){
-		return new View<M>(this, cls,tableName);
+		View<M> view=new View<M>(this, cls,tableName);
+		viewMap.put(cls, view);
+		return view; 
 	};
 	
 	
 	
-	public <M extends Entry> Table<M>  getTable(Class<M> mcls)throws NullPointerException{
-	      Table<M> table=null;
-		  String fieldName="table"+mcls.getSimpleName();
-	      if(fieldMap.containsKey(fieldName)) {
-		    Field field=this.fieldMap.get(fieldName); //cls.getDeclaredField(fieldName);
-			try {
-				table=(Table<M>)field.get(this);
-			} catch (IllegalArgumentException | IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				String msg=MessageFormat.format("field:{0} can't find in class:{1}",fieldName,thisClass().getName() );
-				throw new NullPointerException(msg);
-			}
-	      }
-	      return table;
+	public <M extends Entry> Table<M>  getTable(Class<M> mcls){
+	      Table<M> ret=(Table<M>)tableMap.get(mcls);
+	      return ret;
 	}
 	
-	public  <M extends Entry> View<M>  getView(Class<M> mcls) throws NullPointerException{
-		View<M> table=null;
-		  String fieldName="view"+mcls.getSimpleName();
-	        if(fieldMap.containsKey(fieldName)) {
-			Field field=fieldMap.get(fieldName); //cls.getDeclaredField(fieldName);
-			try {
-				table=(View<M>)field.get(this);
-			} catch (IllegalArgumentException | IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				String msg=MessageFormat.format("field:{0} can't find in class:{1}",fieldName,thisClass().getName() );
-				throw new NullPointerException(msg);
-			}
-	      }
-	      return table;
+	public  <M extends Entry> View<M>  getView(Class<M> mcls){
+		View<M> ret=(View<M>)viewMap.get(mcls);
+	      return ret;
 	};
 	
 	
@@ -137,7 +119,7 @@ public abstract class DataContext {
 			view=getView(cls);
 		}
 		while(resultSet.next()) {
-			M m = view.newEntry(); //ReflectCommon.newInstance(cls);
+			M m = newEntry(cls);
 			
 			if(m==null) {
 				throw new SQLException(cls.getName()+ " can't be instance");
@@ -246,6 +228,19 @@ public abstract class DataContext {
 		Connection ret=this.dataSource.getConnection();
 		return ret;
 	}
+	
+	protected <E extends Entry> E newEntry(Class<E> entryClass)  {
+		E ret=null;
+		try {
+		
+			ret=(E)entryClass.getConstructors()[0].newInstance(this);
+		} catch (Exception e) {
+			e.printStackTrace();
+			
+		} 
+		return ret;
+	}
+	
 	
 	public interface Logger{
 		

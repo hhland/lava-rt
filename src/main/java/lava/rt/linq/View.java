@@ -36,13 +36,7 @@ public   class  View<M extends Entry> {
 	}
 	
 	
-	protected M newEntry( )  {
-		M ret=null;
-		try {
-			ret=this.entryClass.getConstructor().newInstance();
-		} catch (Exception e) {} 
-		return ret;
-	}
+	
 	
     
     

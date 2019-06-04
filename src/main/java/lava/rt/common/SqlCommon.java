@@ -6,6 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -17,6 +18,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 
 import lava.rt.sqlparser.SingleSqlParserFactory;
 import lava.rt.sqlparser.SqlSegment;
@@ -121,6 +123,51 @@ public class SqlCommon {
     		
     		return re;
     	  }
+      
+      public static Object[][] callProcedure(Connection connection,String procName, Object... params) throws SQLException {
+    	  List<Object[]> ret=new ArrayList<Object[]>();
+          StringBuffer sql =new StringBuffer();
+          sql.append("{call ").append(procName).append("(");
+          
+          String[] paramStrs=new String[params.length];
+          for(int i=0;i<paramStrs.length;i++) {
+          	
+          	
+          	paramStrs[i]= "?";
+          	
+          	
+          }
+          sql.append(String.join(",", paramStrs));
+          
+          sql.append(")}");
+          int cc=0;
+  		 try(
+  		   CallableStatement call =  connection.prepareCall(sql.toString());
+  		 ){	
+  			
+  			for(int i=0;i<params.length;i++) {
+  				
+  				call.setObject(i+1, params[i]);
+  				
+  			}
+  			
+  			
+  			ResultSet resultSet=call.executeQuery();
+  	  		ResultSetMetaData metaData=resultSet.getMetaData();
+  	  		cc=metaData.getColumnCount();
+  	  		while(resultSet.next()) {
+  	  			Object[] objects=new Object[cc];
+  	  			for(int i=0;i<cc;i++) {
+  	  				objects[i]=resultSet.getObject(i+1);
+  	  			}
+  	  			ret.add(objects);
+  	  		}
+  			
+  		 }
+  		return ret.toArray(new Object[ret.size()][cc]);
+  			
+           
+  	}
       
       
       

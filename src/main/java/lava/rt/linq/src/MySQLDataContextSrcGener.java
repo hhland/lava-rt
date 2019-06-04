@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -43,6 +44,12 @@ public class MySQLDataContextSrcGener extends DataContextSrcGener {
 		   tablePks.put(table, pkName);
 		}
 		return tablePks;
+	}
+
+	@Override
+	protected Map<String, List<ProcedureParamSrc>> loadProcedures(String databaseName) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	

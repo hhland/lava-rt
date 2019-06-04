@@ -1,11 +1,16 @@
 package lava.rt.linq.src;
 
 import java.sql.Connection;
+import java.sql.JDBCType;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLType;
+import java.sql.Types;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -22,11 +27,12 @@ public class MSSQLServerDataContextSrcGener extends DataContextSrcGener {
 		
 				Set<String> tables=new HashSet<String>();
 				String sql="select name from sysobjects  where type='V'";
-				PreparedStatement preparedStatement= connection.prepareStatement(sql);
-				ResultSet resultSet=preparedStatement.executeQuery();
+				try(PreparedStatement preparedStatement= connection.prepareStatement(sql);
+				ResultSet resultSet=preparedStatement.executeQuery();){
 				while(resultSet.next()) {
 				   String table=resultSet.getString(1).toUpperCase();
 				   tables.add(table);
+				}
 				}
 				return tables;
 	}
@@ -53,14 +59,68 @@ public class MSSQLServerDataContextSrcGener extends DataContextSrcGener {
 				"                           WHERE    sc.id = col.id" + 
 				"                                    AND sc.colid = col.colid " + 
 				") >0 ";
-		PreparedStatement preparedStatement= connection.prepareStatement(sql);
-		ResultSet resultSet=preparedStatement.executeQuery();
+		try(PreparedStatement preparedStatement= connection.prepareStatement(sql);
+		ResultSet resultSet=preparedStatement.executeQuery();){
 		while(resultSet.next()) {
 		   String table=resultSet.getString(1).toUpperCase();
 		   String pkName=resultSet.getString(2).toUpperCase();
 		   tablePks.put(table, pkName);
 		}
+		}
 		return tablePks;
+	}
+
+	
+	
+	
+	@Override
+	protected Map<String, List<ProcedureParamSrc>> loadProcedures(String databaseName) throws SQLException {
+		// TODO Auto-generated method stub
+		Map<String,List<ProcedureParamSrc>> ret=new HashMap<>();
+		String sql=" select  \n" + 
+				
+				"(SELECT top(1) p.name FROM sys.procedures p where sp.object_id = p.object_id) as PROC_NAME,\n" + 
+				"   PARAM_NAME = name,  \n" + 
+				"   PARAM_TYPE   = type_name(user_type_id),  \n" + 
+				"   PARAM_LEN   = max_length,  \n" + 
+				"   PARAM_PREC   = case when type_name(system_type_id) = 'uniqueidentifier' \n" + 
+				"              then precision  \n" + 
+				"              else OdbcPrec(system_type_id, max_length, precision) end,  \n" + 
+				"   PARAM_SCALE   = OdbcScale(system_type_id, scale),  \n" + 
+				"   PARAM_ORDER  = parameter_id,  \n" + 
+				"   PARAM_COLL   = convert(sysname, \n" + 
+				"                   case when system_type_id in (35, 99, 167, 175, 231, 239)  \n" + 
+				"                   then ServerProperty('collation') end)  \n" + 
+				"   ,PARAM_IS_OUTPUT = sp.is_output\n" + 
+				"  from sys.parameters sp order by object_id,parameter_id";
+		try(PreparedStatement preparedStatement= connection.prepareStatement(sql);
+		ResultSet resultSet=preparedStatement.executeQuery();){
+		while(resultSet.next()) {
+		   String name=resultSet.getString("PROC_NAME");
+		   if(name==null)continue;
+		   
+		   String key=name.toUpperCase();
+		   if(!ret.containsKey(key)) {
+			   ret.put(key, new ArrayList<DataContextSrcGener.ProcedureParamSrc>());
+		   }
+		   ProcedureParamSrc paramSrc=new ProcedureParamSrc();
+		   paramSrc.isOutput=resultSet.getInt("PARAM_IS_OUTPUT")==1;
+		   paramSrc.paramName=resultSet.getString("PARAM_NAME");
+		   if("int".equals(resultSet.getString("PARAM_TYPE"))) {
+			   paramSrc.sqlType=Types.INTEGER;
+			   paramSrc.cls=Integer.class;
+		   }else {
+			   paramSrc.sqlType=Types.VARCHAR;
+			   paramSrc.cls=String.class;
+		   }
+		   
+		   ret.get(key).add(paramSrc);
+		   
+		  
+		  }
+		}
+		
+		return ret;
 	}
 
 }

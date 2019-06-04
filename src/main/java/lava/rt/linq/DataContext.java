@@ -4,7 +4,7 @@ package lava.rt.linq;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -24,6 +24,7 @@ import javax.sql.DataSource;
 
 import lava.rt.common.ReflectCommon;
 import lava.rt.common.SqlCommon;
+
 
 
 public abstract class DataContext {
@@ -240,6 +241,14 @@ public abstract class DataContext {
 		} 
 		return ret;
 	}
+	
+     protected Object[][] call(String procName, Object... params) throws SQLException {
+	
+			return SqlCommon.callProcedure(getConnection(), procName, params);
+		     
+	 }
+	
+	
 	
 	
 	public interface Logger{

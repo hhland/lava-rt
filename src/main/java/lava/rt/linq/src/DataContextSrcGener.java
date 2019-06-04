@@ -17,9 +17,11 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.MessageFormat;
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,9 +31,12 @@ import javax.sql.DataSource;
 import lava.rt.common.TextCommon;
 import lava.rt.linq.Column;
 import lava.rt.linq.DataContext;
+
 import lava.rt.linq.Entry;
+
 import lava.rt.linq.Table;
 import lava.rt.linq.View;
+
 
 public abstract class DataContextSrcGener   {
 
@@ -72,9 +77,11 @@ public abstract class DataContextSrcGener   {
 		.append("import " + Column.class.getName()+" ; \n")
 		.append("import "+ Entry.class.getName()+"; \n")
 		
-        
+		.append("import "+ List.class.getName()+"; \n")
+		.append("import "+ ArrayList.class.getName()+"; \n")
+		.append("import "+ SQLException.class.getName()+"; \n")
 		.append("import "+DataSource.class.getName()+"; \n\n\n")
-		
+	
 		;
 		
 		src.append("public class "+cls.getSimpleName()+" extends "+DataContext.class.getName()+"{ \n\n");
@@ -84,6 +91,8 @@ public abstract class DataContextSrcGener   {
 		.append("\t public "+cls.getSimpleName()+"("+DataSource.class.getSimpleName()+" dataSource){ super(dataSource);  } \n\n");
 		
 		Set<String> tables=new HashSet<>(),views=loadViews(databaseName);
+		
+		Map<String, List<ProcedureParamSrc>>procs=loadProcedures(databaseName);
 		
 		Map<String, String> tablesPks=loadTablesPks(databaseName);
 		
@@ -144,6 +153,13 @@ public abstract class DataContextSrcGener   {
 			src.append(tableSrc.toSrc());
 		}
 		
+        for(java.util.Map.Entry<String, List<ProcedureParamSrc>> ent : procs.entrySet() ) {
+			
+			String tn=ent.getKey().toUpperCase();
+			ProcedureSrc tableSrc=new ProcedureSrc(tn,ent.getValue());
+			src.append(tableSrc.toSrc());
+		}
+		
 		src
 		.append("\tpublic final static Criteria CRITERIA=new Criteria();\n\n")
 		.append("\tpublic  static class Criteria{ \n\n")
@@ -151,7 +167,7 @@ public abstract class DataContextSrcGener   {
 		.append("\t\tpublic static final Column \n");
 		
 		for(String colName:columnNames) {
-			src.append("\t\t"+ colName+" = new Column(\""+colName+"\"),\n" );
+			src.append("\t\t"+ toClassName(colName)+" = new Column(\""+colName+"\"),\n" );
 		}
 		src.deleteCharAt(src.length()-2);
 		src.append( "\t\t;\n\n")
@@ -165,13 +181,103 @@ public abstract class DataContextSrcGener   {
 	
 	
 	
+	protected abstract Map<String,List<ProcedureParamSrc>> loadProcedures(String databaseName) throws SQLException;
+
 	public abstract Set<String> loadViews(String databaseName) throws SQLException;
 	
 	
 	public abstract Map<String,String> loadTablesPks(String databaseName) throws SQLException;
 	
 	
+	protected class ProcedureParamSrc{
+		
+		public Class cls;
+		public String  paramName;
+		
+		public int sqlType;
+		
+		public boolean isOutput;
+		
+	}
 	
+	public class ProcedureSrc{
+
+		
+		public String  procName,className;
+		List<ProcedureParamSrc> paramSrcs;
+		
+		public ProcedureSrc(String procName, List<ProcedureParamSrc> paramSrcs) {
+			// TODO Auto-generated constructor stub
+			this.procName=procName;
+			this.className=DataContextSrcGener.toClassName(procName);
+			this.paramSrcs=paramSrcs;
+		}
+
+		public Object toSrc() {
+			// TODO Auto-generated method stub
+			 StringBuffer context=new StringBuffer("");
+		    	
+		        //context.append("\t public    class "+tableName+"Table extend Table<"+tableName+"> { \n\n ")
+		        //.append("\t\tpublic "+tableName+"Table (DataContext dataContext){ super(dataContext, "+tableName+".class, \""+tableName+"\", \""+pkName+"\") }\n\n")
+		        
+		        
+		        //.append("\t\tpublic final  Column "+genColsEnum() +"; \n\n")
+		        //.append("\t } \n\n");
+		        
+		        context
+		       
+		    //	.append("\t public   "+className+" extends ")
+		    //	.append(""+Procedure.class.getSimpleName())
+		    	
+		    //	.append(" {\n\n")
+		    	//.append("\t\t private static final long serialVersionUID = 1L; ")
+		   // 	.append("\n\n")
+		  // 	.append("\public "+className+"(DataContext dataContext, String procName) {\r\n" + 
+		  //  			"			super(dataContext, procName);\r\n" + 
+		  //  			"			// TODO Auto-generated constructor stub\r\n" + 
+		  //  			"		}")
+		    	.append("\n\n")
+		    	.append(genOveriderSrc())
+		    	.append("\n\n")
+		   // 	.append("\t } //end "+procName)
+		        .append("\n\n")
+		        ;
+		        
+		        return context;
+		}
+
+		private Object genOveriderSrc() {
+			// TODO Auto-generated method stub
+			StringBuffer src=new StringBuffer("");
+			String[] funParams=new String[paramSrcs.size()]
+					,callParams=new String[paramSrcs.size()];
+			for(int i=0;i<paramSrcs.size();i++) {
+				ProcedureParamSrc paramSrc=paramSrcs.get(i);
+				String paramName=paramSrc.paramName.replace("@", "");
+				funParams[i]=paramSrc.cls.getSimpleName()+" "+paramName;
+				callParams[i]=","+paramName;
+			}
+			src
+			//.append("\t\t@"+Override.class.getSimpleName()+"\n")
+			.append("\t\tpublic Object[][] "+className+"(")
+			.append(String.join(",", funParams))
+			.append(") throws SQLException {")
+			.append("\n")
+			//.append("\t\t\tList<"+Param.class.getSimpleName()+"> params=new ArrayList<>();")
+			.append("\n")
+			//.append(String.join(",", callParams))
+			.append("\n")
+			.append("\t\t\t return call(\""+procName+"\""+String.join("", callParams)+");")
+			.append("\n")
+			.append("\t\t} \n\n")
+			.append("\n\n")
+			
+		    ;
+			
+			return src.toString();
+		}
+		
+	}
 	
 	public class TableSrc{
 		

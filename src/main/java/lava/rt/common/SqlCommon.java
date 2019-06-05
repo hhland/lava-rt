@@ -1,5 +1,7 @@
 package lava.rt.common;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -12,6 +14,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -132,9 +135,11 @@ public class SqlCommon {
           String[] paramStrs=new String[params.length];
           for(int i=0;i<paramStrs.length;i++) {
           	
-          	
-          	paramStrs[i]= "?";
-          	
+          	if(params[i] instanceof OutputParam) {
+          	   paramStrs[i]= "? output";
+          	}else {
+          	   paramStrs[i]= "?";
+          	}
           	
           }
           sql.append(String.join(",", paramStrs));
@@ -146,13 +151,28 @@ public class SqlCommon {
   		 ){	
   			
   			for(int i=0;i<params.length;i++) {
+  				if(params[i] instanceof OutputParam) {
+  					OutputParam outputParam=(OutputParam)params[i];
+  					call.registerOutParameter(i+1,outputParam.sqlType);
+  				}else {
+  					call.setObject(i+1, params[i]);
+  				}
   				
-  				call.setObject(i+1, params[i]);
   				
   			}
   			
+  			call.execute();
   			
-  			ResultSet resultSet=call.executeQuery();
+  			
+  			for(int i=0;i<params.length;i++) {
+  				if(params[i] instanceof OutputParam) {
+  					OutputParam outputParam=(OutputParam)params[i];
+  					outputParam.result=call.getObject(i+1);
+  				}
+  				
+  			}
+  			
+  			ResultSet resultSet=call.getResultSet();
   	  		ResultSetMetaData metaData=resultSet.getMetaData();
   	  		cc=metaData.getColumnCount();
   	  		while(resultSet.next()) {
@@ -182,7 +202,25 @@ public class SqlCommon {
       }
       
       
-     
+     public class  OutputParam<E>{
+    	 
+    	 E result;
+         final int sqlType;
+         final Class<E> reslutCls;
+         
+		public OutputParam(Class<E> reslutCls) {
+			super();
+			this.reslutCls=reslutCls;
+			if(reslutCls== Integer.class) {
+				sqlType=Types.INTEGER;
+			}else {
+				sqlType=Types.VARCHAR;
+			}
+		}
+    	 
+		
+    	 
+     }
       
       
       public static void main(String[] args) {

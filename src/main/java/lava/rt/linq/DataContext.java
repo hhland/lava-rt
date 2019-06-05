@@ -242,7 +242,7 @@ public abstract class DataContext {
 		return ret;
 	}
 	
-     protected Object[][] call(String procName, Object... params) throws SQLException {
+     protected Object[][] callProcedure(String procName, Object... params) throws SQLException {
 	
 			return SqlCommon.callProcedure(getConnection(), procName, params);
 		     

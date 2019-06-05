@@ -27,7 +27,7 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
-
+import lava.rt.common.SqlCommon.OutputParam;
 import lava.rt.common.TextCommon;
 import lava.rt.linq.Column;
 import lava.rt.linq.DataContext;
@@ -254,12 +254,16 @@ public abstract class DataContextSrcGener   {
 			for(int i=0;i<paramSrcs.size();i++) {
 				ProcedureParamSrc paramSrc=paramSrcs.get(i);
 				String paramName=paramSrc.paramName.replace("@", "");
-				funParams[i]=paramSrc.cls.getSimpleName()+" "+paramName;
+				if(paramSrc.isOutput) {
+					funParams[i]=OutputParam.class.getSimpleName()+"<" +paramSrc.cls.getSimpleName()+"> "+paramName;
+				}else {
+				   funParams[i]=paramSrc.cls.getSimpleName()+" "+paramName;
+				}
 				callParams[i]=","+paramName;
 			}
 			src
 			//.append("\t\t@"+Override.class.getSimpleName()+"\n")
-			.append("\t\tpublic Object[][] "+className+"(")
+			.append("\t\tpublic Object[][] "+procName+"(")
 			.append(String.join(",", funParams))
 			.append(") throws SQLException {")
 			.append("\n")
@@ -267,7 +271,7 @@ public abstract class DataContextSrcGener   {
 			.append("\n")
 			//.append(String.join(",", callParams))
 			.append("\n")
-			.append("\t\t\t return call(\""+procName+"\""+String.join("", callParams)+");")
+			.append("\t\t\t return callProcedure(\""+procName+"\""+String.join("", callParams)+");")
 			.append("\n")
 			.append("\t\t} \n\n")
 			.append("\n\n")

@@ -99,7 +99,7 @@ public class MSSQLServerDataContextSrcGener extends DataContextSrcGener {
 		   String name=resultSet.getString("PROC_NAME");
 		   if(name==null)continue;
 		   
-		   String key=name.toUpperCase();
+		   String key=name;
 		   if(!ret.containsKey(key)) {
 			   ret.put(key, new ArrayList<DataContextSrcGener.ProcedureParamSrc>());
 		   }
@@ -109,6 +109,9 @@ public class MSSQLServerDataContextSrcGener extends DataContextSrcGener {
 		   if("int".equals(resultSet.getString("PARAM_TYPE"))) {
 			   paramSrc.sqlType=Types.INTEGER;
 			   paramSrc.cls=Integer.class;
+		   }else if("float".equals(resultSet.getString("PARAM_TYPE"))) {
+			   paramSrc.sqlType=Types.FLOAT;
+			   paramSrc.cls=Float.class;
 		   }else {
 			   paramSrc.sqlType=Types.VARCHAR;
 			   paramSrc.cls=String.class;

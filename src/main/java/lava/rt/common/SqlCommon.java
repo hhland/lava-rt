@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
+import lava.rt.linq.OutputParam;
 import lava.rt.sqlparser.SingleSqlParserFactory;
 import lava.rt.sqlparser.SqlSegment;
 
@@ -135,11 +135,9 @@ public class SqlCommon {
           String[] paramStrs=new String[params.length];
           for(int i=0;i<paramStrs.length;i++) {
           	
-          	if(params[i] instanceof OutputParam) {
-          	   paramStrs[i]= "? output";
-          	}else {
+          	
           	   paramStrs[i]= "?";
-          	}
+          	
           	
           }
           sql.append(String.join(",", paramStrs));
@@ -149,11 +147,15 @@ public class SqlCommon {
   		 try(
   		   CallableStatement call =  connection.prepareCall(sql.toString());
   		 ){	
-  			
+  			boolean isOutputParam=false;
   			for(int i=0;i<params.length;i++) {
   				if(params[i] instanceof OutputParam) {
   					OutputParam outputParam=(OutputParam)params[i];
   					call.registerOutParameter(i+1,outputParam.sqlType);
+  					if(outputParam.value!=null) {
+  						call.setObject(i+1, outputParam.value);
+  					}
+  					isOutputParam=true;
   				}else {
   					call.setObject(i+1, params[i]);
   				}
@@ -164,13 +166,6 @@ public class SqlCommon {
   			call.execute();
   			
   			
-  			for(int i=0;i<params.length;i++) {
-  				if(params[i] instanceof OutputParam) {
-  					OutputParam outputParam=(OutputParam)params[i];
-  					outputParam.result=call.getObject(i+1);
-  				}
-  				
-  			}
   			
   			ResultSet resultSet=call.getResultSet();
   	  		ResultSetMetaData metaData=resultSet.getMetaData();
@@ -182,6 +177,17 @@ public class SqlCommon {
   	  			}
   	  			ret.add(objects);
   	  		}
+  	  		
+  	     	if(isOutputParam) {
+ 			 call.getMoreResults();	
+ 			  for(int i=0;i<params.length;i++) {
+ 				if(params[i] instanceof OutputParam) {
+ 					OutputParam outputParam=(OutputParam)params[i];
+ 					outputParam.result=call.getObject(i+1);
+ 				 }
+ 				
+ 		    	}
+ 			}
   			
   		 }
   		return ret.toArray(new Object[ret.size()][cc]);
@@ -202,25 +208,7 @@ public class SqlCommon {
       }
       
       
-     public class  OutputParam<E>{
-    	 
-    	 E result;
-         final int sqlType;
-         final Class<E> reslutCls;
-         
-		public OutputParam(Class<E> reslutCls) {
-			super();
-			this.reslutCls=reslutCls;
-			if(reslutCls== Integer.class) {
-				sqlType=Types.INTEGER;
-			}else {
-				sqlType=Types.VARCHAR;
-			}
-		}
-    	 
-		
-    	 
-     }
+     
       
       
       public static void main(String[] args) {

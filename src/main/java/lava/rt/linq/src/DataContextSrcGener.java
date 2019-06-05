@@ -27,13 +27,13 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
-import lava.rt.common.SqlCommon.OutputParam;
+
 import lava.rt.common.TextCommon;
 import lava.rt.linq.Column;
 import lava.rt.linq.DataContext;
 
 import lava.rt.linq.Entry;
-
+import lava.rt.linq.OutputParam;
 import lava.rt.linq.Table;
 import lava.rt.linq.View;
 
@@ -72,10 +72,8 @@ public abstract class DataContextSrcGener   {
 			}
 			src.append("import "+fieldClsName+"; \n");
 		}
-		src.append("import "+Table.class.getName()+"; \n")
-		.append("import "+View.class.getName()+"; \n")
-		.append("import " + Column.class.getName()+" ; \n")
-		.append("import "+ Entry.class.getName()+"; \n")
+		src.append("import "+DataContext.class.getPackage().getName()+".*; \n")
+		
 		
 		.append("import "+ List.class.getName()+"; \n")
 		.append("import "+ ArrayList.class.getName()+"; \n")
@@ -138,7 +136,7 @@ public abstract class DataContextSrcGener   {
 		//tables.addAll(views);
 		for(String table:tables) {
 			String pkName=null;
-			String tn=table.toUpperCase();
+			String tn=table;
 			if(tablesPks.containsKey(tn)) {
 				pkName=tablesPks.get(tn);
 			}
@@ -148,14 +146,14 @@ public abstract class DataContextSrcGener   {
 		
 		for(String table:views) {
 			
-			String tn=table.toUpperCase();
+			String tn=table;
 			TableSrc tableSrc=new TableSrc(tn,null);
 			src.append(tableSrc.toSrc());
 		}
 		
         for(java.util.Map.Entry<String, List<ProcedureParamSrc>> ent : procs.entrySet() ) {
 			
-			String tn=ent.getKey().toUpperCase();
+			String tn=ent.getKey();
 			ProcedureSrc tableSrc=new ProcedureSrc(tn,ent.getValue());
 			src.append(tableSrc.toSrc());
 		}

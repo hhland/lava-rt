@@ -68,13 +68,13 @@ public abstract class DataContext {
 	
 	
 	
-	public  <M extends Entry> Table<M>  createTable(Class<M> cls,String tableName,String pkName){
+	public  <M extends Entity> Table<M>  createTable(Class<M> cls,String tableName,String pkName){
 		Table<M> table=new Table<M>(this, cls,tableName, pkName);
 		tableMap.put(cls, table);
 		return table;
 	}
 	
-	public  <M extends Entry> View<M>  createView(Class<M> cls,String tableName){
+	public  <M extends Entity> View<M>  createView(Class<M> cls,String tableName){
 		View<M> view=new View<M>(this, cls,tableName);
 		viewMap.put(cls, view);
 		return view; 
@@ -82,12 +82,12 @@ public abstract class DataContext {
 	
 	
 	
-	public <M extends Entry> Table<M>  getTable(Class<M> mcls){
+	public <M extends Entity> Table<M>  getTable(Class<M> mcls){
 	      Table<M> ret=(Table<M>)tableMap.get(mcls);
 	      return ret;
 	}
 	
-	public  <M extends Entry> View<M>  getView(Class<M> mcls){
+	public  <M extends Entity> View<M>  getView(Class<M> mcls){
 		View<M> ret=(View<M>)viewMap.get(mcls);
 	      return ret;
 	};
@@ -98,7 +98,7 @@ public abstract class DataContext {
 	
 	
 	
-	public <M extends Entry>  List<M> executeQueryList(String sql,Class<M> cls,Object...params) throws SQLException{
+	public <M extends Entity>  List<M> executeQueryList(String sql,Class<M> cls,Object...params) throws SQLException{
 		Connection connection=getConnection();
 		List<M> list=new ArrayList<M>();
 		PreparedStatement preparedStatement= connection.prepareStatement(sql);
@@ -190,7 +190,7 @@ public abstract class DataContext {
 	} 
 	
 	
-	public <M extends Entry> int insert(M...entrys) throws SQLException{
+	public <M extends Entity> int insert(M...entrys) throws SQLException{
 		int re=0;
 		if(entrys.length==0)return re;
 		for(M entry:entrys) {
@@ -201,7 +201,7 @@ public abstract class DataContext {
 		return re;
 	}
 	
-	public <M extends Entry> int update(M...entrys) throws SQLException{
+	public <M extends Entity> int update(M...entrys) throws SQLException{
 		int re=0;
 		if(entrys.length==0)return re;
 		for(M entry:entrys) {
@@ -214,7 +214,7 @@ public abstract class DataContext {
 		return re;
 	}
 	
-	public <M extends Entry> int delete(M...entrys) throws SQLException{
+	public <M extends Entity> int delete(M...entrys) throws SQLException{
 		int re=0;
 		if(entrys.length==0)return re;
 		for(M entry:entrys) {
@@ -230,7 +230,7 @@ public abstract class DataContext {
 		return ret;
 	}
 	
-	protected <E extends Entry> E newEntry(Class<E> entryClass)  {
+	protected <E extends Entity> E newEntry(Class<E> entryClass)  {
 		E ret=null;
 		try {
 		

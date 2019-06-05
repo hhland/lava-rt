@@ -32,7 +32,7 @@ import lava.rt.common.TextCommon;
 import lava.rt.linq.Column;
 import lava.rt.linq.DataContext;
 
-import lava.rt.linq.Entry;
+import lava.rt.linq.Entity;
 import lava.rt.linq.OutputParam;
 import lava.rt.linq.Table;
 import lava.rt.linq.View;
@@ -304,7 +304,7 @@ public abstract class DataContextSrcGener   {
 	        context
 	       
 	    	.append("\t public  class "+className+" extends ")
-	    	.append(""+Entry.class.getSimpleName())
+	    	.append(""+Entity.class.getSimpleName())
 	    	
 	    	.append(" {\n\n")
 	    	//.append("\t\t private static final long serialVersionUID = 1L; ")
@@ -322,16 +322,16 @@ public abstract class DataContextSrcGener   {
 		private String genOveriderSrc() {
 			StringBuffer src=new StringBuffer("");
 			src
-			.append("\t\t@"+Override.class.getSimpleName()+"\n")
-			.append("\t\tpublic boolean equals(Object obj) {return this.toString().equals(obj.toString());} \n\n")
+			//.append("\t\t@"+Override.class.getSimpleName()+"\n")
+			//.append("\t\tpublic boolean equals(Object obj) {return this.toString().equals(obj.toString());} \n\n")
 			.append("\n\n")
 			.append("\t\t@"+Override.class.getSimpleName()+"\n")
 			.append("\t\tpublic Class<? extends Entry> thisClass() {return this.getClass() ;}")
 		    ;
 			if(pkName!=null) {
-			src.append("\n\n").append("\t\t@"+Override.class.getSimpleName()+"\n")
-			.append("\t\tpublic String toString() {return this.getClass().getName()+\":"+tableName+":\"+this."+pkName+";}")
-			.append("\n\n")
+			//src.append("\n\n").append("\t\t@"+Override.class.getSimpleName()+"\n")
+			//.append("\t\tpublic String toString() {return this.getClass().getName()+\":"+tableName+":\"+this."+pkName+";}")
+			//.append("\n\n")
 			//.append("\t\t@"+Override.class.getSimpleName()+"\n")
 			//.append("\t\tpublic Object getPk() {return this."+pkName+";}")
 			

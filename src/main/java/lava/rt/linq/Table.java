@@ -12,7 +12,7 @@ import lava.rt.common.ReflectCommon;
 import lava.rt.common.TextCommon;
 
 
-public  class Table<M extends Entry> extends View<M> {
+public  class Table<M extends Entity> extends View<M> {
 
 	protected final String pkName;
 	

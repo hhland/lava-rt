@@ -7,18 +7,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public   class LangCommon {
 
-	public static <T> boolean isIn(T obj1, T[] objs) {
-		for (T obj : objs) {
-			if (isEquals(obj1, obj)) {
-				return true;
-			}
-		}
-		return false;
-	}
+	
 
 	
 	
@@ -36,49 +31,28 @@ public   class LangCommon {
 	
      public static  <T> List<T>  toList(T... ts){
 		
-		List<T> ret=new ArrayList<>();
-		
-		for(T t:ts) {
-			ret.add( t);
-		}
-		return ret;
+    	 return Stream.of(ts).collect(Collectors.toList());
 		
 	}
      
      
      public static  <T> Set<T>  toSet(T... ts){
  		
- 		Set<T> ret=new HashSet<>();
  		
- 		for(T t:ts) {
- 			ret.add( t);
- 		}
- 		return ret;
+ 		return Stream.of(ts).collect(Collectors.toSet());
+ 		
  		
  	}
 	
    public static  <T> Map<String, T>  toMap(T... ts){
-		
-		Map<String, T> tm=new HashMap<>();
-		
-		for(T t:ts) {
-			tm.put(t.toString(), t);
-		}
-		
-		return tm;
+	   return Stream.of(ts).collect(Collectors.toMap(t->t.toString(),t->t ));
 		
 	}
 	
 	
 	public static  <T> Map<String, T>  toMap(Collection<T> ts){
 		
-		Map<String, T> tm=new HashMap<>();
-		
-		for(T t:ts) {
-			tm.put(t.toString(), t);
-		}
-		
-		return tm;
+		return ts.stream().collect(Collectors.toMap(t->t.toString(),t->t ));
 		
 	}
 	

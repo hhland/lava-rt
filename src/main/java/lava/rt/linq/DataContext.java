@@ -13,7 +13,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import java.util.ArrayList;
-
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -22,22 +22,23 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import lava.rt.common.ReflectCommon;
+
 import lava.rt.common.SqlCommon;
+import lava.rt.lang.BaseObject;
 
 
 
-public abstract class DataContext {
+public abstract class DataContext extends BaseObject{
 
 	public static boolean DEBUG=false;
 	
-	protected abstract Class thisClass() ;
-	
-	private final  Map<String,Field> fieldMap;
+
 	
 	private final Map<Class,Table> tableMap=new HashMap<>();
 	
 	private final Map<Class,View>  viewMap=new HashMap<>();
+	
+	private final ThreadLocal<Connection> loacalConnection=new ThreadLocal<>();
 
 	public static Logger LOGGER=new Logger() {
 		
@@ -51,20 +52,16 @@ public abstract class DataContext {
 	};
 
 	protected DataContext() {
-		fieldMap=ReflectCommon.getDeclaredFields(thisClass());
+		super();
 	}
 	
 	public DataContext(DataSource dataSource) {
-		fieldMap=ReflectCommon.getDeclaredFields(thisClass());
+		super();
 		this.dataSource=dataSource;
 	}
 	
 	private DataSource dataSource;
 	
-
-	
-	
-	protected final Map<String,String> sqlMap=new HashMap<String,String>();
 	
 	
 	
@@ -101,12 +98,12 @@ public abstract class DataContext {
 	public <M extends Entity>  List<M> executeQueryList(String sql,Class<M> cls,Object...params) throws SQLException{
 		Connection connection=getConnection();
 		List<M> list=new ArrayList<M>();
-		PreparedStatement preparedStatement= connection.prepareStatement(sql);
+		try(PreparedStatement preparedStatement= connection.prepareStatement(sql);){
 		for(int i=0;i<params.length;i++) {
 			preparedStatement.setObject(i+1,params[i] );
 		}
 		
-		ResultSet resultSet=preparedStatement.executeQuery();
+		try(ResultSet resultSet=preparedStatement.executeQuery();){
 
 		ResultSetMetaData metaData=resultSet.getMetaData();
 		Map<String,Integer> meteDataMap=new HashMap<String,Integer>();
@@ -126,11 +123,11 @@ public abstract class DataContext {
 				throw new SQLException(cls.getName()+ " can't be instance");
 			}
 			int c=0;
-			for(Iterator<String> it=view.fieldMap.keySet().iterator();c<metaData.getColumnCount()&&it.hasNext();) {
+			for(Iterator<String> it=view.entryFieldMap.keySet().iterator();c<metaData.getColumnCount()&&it.hasNext();) {
 				String columnName=it.next().toUpperCase();
 				if(!meteDataMap.containsKey(columnName))continue;
 				int columnIndex=meteDataMap.get(columnName);
-				Field field=view.fieldMap.get(columnName);
+				Field field=view.entryFieldMap.get(columnName);
 				try {
 					field.set(m, resultSet.getObject(columnIndex));
 				} catch (Exception e) {continue;}
@@ -139,7 +136,8 @@ public abstract class DataContext {
 			
 			list.add(m);
 		}
-		ReflectCommon.close(resultSet,preparedStatement);  
+		}
+	}
 		
 		return list;
 	} 
@@ -147,16 +145,15 @@ public abstract class DataContext {
     public Object[][] executeQueryArray(String sql,Object...params) throws SQLException{
     	Connection connection=getConnection();
     	Object[][] re=SqlCommon.executeQueryArray(connection, sql, params);
-		ReflectCommon.close(connection);  
+		 
 		return re;
 	} 
 	
     
 	
     public int executeUpdate(String sql,Object... param) throws SQLException{
-		Connection connection=getConnection();
-		int re=0;
-		re+=SqlCommon.executeUpdate(connection, sql, param);
+    	int re=0;
+		re+=SqlCommon.executeUpdate(getConnection(), sql, param);
 		return re;
 	} 
 	
@@ -175,7 +172,7 @@ public abstract class DataContext {
 		if(resultSet.next()) {
 				pk=resultSet.getInt(1);
 		}
-		ReflectCommon.close(resultSet,preparedStatement);
+		
 		return pk;
 	} 
 	
@@ -183,52 +180,85 @@ public abstract class DataContext {
 	public int  executeBatch(String sql,Object[]...params) throws SQLException{
 		int ret=0;
 		Connection connection=getConnection();    
-	    connection.setAutoCommit(false);
 		ret= SqlCommon.executeBatch(connection, sql, params);
-		
 		return ret;
 	} 
 	
 	
-	public <M extends Entity> int insert(M...entrys) throws SQLException{
+	public  int insert(Collection<Entity> entrys) throws SQLException{
 		int re=0;
-		if(entrys.length==0)return re;
-		for(M entry:entrys) {
-			Class cls=entry.getClass();
-			Table table= this.getTable(cls);
-			re+= table.insert(entry);
-		}
-		return re;
-	}
-	
-	public <M extends Entity> int update(M...entrys) throws SQLException{
-		int re=0;
-		if(entrys.length==0)return re;
-		for(M entry:entrys) {
-			Class cls=entry.getClass();
-			Table table= this.getTable(cls);
-			re+= table.update(entry);
-		}
+		if(entrys.size()==0)return re;
 		
+		for(Entity entry:entrys) {
+			re+= insert(entry);
+		}
 		
 		return re;
 	}
 	
-	public <M extends Entity> int delete(M...entrys) throws SQLException{
+	
+	
+	
+	public  int insert(Entity entry) throws SQLException{
 		int re=0;
-		if(entrys.length==0)return re;
-		for(M entry:entrys) {
-			Class cls=entry.getClass();
-			Table table= this.getTable(cls);
-			re+= table.delete(entry);
+		Class cls=entry.getClass();
+		Table table= this.getTable(cls);
+		re+= table.insert(entry);
+		return re;
+	}
+	
+	public  int update(Entity entry) throws SQLException{
+		int re=0;
+		
+		Class cls=entry.getClass();
+		Table table= this.getTable(cls);
+		re+= table.update(entry);
+		
+		
+		
+		return re;
+	}
+	
+	public  int update(Collection<Entity> entrys) throws SQLException{
+		int re=0;
+		
+		for(Entity entry:entrys) {
+			re+= update(entry);
+		}
+		
+		return re;
+	}
+	
+	public  int delete(Entity entry) throws SQLException{
+		int re=0;
+		
+		Class cls=entry.getClass();
+		Table table= this.getTable(cls);
+		re+= table.delete(entry);
+		
+		return re;
+	}
+	
+	public  int delete(Collection<Entity> entrys) throws SQLException{
+		int re=0;
+		
+		for(Entity entry:entrys) {
+			re+= delete(entry);
 		}
 		return re;
 	}
 	
-	public Connection getConnection() throws SQLException {
-		Connection ret=this.dataSource.getConnection();
+	public synchronized Connection getConnection() throws SQLException {
+		Connection ret=loacalConnection.get();
+		if(ret==null) {
+			ret=this.dataSource.getConnection();
+			loacalConnection.set(ret);
+		}
+		
 		return ret;
 	}
+	
+	
 	
 	protected <E extends Entity> E newEntry(Class<E> entryClass)  {
 		E ret=null;
@@ -244,7 +274,72 @@ public abstract class DataContext {
 	
      protected Object[][] callProcedure(String procName, Object... params) throws SQLException {
 	
-			return SqlCommon.callProcedure(getConnection(), procName, params);
+       	  List<Object[]> ret=new ArrayList<Object[]>();
+             StringBuffer sql =new StringBuffer();
+             sql.append("{call ").append(procName).append("(");
+             
+             String[] paramStrs=new String[params.length];
+             for(int i=0;i<paramStrs.length;i++) {
+             	
+             	
+             	   paramStrs[i]= "?";
+             	
+             	
+             }
+             sql.append(String.join(",", paramStrs));
+             
+             sql.append(")}");
+             int cc=0;
+     		 try(
+     		   CallableStatement call =  getConnection().prepareCall(sql.toString());
+     		 ){	
+     			boolean isOutputParam=false;
+     			for(int i=0;i<params.length;i++) {
+     				if(params[i] instanceof OutputParam) {
+     					OutputParam outputParam=(OutputParam)params[i];
+     					call.registerOutParameter(i+1,outputParam.sqlType);
+     					if(outputParam.value!=null) {
+     						call.setObject(i+1, outputParam.value);
+     					}
+     					isOutputParam=true;
+     				}else {
+     					call.setObject(i+1, params[i]);
+     				}
+     				
+     				
+     			}
+     			
+     			call.execute();
+     			
+     			
+     			
+     			ResultSet resultSet=call.getResultSet();
+     	  		ResultSetMetaData metaData=resultSet.getMetaData();
+     	  		cc=metaData.getColumnCount();
+     	  		while(resultSet.next()) {
+     	  			Object[] objects=new Object[cc];
+     	  			for(int i=0;i<cc;i++) {
+     	  				objects[i]=resultSet.getObject(i+1);
+     	  			}
+     	  			ret.add(objects);
+     	  		}
+     	  		
+     	     	if(isOutputParam) {
+    			 call.getMoreResults();	
+    			  for(int i=0;i<params.length;i++) {
+    				if(params[i] instanceof OutputParam) {
+    					OutputParam outputParam=(OutputParam)params[i];
+    					outputParam.result=call.getObject(i+1);
+    				 }
+    				
+    		    	}
+    			}
+     			
+     		 }
+     		return ret.toArray(new Object[ret.size()][cc]);
+     			
+              
+     	
 		     
 	 }
 	

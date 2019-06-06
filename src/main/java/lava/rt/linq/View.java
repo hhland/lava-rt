@@ -21,7 +21,7 @@ public   class  View<M extends Entity> {
 	
 	protected final String tableName;
 	protected final Class<M> entryClass;
-	protected final Map<String,Field> fieldMap;
+	protected final Map<String,Field> entryFieldMap;
 	
 	
 	
@@ -29,8 +29,8 @@ public   class  View<M extends Entity> {
 		this.dataContext=dataContext;
 		this.tableName=tableName;
 		this.entryClass=entryClass;
-		this.fieldMap=ReflectCommon.getDeclaredFields(entryClass);
-		fieldMap.forEach((k,v)->v.setAccessible(true));
+		this.entryFieldMap=ReflectCommon.getDeclaredFields(entryClass);
+		entryFieldMap.forEach((k,v)->v.setAccessible(true));
 		
 		
 	}
@@ -94,8 +94,15 @@ public   class  View<M extends Entity> {
 
 	@Override
 	public String toString() {
-		return tableName;
+		return "View [tableName=" + tableName + ", entryClass=" + entryClass + "]";
 	}
+
+
+
+
+
+
+	
 	
 	
 	

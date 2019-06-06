@@ -1,28 +1,19 @@
 package lava.rt.common;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Types;
-import java.text.MessageFormat;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import lava.rt.linq.OutputParam;
+
 import lava.rt.sqlparser.SingleSqlParserFactory;
 import lava.rt.sqlparser.SqlSegment;
 
@@ -33,7 +24,7 @@ public class SqlCommon {
 	public static int executeBatch(Connection connection,String sql,Object[]... params) throws SQLException{
 		
 		int re=0;
-		PreparedStatement preparedStatement= connection.prepareStatement(sql);
+		try(PreparedStatement preparedStatement= connection.prepareStatement(sql);){
 		
 		for(Object[] param :params) {
 			for(int i=0;i<param.length;i++) {
@@ -46,7 +37,25 @@ public class SqlCommon {
 		for(int i:res) {
 			re+=i;
 		}
-		ReflectCommon.close(preparedStatement);
+		}
+		
+		return re;
+	} 
+	
+    public static int executeBatch(Connection connection,String[] sqls) throws SQLException{
+		
+		int re=0;
+		try(Statement statement= connection.createStatement();){
+		
+		for(String sql :sqls) {
+			statement.addBatch(sql);
+			re++;
+		}
+		int[] res= statement.executeBatch();
+		for(int i:res) {
+			re+=i;
+		  }
+		}
 		
 		return re;
 	} 
@@ -54,14 +63,15 @@ public class SqlCommon {
       public static int executeUpdate(Connection connection,String sql,Object...params) throws SQLException{
 		
 		int re=0;
-		PreparedStatement preparedStatement= connection.prepareStatement(sql);
+		try(PreparedStatement preparedStatement= connection.prepareStatement(sql);){
 		
 			for(int i=0;i<params.length;i++) {
 				preparedStatement.setObject(i+1, params[i]);
 			}
 			
 		re= preparedStatement.executeUpdate();
-		ReflectCommon.close(preparedStatement);
+		}
+		
 		return re;
 	} 
       
@@ -75,15 +85,15 @@ public class SqlCommon {
       
       
       public static Object[][] executeQueryArray(Connection connection,String sql,Object...params) throws SQLException{
-      	
+    	int cc=0;
   		List<Object[]> list=new ArrayList<Object[]>();
-  		PreparedStatement preparedStatement= connection.prepareStatement(sql);
+  		try(PreparedStatement preparedStatement= connection.prepareStatement(sql)){
   		for(int i=0;i<params.length;i++) {
   			preparedStatement.setObject(i+1,params[i] );
   		}
-  		ResultSet resultSet=preparedStatement.executeQuery();
+  		 try(ResultSet resultSet=preparedStatement.executeQuery();){
   		ResultSetMetaData metaData=resultSet.getMetaData();
-  		int cc=metaData.getColumnCount();
+  		 cc=metaData.getColumnCount();
   		while(resultSet.next()) {
   			Object[] objects=new Object[cc];
   			for(int i=0;i<cc;i++) {
@@ -91,19 +101,22 @@ public class SqlCommon {
   			}
   			list.add(objects);
   		}
-  		ReflectCommon.close(resultSet,preparedStatement);  
-  		return list.toArray(new Object[list.size()][cc]);
+  		 }
+  		}
+  		  
+		return list.toArray(new Object[list.size()][cc]);
   	} 
       
       
       public static List<Map<String, Object>> executeQueryListMap(Connection connection, String sql, Object... params) throws SQLException {
 
   		List<Map<String, Object>> list = new ArrayList<>();
-  		PreparedStatement preparedStatement = connection.prepareStatement(sql);
+  		try(
+  		PreparedStatement preparedStatement = connection.prepareStatement(sql);){
   		for (int i = 0; i < params.length; i++) {
   			preparedStatement.setObject(i + 1, params[i]);
   		}
-  		ResultSet resultSet = preparedStatement.executeQuery();
+  		  try(ResultSet resultSet = preparedStatement.executeQuery();){
   		ResultSetMetaData metaData = resultSet.getMetaData();
   		int cc = metaData.getColumnCount();
   		Map<String, Object> rowMap = null;
@@ -114,7 +127,9 @@ public class SqlCommon {
   			}
   			list.add(rowMap);
   		}
-  		ReflectCommon.close(resultSet, preparedStatement);
+  		  }
+  		}
+  		
   		return list;
   	}
 	
@@ -127,73 +142,7 @@ public class SqlCommon {
     		return re;
     	  }
       
-      public static Object[][] callProcedure(Connection connection,String procName, Object... params) throws SQLException {
-    	  List<Object[]> ret=new ArrayList<Object[]>();
-          StringBuffer sql =new StringBuffer();
-          sql.append("{call ").append(procName).append("(");
-          
-          String[] paramStrs=new String[params.length];
-          for(int i=0;i<paramStrs.length;i++) {
-          	
-          	
-          	   paramStrs[i]= "?";
-          	
-          	
-          }
-          sql.append(String.join(",", paramStrs));
-          
-          sql.append(")}");
-          int cc=0;
-  		 try(
-  		   CallableStatement call =  connection.prepareCall(sql.toString());
-  		 ){	
-  			boolean isOutputParam=false;
-  			for(int i=0;i<params.length;i++) {
-  				if(params[i] instanceof OutputParam) {
-  					OutputParam outputParam=(OutputParam)params[i];
-  					call.registerOutParameter(i+1,outputParam.sqlType);
-  					if(outputParam.value!=null) {
-  						call.setObject(i+1, outputParam.value);
-  					}
-  					isOutputParam=true;
-  				}else {
-  					call.setObject(i+1, params[i]);
-  				}
-  				
-  				
-  			}
-  			
-  			call.execute();
-  			
-  			
-  			
-  			ResultSet resultSet=call.getResultSet();
-  	  		ResultSetMetaData metaData=resultSet.getMetaData();
-  	  		cc=metaData.getColumnCount();
-  	  		while(resultSet.next()) {
-  	  			Object[] objects=new Object[cc];
-  	  			for(int i=0;i<cc;i++) {
-  	  				objects[i]=resultSet.getObject(i+1);
-  	  			}
-  	  			ret.add(objects);
-  	  		}
-  	  		
-  	     	if(isOutputParam) {
- 			 call.getMoreResults();	
- 			  for(int i=0;i<params.length;i++) {
- 				if(params[i] instanceof OutputParam) {
- 					OutputParam outputParam=(OutputParam)params[i];
- 					outputParam.result=call.getObject(i+1);
- 				 }
- 				
- 		    	}
- 			}
-  			
-  		 }
-  		return ret.toArray(new Object[ret.size()][cc]);
-  			
-           
-  	}
+      
       
       
       

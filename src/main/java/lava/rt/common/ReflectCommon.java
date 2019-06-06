@@ -144,18 +144,7 @@ public class ReflectCommon {
     
     
     
-    public static void close(Object...objs) {
-    	for(Object obj :objs) {
-    		try {
-				obj.getClass().getMethod("close").invoke(obj);
-			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
-					| NoSuchMethodException | SecurityException e) {
-				// TODO Auto-generated catch block
-				  
-			}
-    	}
-    }
-    
+   
     
     public static Object invoke(Object target,String methodName,Object...params) throws Exception {
 		Object ret=null;

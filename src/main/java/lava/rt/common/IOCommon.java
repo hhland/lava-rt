@@ -52,7 +52,7 @@ public class IOCommon {
 	      while ((line = in.readLine()) != null) {
 	        result += line; 
 	      }
-	      ReflectCommon.close(in);
+	      
 	      return result;
 	  }
 	 
@@ -87,7 +87,7 @@ public class IOCommon {
 	      while ((line = in.readLine()) != null) {
 	        result += line;
 	      }
-	      ReflectCommon.close(out,in);
+	    
 	    return result;
 	  }  
 	  

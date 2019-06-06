@@ -286,7 +286,14 @@ public abstract class DataContext extends LangObject{
 		return re.get();
 	}
 	
-	public synchronized Connection getConnection() throws SQLException {
+	public void resetConnection() throws SQLException {
+		
+		Connection ret=this.dataSource.getConnection();
+		loacalConnection.set(ret);
+		
+	}
+	
+     protected  Connection getConnection() throws SQLException {
 		Connection ret=loacalConnection.get();
 		if(ret==null) {
 			ret=this.dataSource.getConnection();

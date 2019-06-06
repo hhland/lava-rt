@@ -14,7 +14,7 @@ public abstract class LangObject {
 
 	protected final Map<String,Field> fieldMap=ReflectCommon.allDeclaredFieldMap(thisClass());
 	
-	protected static final  UnsafeAdapter unsafeAdapter=new UnsafeAdapter();
+	
 	
 	@Override
 	public String toString() {
@@ -41,22 +41,4 @@ public abstract class LangObject {
 	}
 
 	
-	public   boolean compareAndSwapObject(String fieldName, Object value) throws Exception {
-	     
-		 boolean ret=false;
-		 ret=unsafeAdapter.compareAndSwapObject(this, fieldMap.get(fieldName),value);
-		 return ret;
-	}
-	
-	public   boolean compareAndSwapInt(String fieldName, int value) throws Exception {
-		 boolean ret=false;
-		 ret=unsafeAdapter.compareAndSwapInt(this, fieldMap.get(fieldName),value);
-		 return ret;
-	}
-	
-	public   boolean compareAndSwapLong(String fieldName, long value) throws Exception {
-		boolean ret=false;
-		 ret=unsafeAdapter.compareAndSwapLong(this, fieldMap.get(fieldName),value);
-		 return ret;
-	}
 }

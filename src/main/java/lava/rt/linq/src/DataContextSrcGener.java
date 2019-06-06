@@ -400,6 +400,7 @@ public abstract class DataContextSrcGener   {
 			for(int type:types) {
 				sqlTypes.add(type);
 			}
+			
 		}
 		
 		public static Class toClass(int type) {

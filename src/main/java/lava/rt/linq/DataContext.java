@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import javax.sql.DataSource;
@@ -187,16 +189,23 @@ public abstract class DataContext extends LangObject{
 	} 
 	
 	
-	public  int insert(Collection<Entity> entrys) throws SQLException{
-		int re=0;
-		if(entrys.size()==0)return re;
+	public  int insert(Collection<? extends Entity> entrys) throws SQLException{
+		AtomicInteger re=new AtomicInteger(0);
+		AtomicReference<SQLException> sex=new AtomicReference<>();
 		
-		for(Entity entry:entrys) {
-			 re+=insert(entry);	
-			
+		entrys.parallelStream().forEach(entry->{
+			try {
+				re.getAndAdd(insert(entry));
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+			    sex.set(e);	
+			}
+		});
+		if(sex.get()!=null) {
+			throw sex.get();
 		}
 		
-		return re;
+		return re.get();
 	}
 	
 	
@@ -212,7 +221,7 @@ public abstract class DataContext extends LangObject{
 		   re+= table.insert(entry);
 		   
 		}else {
-		   re+= table.insertWithoutPk();
+		   re+= table.insertWithoutPk(entry);
 		}
 		entry._updateTime=now();
 		return re;
@@ -230,14 +239,23 @@ public abstract class DataContext extends LangObject{
 		return re;
 	}
 	
-	public  int update(Collection<Entity> entrys) throws SQLException{
-		int re=0;
+	public  int update(Collection<? extends Entity> entrys) throws SQLException{
+		AtomicInteger re=new AtomicInteger(0);
+		AtomicReference<SQLException> sex=new AtomicReference<>();
 		
-		for(Entity entry:entrys) {
-			re+= update(entry);
+		entrys.parallelStream().forEach(entry->{
+			try {
+				re.getAndAdd(update(entry));
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				sex.set(e);
+			}
+		});
+		if(sex.get()!=null) {
+			throw sex.get();
 		}
 		
-		return re;
+		return re.get();
 	}
 	
 	public  int delete(Entity entry) throws SQLException{
@@ -250,13 +268,22 @@ public abstract class DataContext extends LangObject{
 		return re;
 	}
 	
-	public  int delete(Collection<Entity> entrys) throws SQLException{
-		int re=0;
+	public  int delete(Collection<? extends Entity> entrys) throws SQLException{
+		AtomicInteger re=new AtomicInteger(0);
+		AtomicReference<SQLException> sex=new AtomicReference<>();
 		
-		for(Entity entry:entrys) {
-			re+= delete(entry);
+		entrys.parallelStream().forEach(entry->{
+			try {
+				re.getAndAdd(delete(entry));
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				sex.set(e);
+			}
+		});
+		if(sex.get()!=null) {
+			throw sex.get();
 		}
-		return re;
+		return re.get();
 	}
 	
 	public synchronized Connection getConnection() throws SQLException {
@@ -271,7 +298,7 @@ public abstract class DataContext extends LangObject{
 	
 	
 	
-	protected <E extends Entity> E newEntry(Class<E> entryClass)  {
+	public <E extends Entity> E newEntry(Class<E> entryClass)  {
 		E ret=null;
 		try {
 		

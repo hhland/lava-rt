@@ -12,7 +12,7 @@ public abstract class LangObject {
 	
 	protected abstract Class<? extends LangObject> thisClass();
 
-	protected final Map<String,Field> fieldMap=ReflectCommon.getDeclaredFieldMap(thisClass());
+	protected final Map<String,Field> fieldMap=ReflectCommon.allDeclaredFieldMap(thisClass());
 	
 	protected static final  UnsafeAdapter unsafeAdapter=new UnsafeAdapter();
 	
@@ -22,11 +22,12 @@ public abstract class LangObject {
 		sbr.append(" [");
 		
 		for(java.util.Map.Entry<String, Field> ent: fieldMap.entrySet()) {
-			String val="null";
+			Object val="null";
 			try {
-				ent.getValue().setAccessible(true);
-				val = ent.getValue().get(this).toString();
-			} catch (IllegalArgumentException | IllegalAccessException e) {}
+				Field field=ent.getValue();
+				field.setAccessible(true);
+				val = field.get(this);
+			} catch (Exception e) {}
 			sbr
 			.append(ent.getKey())
 			.append("=")

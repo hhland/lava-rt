@@ -29,10 +29,12 @@ public   class  View<M extends Entity> {
 		this.dataContext=dataContext;
 		this.tableName=tableName;
 		this.entryClass=entryClass;
-		this.entryFieldMap=ReflectCommon.getDeclaredFieldMap(entryClass);
+		this.entryFieldMap=ReflectCommon.theDeclaredFieldMap(entryClass);
+		
+		
 		entryFieldMap.forEach((k,v)->v.setAccessible(true));
 		
-		
+		 
 	}
 	
 	

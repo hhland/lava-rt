@@ -308,6 +308,7 @@ public abstract class DataContextSrcGener   {
 	    	
 	    	.append(" {\n\n")
 	    	//.append("\t\t private static final long serialVersionUID = 1L; ")
+	    	//.append("\t public "+className+"(){ super(); }")
 	    	.append("\n\n")
 	    	.append(this.genColsSrc())
 	    	.append("\n\n")
@@ -326,7 +327,7 @@ public abstract class DataContextSrcGener   {
 			//.append("\t\tpublic boolean equals(Object obj) {return this.toString().equals(obj.toString());} \n\n")
 			.append("\n\n")
 			.append("\t\t@"+Override.class.getSimpleName()+"\n")
-			.append("\t\tpublic Class<? extends Entry> thisClass() {return this.getClass() ;}")
+			.append("\t\tpublic Class<? extends "+Entity.class.getSimpleName()+"> thisClass() {return this.getClass() ;}")
 		    ;
 			if(pkName!=null) {
 			//src.append("\n\n").append("\t\t@"+Override.class.getSimpleName()+"\n")
@@ -430,12 +431,17 @@ public abstract class DataContextSrcGener   {
 	}
 	
 	public static String toClassName(String name) {
-		String ret="";
+		StringBuffer ret=new StringBuffer("");
 		for(String _colName:name.split("_")) {
-			ret+=_colName.substring(0, 1).toUpperCase()+_colName.substring(1).toLowerCase();
+			ret
+			.append(_colName.substring(0, 1).toUpperCase())
+			.append(_colName.substring(1).toLowerCase());
 			
 		}
-		return ret;
+		if(name.endsWith("_")) {
+			ret.append("_");
+		}
+		return ret.toString();
 	}
 	
 }

@@ -15,11 +15,6 @@ public abstract class Entity extends LangObject {
      
      
      
-     Entity(){
-    	 
-    	 this.fieldMap.remove("_createTime");
-    	 this.fieldMap.remove("_updateTime");
-     }
 
 
 	@Override

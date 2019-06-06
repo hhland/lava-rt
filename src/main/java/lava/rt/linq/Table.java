@@ -7,6 +7,9 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 
 import lava.rt.common.ReflectCommon;
 import lava.rt.common.TextCommon;
@@ -143,33 +146,37 @@ public class Table<M extends Entity> extends View<M> {
 	}
 
 	public <E extends M> int insertWithoutPk(E... entrys) throws SQLException {
-
+        AtomicInteger re=new AtomicInteger(0);
+        AtomicReference<SQLException> sex=new AtomicReference<>();
 		String sql=sqlInsertWithoutPk;
 		if (dataContext.DEBUG) {
 			dataContext.LOGGER.log(this.entryClass, sql);
 		}
-		int re = 0, insertsize = insertFields.length;
+		int insertsize = insertFields.length;
 
 		Object[] param = new Object[insertsize];
 
-		for(E entry:entrys) {
-		int pk = 0;
-		try {
-			for (int j = 0; j < insertsize; j++) {
-				Field field = insertFields[j];
-				param[j] = field.get(entry);
-			}
-			pk = dataContext.executeInsertReturnPk(sql, param);
-			pkField.set(entry, pk);
+		Stream.of(entrys).parallel().forEach(entry->{
+			try {
+				for (int j = 0; j < insertsize; j++) {
+					Field field = insertFields[j];
+					param[j] = field.get(entry);
+				}
+				int pk = dataContext.executeInsertReturnPk(sql, param);
+				pkField.set(entry, pk);
+			    re.getAndIncrement();
+			} catch (Exception se) {
+				SQLException nse = new SQLException(se.getMessage() + "\n" + sql);
+				sex.set(nse);
+			} 
+		});
 		
-		} catch (SQLException se) {
-			SQLException nse = new SQLException(se.getMessage() + "\n" + sql);
-			throw nse;
-		} catch (Exception e) {
-			throw new SQLException(e);
+		if(sex.get()!=null) {
+			throw sex.get();
 		}
-		}
-		return re;
+		
+		
+		return re.get();
 
 	}
 
@@ -238,10 +245,10 @@ public class Table<M extends Entity> extends View<M> {
 		return re;
 	}
 
-	public <E extends M> Object getPk(E entry) {
-		Object ret = null;
+	public <E extends M,R> R getPk(E entry) {
+		R ret = null;
 		try {
-			ret = pkField.get(entry);
+			ret = (R)pkField.get(entry);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 		}
 		return ret;

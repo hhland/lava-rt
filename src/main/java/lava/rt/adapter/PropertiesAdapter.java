@@ -30,7 +30,7 @@ public class PropertiesAdapter extends BaseAdapter<Properties>{
 	protected  float load(Class cls,Object object) {
 		float re=0,total=_this.size();
 		
-		Map<String,Field> keyFields=ReflectCommon.getDeclaredFields(cls);
+		Map<String,Field> keyFields=ReflectCommon.getDeclaredFieldMap(cls);
 		
 		for(Iterator<Object> it=_this.keySet().iterator();it.hasNext();) {
 			String key=it.next().toString();
@@ -120,7 +120,7 @@ public class PropertiesAdapter extends BaseAdapter<Properties>{
     	StringBuffer ret=new StringBuffer("");
     	for(Class cls :clss) {
     	
-    		Map<String,Field> keyFields=ReflectCommon.getDeclaredFields(cls);
+    		Map<String,Field> keyFields=ReflectCommon.getDeclaredFieldMap(cls);
     	    for(Entry<String, Field> ent: keyFields.entrySet()) {
     	    	ret
     	    	.append(cls.getName())

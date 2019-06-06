@@ -5,13 +5,13 @@ import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.Map;
 
+import lava.rt.base.LangObject;
 import lava.rt.common.ReflectCommon;
-import lava.rt.lang.BaseObject;
 
-public abstract class Entity extends BaseObject {
+public abstract class Entity extends LangObject {
 
 	
-     public Date _createTime,_updateTime;
+     protected Date _createTime,_updateTime;
      
      
      Entity(){
@@ -28,7 +28,19 @@ public abstract class Entity extends BaseObject {
 		return ret;
 		
 	}
+
+
+	public Date get_createTime() {
+		return _createTime;
+	}
+
+
+	public Date get_updateTime() {
+		return _updateTime;
+	}
      
      
-     
+    
+	
+	
 }

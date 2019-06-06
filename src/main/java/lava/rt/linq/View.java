@@ -29,7 +29,7 @@ public   class  View<M extends Entity> {
 		this.dataContext=dataContext;
 		this.tableName=tableName;
 		this.entryClass=entryClass;
-		this.entryFieldMap=ReflectCommon.getDeclaredFields(entryClass);
+		this.entryFieldMap=ReflectCommon.getDeclaredFieldMap(entryClass);
 		entryFieldMap.forEach((k,v)->v.setAccessible(true));
 		
 		

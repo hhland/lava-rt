@@ -21,7 +21,7 @@ import java.util.stream.Stream;
 import sun.misc.Unsafe;
 
 @SuppressWarnings("restriction")
-public class ReflectCommon {
+public final class ReflectCommon {
 
 	
 	
@@ -29,19 +29,7 @@ public class ReflectCommon {
 	
 	
 	
-    public static Unsafe getUnsafe() {
-    	Unsafe ret=null;
-		try {
-			Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
-			theUnsafe.setAccessible(true);
-	        ret= (Unsafe) theUnsafe.get(null);
-		} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-        
-        return ret;
-    }
+    
 	
 
 	
@@ -85,10 +73,10 @@ public class ReflectCommon {
    
     
     
-    public static Map<String,Method> getMethods(Class cls){
+    public static Map<String,Method> getMethodMap(Class cls){
     	Map<String,Method> fieldMap=new HashMap<>();
     	
-    	for(Class cl :getClasses(cls).values()) {
+    	for(Class cl :getClassMap(cls).values()) {
     		Method[] fields=cl.getMethods();
     		Stream.of(fields).filter(f-> !fieldMap.containsKey(f.getName()))
     		.forEach(f->fieldMap.put(f.getName(), f) );    		
@@ -96,10 +84,10 @@ public class ReflectCommon {
     	return fieldMap;
     }
     
-    public static Map<String,Method> getDeclaredMethods(Class cls){
+    public static Map<String,Method> getDeclaredMethodMap(Class cls){
     	Map<String,Method> fieldMap=new HashMap<>();
     	
-    	for(Class cl:getClasses(cls).values()) {
+    	for(Class cl:getClassMap(cls).values()) {
     		Method[] fields=cl.getDeclaredMethods();
     		Stream.of(fields).filter(f-> !fieldMap.containsKey(f.getName()))
     		.forEach(f->fieldMap.put(f.getName(), f) );    		
@@ -108,10 +96,10 @@ public class ReflectCommon {
     }
     
     
-    public static Map<String,Field> getFields(Class cls){
+    public static Map<String,Field> getFieldMap(Class cls){
     	Map<String,Field> fieldMap=new HashMap<String,Field>();
     	
-    	for(Class cl :getClasses(cls).values()) {
+    	for(Class cl :getClassMap(cls).values()) {
     		Field[] fields=cl.getFields();
     		Stream.of(fields).filter(f-> !fieldMap.containsKey(f.getName()))
     		.forEach(f->fieldMap.put(f.getName(), f) );    		
@@ -119,10 +107,10 @@ public class ReflectCommon {
     	return fieldMap;
     }
     
-    public static Map<String,Field> getDeclaredFields(Class cls){
+    public static Map<String,Field> getDeclaredFieldMap(Class cls){
     	Map<String,Field> fieldMap=new HashMap<String,Field>();
     	
-    	for(Class cl:getClasses(cls).values()) {
+    	for(Class cl:getClassMap(cls).values()) {
     		Field[] fields=cl.getDeclaredFields();
     		Stream.of(fields).filter(f-> !fieldMap.containsKey(f.getName()))
     		.forEach(f->fieldMap.put(f.getName(), f) );    		
@@ -131,7 +119,7 @@ public class ReflectCommon {
     }
     
     
-    public static Map<String,Class> getClasses(Class cls){
+    public static Map<String,Class> getClassMap(Class cls){
     	Map<String,Class> re=new HashMap<String,Class>();
     	
     	for(Class cl=cls;!Object.class.equals(cl);cl=cl.getSuperclass()) {
@@ -161,7 +149,7 @@ public class ReflectCommon {
 	}
     
     
-    public static Map<String,Class<?>> getClasses(Package pack) {
+    public static Map<String,Class<?>> getClassMap(Package pack) {
 
 		// 第一个class类的集合
 		//Set<Class<?>> classes = new LinkedHashSet<Class<?>>();

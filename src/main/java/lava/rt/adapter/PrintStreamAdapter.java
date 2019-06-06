@@ -9,8 +9,8 @@ public class PrintStreamAdapter extends BaseAdapter<PrintStream>{
 	
 
 	
-	public PrintStreamAdapter(PrintStream _this) {
-		super(_this);
+	public PrintStreamAdapter(PrintStream printStream) {
+		super(printStream);
 		// TODO Auto-generated constructor stub
 	}
 

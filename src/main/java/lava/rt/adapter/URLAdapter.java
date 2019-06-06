@@ -10,8 +10,8 @@ import java.util.Map.Entry;
 
 public class URLAdapter extends BaseAdapter<URL>{
 
-	public URLAdapter(URL _this) {
-		super(_this);
+	public URLAdapter(URL url) {
+		super(url);
 		// TODO Auto-generated constructor stub
 	}
 

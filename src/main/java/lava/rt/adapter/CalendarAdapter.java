@@ -6,11 +6,14 @@ import java.util.Date;
 public class CalendarAdapter extends BaseAdapter<Calendar> {
 
 	
-
+	public CalendarAdapter() {
+   	 super( Calendar.getInstance());
+		
+	}
 	
 	
-	public CalendarAdapter(Calendar _this) {
-		super(_this);
+	public CalendarAdapter(Calendar calendar) {
+		super(calendar);
 		// TODO Auto-generated constructor stub
 	}
 	

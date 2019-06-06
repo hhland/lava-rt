@@ -24,13 +24,12 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-
+import lava.rt.base.LangObject;
 import lava.rt.common.SqlCommon;
-import lava.rt.lang.BaseObject;
 
 
 
-public abstract class DataContext extends BaseObject{
+public abstract class DataContext extends LangObject{
 
 	public static boolean DEBUG=false;
 	

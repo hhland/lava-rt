@@ -1,4 +1,4 @@
-package lava.rt.lang;
+package lava.rt.base;
 
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -6,12 +6,12 @@ import java.util.Map;
 import lava.rt.common.ReflectCommon;
 
 
-public abstract class BaseObject {
+public abstract class LangObject {
 
 	
-	protected abstract Class<? extends BaseObject> thisClass();
+	protected abstract Class<? extends LangObject> thisClass();
 
-	protected final Map<String,Field> fieldMap=ReflectCommon.getDeclaredFields(thisClass());
+	protected final Map<String,Field> fieldMap=ReflectCommon.getDeclaredFieldMap(thisClass());
 	
 	@Override
 	public String toString() {
@@ -21,6 +21,7 @@ public abstract class BaseObject {
 		for(java.util.Map.Entry<String, Field> ent: fieldMap.entrySet()) {
 			String val="null";
 			try {
+				ent.getValue().setAccessible(true);
 				val = ent.getValue().get(this).toString();
 			} catch (IllegalArgumentException | IllegalAccessException e) {}
 			sbr

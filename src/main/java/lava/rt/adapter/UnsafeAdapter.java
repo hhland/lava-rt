@@ -15,6 +15,8 @@ public class UnsafeAdapter extends BaseAdapter<Unsafe>{
 	public UnsafeAdapter(Unsafe unsafe) {
 		super(unsafe);
 		// TODO Auto-generated constructor stub
+		
+	   
 	}
 
 	
@@ -31,6 +33,55 @@ public class UnsafeAdapter extends BaseAdapter<Unsafe>{
 		}
         
         return ret;
+        
+        
     }
+	
+	
+	
+	public   boolean compareAndSwapObject(Object obj,String fieldName, Object value) throws Exception {
+	     Field field=obj.getClass().getDeclaredField(fieldName);
+		 
+	     return compareAndSwapObject(obj, field, value);
+	}
+	
+	public   boolean compareAndSwapInt(Object obj,String fieldName, int value) throws Exception {
+	     Field field=obj.getClass().getDeclaredField(fieldName);
+		
+	     
+	     return compareAndSwapInt(obj, field, value);
+	}
+	
+	public   boolean compareAndSwapLong(Object obj,String fieldName, long value) throws Exception {
+	     Field field=obj.getClass().getDeclaredField(fieldName);
+		 
+	     
+	     return compareAndSwapLong(obj, field, value);
+	}
+	
+	
+	public   boolean compareAndSwapObject(Object obj,Field field, Object value) throws Exception {
+	     
+		 long fieldOffset=_this.objectFieldOffset(field);
+	     
+	     return _this.compareAndSwapObject(obj, fieldOffset, field.get(obj), value);
+	}
+	
+	public   boolean compareAndSwapInt(Object obj,Field field, int value) throws Exception {
+	    
+		 long fieldOffset=_this.objectFieldOffset(field);
+	     
+	     return _this.compareAndSwapInt(obj, fieldOffset, (int)field.get(obj), value);
+	}
+	
+	public   boolean compareAndSwapLong(Object obj,Field field, long value) throws Exception {
+	     
+		 long fieldOffset=_this.objectFieldOffset(field);
+	     
+	     return _this.compareAndSwapLong(obj, fieldOffset,(long)field.get(obj), value);
+	}
+
+	
+	
 	
 }

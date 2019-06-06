@@ -14,6 +14,7 @@ public abstract class Entity extends LangObject {
      protected Date _createTime,_updateTime;
      
      
+     
      Entity(){
     	 
     	 this.fieldMap.remove("_createTime");

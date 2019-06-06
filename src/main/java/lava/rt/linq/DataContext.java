@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
+import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 
@@ -69,6 +69,7 @@ public abstract class DataContext extends LangObject{
 	public  <M extends Entity> Table<M>  createTable(Class<M> cls,String tableName,String pkName){
 		Table<M> table=new Table<M>(this, cls,tableName, pkName);
 		tableMap.put(cls, table);
+		viewMap.put(cls, table);
 		return table;
 	}
 	
@@ -98,6 +99,8 @@ public abstract class DataContext extends LangObject{
 	
 	public <M extends Entity>  List<M> executeQueryList(String sql,Class<M> cls,Object...params) throws SQLException{
 		Connection connection=getConnection();
+		
+		
 		List<M> list=new ArrayList<M>();
 		try(PreparedStatement preparedStatement= connection.prepareStatement(sql);){
 		for(int i=0;i<params.length;i++) {
@@ -113,10 +116,8 @@ public abstract class DataContext extends LangObject{
 			meteDataMap.put(key, i);
 		}
 		
-		View<M> view=getTable(cls);
-		if(view==null) {
-			view=getView(cls);
-		}
+		View<M> view=getView(cls);
+		
 		while(resultSet.next()) {
 			M m = newEntry(cls);
 			

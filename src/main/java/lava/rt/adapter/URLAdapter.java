@@ -1,23 +1,22 @@
-package lava.rt.common;
+package lava.rt.adapter;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+public class URLAdapter extends BaseAdapter<URL>{
 
+	public URLAdapter(URL _this) {
+		super(_this);
+		// TODO Auto-generated constructor stub
+	}
 
-
-
-public class IOCommon {
-
+	
+	
 	protected static String toQueryString( Map<String, Object> paramMap) {
 		
 		 String ret="";
@@ -31,12 +30,12 @@ public class IOCommon {
 		return ret;
 	}
 	
-	public static String get(String url) throws Exception{
+	public String get() throws Exception{
 	    String result = "";
 	    BufferedReader in = null;
 	    
-	      String urlNameString = url ;
-	      URL realUrl = new URL(urlNameString);
+	      
+	      URL realUrl = _this;
 	      
 	      URLConnection connection = realUrl.openConnection();
 	  
@@ -57,13 +56,13 @@ public class IOCommon {
 	  }
 	 
 	 
-	  public static String post(String url, Map<String, Object> paramMap)throws Exception {
+	  public String post(Map<String, Object> paramMap)throws Exception {
 		
 	    PrintWriter out = null;
 	    BufferedReader in = null;
 	    String result = "";
 	    
-	      URL realUrl = new URL(url);
+	      URL realUrl = _this;
 	    
 	      URLConnection conn = realUrl.openConnection();
 	     
@@ -91,10 +90,6 @@ public class IOCommon {
 	    return result;
 	  }  
 	  
-	  
-	 
-
-
-
-		 
+	
+	
 }

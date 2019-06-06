@@ -1,33 +1,40 @@
-package lava.rt.common;
+package lava.rt.adapter;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Map.Entry;
 
-public class PropertiesCommon {
+import lava.rt.common.ReflectCommon;
+
+public class PropertiesAdapter extends BaseAdapter<Properties>{
 
 	
 	
-	public static float load(Properties properties,Object object) {
-		return load(properties, object.getClass(),object);
+
+	public PropertiesAdapter(Properties properties) {
+		super(properties);
 	}
 	
-	public static float load(Properties properties,Class cls) {
+	
+	public  float load(Object object) {
+		return load( object.getClass(),object);
+	}
+	
+	public  float load(Class cls) {
 		
-		return load(properties,cls,null);
+		return load(cls,null);
 	}
 	
-	protected static float load(Properties properties,Class cls,Object object) {
-		float re=0,total=properties.size();
+	protected  float load(Class cls,Object object) {
+		float re=0,total=_this.size();
 		
 		Map<String,Field> keyFields=ReflectCommon.getDeclaredFields(cls);
 		
-		for(Iterator<Object> it=properties.keySet().iterator();it.hasNext();) {
+		for(Iterator<Object> it=_this.keySet().iterator();it.hasNext();) {
 			String key=it.next().toString();
-			String value=properties.getProperty(key);
+			String value=_this.getProperty(key);
 			
 			if(keyFields.containsKey(key)) {
 				Field field=keyFields.get(key);
@@ -49,12 +56,12 @@ public class PropertiesCommon {
 	}
 	
 	
-	public static int injection(Properties properties) {
-        int re=0,total=properties.size();
+	public  int injection() {
+        int re=0,total=_this.size();
         
-        for(Iterator<Object> it=properties.keySet().iterator();it.hasNext();) {
+        for(Iterator<Object> it=_this.keySet().iterator();it.hasNext();) {
         	String key=it.next().toString();
-        	String value= properties.get(key).toString();
+        	String value= _this.get(key).toString();
         	
         	String fieldName=key.substring(key.lastIndexOf(".")+1)
         			,className=key.substring(0,key.length()-fieldName.length()-1)
@@ -124,5 +131,5 @@ public class PropertiesCommon {
     	}
     	return ret.toString();
     }
-    
+	
 }

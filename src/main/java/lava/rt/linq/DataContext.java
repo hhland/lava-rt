@@ -13,7 +13,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -190,7 +192,8 @@ public abstract class DataContext extends BaseObject{
 		if(entrys.size()==0)return re;
 		
 		for(Entity entry:entrys) {
-			re+= insert(entry);
+			 re+=insert(entry);	
+			
 		}
 		
 		return re;
@@ -199,11 +202,19 @@ public abstract class DataContext extends BaseObject{
 	
 	
 	
+	@SuppressWarnings("unchecked")
 	public  int insert(Entity entry) throws SQLException{
 		int re=0;
-		Class cls=entry.getClass();
+		Class<? extends Entity> cls=entry.getClass();
 		Table table= this.getTable(cls);
-		re+= table.insert(entry);
+		boolean hasPk=table.getPk(entry)!=null;
+		if(hasPk) {
+		   re+= table.insert(entry);
+		   
+		}else {
+		   re+= table.insertWithoutPk();
+		}
+		entry._updateTime=now();
 		return re;
 	}
 	
@@ -213,7 +224,7 @@ public abstract class DataContext extends BaseObject{
 		Class cls=entry.getClass();
 		Table table= this.getTable(cls);
 		re+= table.update(entry);
-		
+		entry._updateTime=now();
 		
 		
 		return re;
@@ -265,6 +276,7 @@ public abstract class DataContext extends BaseObject{
 		try {
 		
 			ret=(E)entryClass.getConstructors()[0].newInstance(this);
+			ret._createTime=now();
 		} catch (Exception e) {
 			e.printStackTrace();
 			
@@ -272,7 +284,12 @@ public abstract class DataContext extends BaseObject{
 		return ret;
 	}
 	
-     protected Object[][] callProcedure(String procName, Object... params) throws SQLException {
+     protected static Date now() {
+		// TODO Auto-generated method stub
+		return Calendar.getInstance().getTime();
+	}
+
+	protected Object[][] callProcedure(String procName, Object... params) throws SQLException {
 	
        	  List<Object[]> ret=new ArrayList<Object[]>();
              StringBuffer sql =new StringBuffer();

@@ -2,7 +2,7 @@ package lava.rt.linq;
 
 
 
-import java.lang.reflect.Constructor;
+
 import java.lang.reflect.Field;
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -22,12 +22,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Stream;
+
 
 import javax.sql.DataSource;
 
 import lava.rt.base.LangObject;
 import lava.rt.common.SqlCommon;
+import lava.rt.logging.Log;
+import lava.rt.logging.LogFactory;
 
 
 
@@ -43,16 +45,7 @@ public abstract class DataContext extends LangObject{
 	
 	private final ThreadLocal<Connection> loacalConnection=new ThreadLocal<>();
 
-	public static Logger LOGGER=new Logger() {
-		
-		public void log(Class cls,String msg) {
-			   ;
-		}
-		
-		public void log(Class cls,Exception ex) {
-			   ;
-		}
-	};
+	public final Log LOGGER=LogFactory.getLog(thisClass());
 
 	protected DataContext() {
 		super();
@@ -99,7 +92,7 @@ public abstract class DataContext extends LangObject{
 	
 	
 	
-	public <M extends Entity>  List<M> executeQueryList(String sql,Class<M> cls,Object...params) throws SQLException{
+	public <M extends Entity>  List<M> executeQueryList(Class<M> cls,String sql,Object...params) throws SQLException{
 		Connection connection=getConnection();
 		
 		
@@ -153,6 +146,56 @@ public abstract class DataContext extends LangObject{
 		return re;
 	} 
 	
+    
+    public  String executeQueryJsonArray(String sql, Object... params) throws SQLException {
+
+		StringBuffer ret=new StringBuffer("[");
+		try(
+		PreparedStatement preparedStatement = getConnection().prepareStatement(sql);){
+		for (int i = 0; i < params.length; i++) {
+			preparedStatement.setObject(i + 1, params[i]);
+		}
+		  try(ResultSet resultSet = preparedStatement.executeQuery();){
+		ResultSetMetaData metaData = resultSet.getMetaData();
+		int cc = metaData.getColumnCount();
+		//String[] row=new String[cc];
+		//Map<String, Object> rowMap = null;
+		while (resultSet.next()) {
+			ret
+			.append("{");
+		
+			for (int i = 0; i < cc; i++) {
+				Object colObject=resultSet.getObject(i + 1);
+				if(colObject==null) {
+					continue;
+				}
+				String colName=metaData.getColumnName(i + 1),colValue=colObject.toString();
+				
+				ret.append(colName)
+				.append(":")
+				;
+				if(colObject instanceof String
+						||colObject instanceof java.sql.Date
+						) {
+					ret.append("\"")
+					.append(colValue)
+					.append("\"");
+					
+				}else {
+					ret.append(colValue);
+				}
+				
+			}
+			
+			ret
+			.append("}");
+			//list.add(rowMap);
+		}
+		  }
+		}
+		ret.append("]");
+		return ret.toString();
+	}
     
 	
     public int executeUpdate(String sql,Object... param) throws SQLException{
@@ -397,11 +440,5 @@ public abstract class DataContext extends LangObject{
      
 	
 	
-	public interface Logger{
-		
-		 void log(Class cls,String msg);
-		
-		 void log(Class cls,Exception ex);
-		
-	}
+	
 }

@@ -96,10 +96,8 @@ public class Table<M extends Entity> extends View<M> {
 	public M load(Object pk) throws SQLException {
 
 		String sql = sqlLoad;
-		if (dataContext.DEBUG) {
-			dataContext.LOGGER.log(this.entryClass, sql);
-		}
-		List<M> entrys = dataContext.<M>executeQueryList(sql, entryClass, pk);
+		
+		List<M> entrys = dataContext.<M>executeQueryList(entryClass,sql , pk);
 		M ret = null;
 		if (entrys.size() == 1) {
 			ret = entrys.get(0);
@@ -116,9 +114,7 @@ public class Table<M extends Entity> extends View<M> {
 		if (entrys.length == 0)
 			return 0;
 		String  sql = sqlInsert;
-		if (dataContext.DEBUG) {
-			dataContext.LOGGER.log(this.entryClass, sql);
-		}
+		
 		int re = 0, insertsize = insertFields.length;
 
 		Object[][] params = new Object[entrys.length][insertsize + 1];
@@ -149,9 +145,7 @@ public class Table<M extends Entity> extends View<M> {
         AtomicInteger re=new AtomicInteger(0);
         AtomicReference<SQLException> sex=new AtomicReference<>();
 		String sql=sqlInsertWithoutPk;
-		if (dataContext.DEBUG) {
-			dataContext.LOGGER.log(this.entryClass, sql);
-		}
+		
 		int insertsize = insertFields.length;
 
 		Object[] param = new Object[insertsize];
@@ -184,9 +178,7 @@ public class Table<M extends Entity> extends View<M> {
 		if (entrys.length == 0)
 			return 0;
 		String  sql = sqlUpdate;
-		if (dataContext.DEBUG) {
-			dataContext.LOGGER.log(this.entryClass, sql);
-		}
+		
 		int updatesize = updateFields.length;
 		Object[][] params = new Object[entrys.length][updatesize + 1];
 		try {
@@ -218,10 +210,7 @@ public class Table<M extends Entity> extends View<M> {
 		if (entrys.length == 0)
 			return 0;
 		String sql=sqlDelete;
-		if (dataContext.DEBUG) {
-
-			dataContext.LOGGER.log(this.entryClass, sql);
-		}
+		
 		int dlength = entrys.length;
 		Object[][] params = new Object[dlength][1];
 

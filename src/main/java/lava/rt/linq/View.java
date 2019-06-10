@@ -45,10 +45,8 @@ public   class  View<M extends Entity> {
     public List<M> select(String where,Object...params) throws SQLException{
     	String pattern="select * from {0} ";
     	String sql=MessageFormat.format(pattern, this.tableName)+where;
-    	if(dataContext.DEBUG) {
-    		dataContext.LOGGER.log(this.entryClass, sql);
-    	}
-		return dataContext.executeQueryList(sql,this.entryClass,params);
+    	
+		return dataContext.executeQueryList(entryClass,sql,params);
 	}
     
 	
@@ -56,36 +54,28 @@ public   class  View<M extends Entity> {
 	public int count(String column,String where,Object...params) throws SQLException{
 		String pattern="select count({0}) from {1} ";
     	String sql=MessageFormat.format(pattern,column, this.tableName)+where;
-    	if(dataContext.DEBUG) {
-    		dataContext.LOGGER.log(this.entryClass, sql);
-    	}
+    	
     	return (int)dataContext.executeQueryArray(sql,params)[0][0];
 	}
 	
 	public float sum(String column,String where,Object...params) throws SQLException{
 		String pattern="select sum({0}) from {1} ";
     	String sql=MessageFormat.format(pattern,column, this.tableName)+where;
-    	if(dataContext.DEBUG) {
-    		dataContext.LOGGER.log(this.entryClass, sql);
-    	}
+    	
     	return (float)dataContext.executeQueryArray(sql,params)[0][0];
 	}
 	
 	public <T> T min(String column,String where,Object...params) throws SQLException{
 		String pattern="select min({0}) from {1} ";
     	String sql=MessageFormat.format(pattern,column, this.tableName)+where;
-    	if(dataContext.DEBUG) {
-    		dataContext.LOGGER.log(this.entryClass, sql);
-    	}
+    	
     	return (T)dataContext.executeQueryArray(sql,params)[0][0];
 	}
 	
 	public <T> T max(String column,String where,Object...params) throws SQLException{
 		String pattern="select max({0}) from {1} ";
     	String sql=MessageFormat.format(pattern,column, this.tableName)+where;
-    	if(dataContext.DEBUG) {
-    		dataContext.LOGGER.log(this.entryClass, sql);
-    	}
+    	
     	return (T)dataContext.executeQueryArray(sql,params)[0][0];
 	}
 

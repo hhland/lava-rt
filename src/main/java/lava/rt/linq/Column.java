@@ -141,7 +141,7 @@ public class Column {
 	
 	
 	
-	private static String sql_val(Object val) {
+	protected static String sql_val(Object val) {
 		String str="";
 		if(val==null) str="?";
 		else if(val instanceof String) str="'"+val.toString()+"'";

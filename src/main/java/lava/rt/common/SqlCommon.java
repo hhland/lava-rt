@@ -76,12 +76,7 @@ public class SqlCommon {
 	} 
       
       
-      public static int executeUpdate(Collection collection,String sql) throws SQLException{
-  		
-  		int re=0;
-  		
-  		return re;
-  	  } 
+      
       
       
       public static Object[][] executeQueryArray(Connection connection,String sql,Object...params) throws SQLException{
@@ -132,6 +127,9 @@ public class SqlCommon {
   		
   		return list;
   	}
+      
+      
+     
 	
       
      

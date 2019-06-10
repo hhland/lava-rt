@@ -49,7 +49,7 @@ public class MySQLDataContextSrcGener extends DataContextSrcGener {
 	@Override
 	protected Map<String, List<ProcedureParamSrc>> loadProcedures(String databaseName) {
 		// TODO Auto-generated method stub
-		return null;
+		return new HashMap<>();
 	}
 
 	

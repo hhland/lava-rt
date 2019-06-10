@@ -8,10 +8,11 @@ import java.util.Map;
 import lava.rt.base.LangObject;
 import lava.rt.common.ReflectCommon;
 
-public abstract class Entity extends LangObject {
+public abstract class Entity extends LangObject  {
 
 	
-     protected Date _createTime,_updateTime;
+     
+	protected Date _createTime,_updateTime;
      
      
      

@@ -23,7 +23,7 @@ public   class  View<M extends Entity> {
 	protected final Class<M> entryClass;
 	protected final Map<String,Field> entryFieldMap;
 	
-	
+	protected final String sqlSelect;
 	
 	protected View (DataContext dataContext,Class<M> entryClass,String tableName) {
 		this.dataContext=dataContext;
@@ -34,7 +34,7 @@ public   class  View<M extends Entity> {
 		
 		entryFieldMap.forEach((k,v)->v.setAccessible(true));
 		
-		 
+		sqlSelect="select * from "+tableName;
 	}
 	
 	
@@ -43,9 +43,8 @@ public   class  View<M extends Entity> {
     
     
     public List<M> select(String where,Object...params) throws SQLException{
-    	String pattern="select * from {0} ";
-    	String sql=MessageFormat.format(pattern, this.tableName)+where;
     	
+    	String sql=sqlSelect+" "+where;
 		return dataContext.executeQueryList(entryClass,sql,params);
 	}
     

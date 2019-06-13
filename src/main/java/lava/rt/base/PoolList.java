@@ -1,28 +1,26 @@
-package lava.rt.pool;
+package lava.rt.base;
 
 import java.util.ArrayList;
 import java.util.Random;
 
-public abstract class ListPool<E> extends ArrayList<E>{
+public abstract class PoolList<E> extends ArrayList<E>{
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 3812995734231209299L;
+	
 
 
 	private Integer index=0;
 	
 	
-    private Random random=new Random();
+    private final Random random=new Random();
 	
 
-	public ListPool(int initialCapacity) {
-		super(initialCapacity);
+	public PoolList(int initialCapacity) throws Exception {
+		super();
 		// TODO Auto-generated constructor stub
-		for(E e :this) {
-			e=newSingle();
+		for(int i=0;i<initialCapacity;i++) {
+			this.add(newSingle(i));
 		}
+		
 	}
 	
 	
@@ -39,6 +37,6 @@ public abstract class ListPool<E> extends ArrayList<E>{
 		}
 	}
 	
-	abstract E newSingle();
+	public abstract E newSingle(int i) throws Exception;
 
 }

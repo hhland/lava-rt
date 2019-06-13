@@ -53,7 +53,11 @@ public class OracleDataContextSrcGener extends DataContextSrcGener{
 	}
 
 	
-
+	@Override
+	protected Class<? extends DataContextSrcGener> thisClass() {
+		// TODO Auto-generated method stub
+		return this.getClass();
+	}
 	
 	
 }

@@ -18,6 +18,7 @@ import java.sql.Types;
 import java.text.MessageFormat;
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -40,7 +41,7 @@ import lava.rt.linq.View;
 
 public abstract class DataContextSrcGener   {
 
-	
+	protected abstract Class<? extends DataContextSrcGener> thisClass();
 	
 	protected Connection connection;
 	
@@ -51,6 +52,7 @@ public abstract class DataContextSrcGener   {
 	}
 	
 	public void toFile(File srcFile,Class<? extends DataContext> cls,String databaseName,String...justTables) throws SQLException, IOException {
+		
 		String src=toSrc(cls, databaseName, justTables);
 		srcFile.delete();
 		srcFile.createNewFile();
@@ -82,11 +84,21 @@ public abstract class DataContextSrcGener   {
 	
 		;
 		
+		src
+		.append("/*\r\n" + 
+				 
+				" *@Database "+databaseName+"\r\n" + 
+				" *@SrcGener "+thisClass().getName()+"\r\n" + 
+				" *@CreateAt "+Calendar.getInstance().getTime()+"\r\n" + 
+				"*/ \n")
+		
+		;
+		
 		src.append("public class "+cls.getSimpleName()+" extends "+DataContext.class.getName()+"{ \n\n");
 		
 		src.append("\t@Override\r\n" + 
 				"\tprotected Class thisClass() {return this.getClass(); }\n\n")
-		.append("\t public "+cls.getSimpleName()+"("+DataSource.class.getSimpleName()+" dataSource){ super(dataSource);  } \n\n");
+		.append("\t public "+cls.getSimpleName()+"("+DataSource.class.getSimpleName()+"... dataSources)throws "+Exception.class.getSimpleName()+"{ super(dataSources);  } \n\n");
 		
 		Set<String> tables=new HashSet<>(),views=loadViews(databaseName);
 		
@@ -444,5 +456,6 @@ public abstract class DataContextSrcGener   {
 		}
 		return ret.toString();
 	}
+
 	
 }

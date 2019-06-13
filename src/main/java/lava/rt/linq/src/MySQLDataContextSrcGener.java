@@ -52,6 +52,10 @@ public class MySQLDataContextSrcGener extends DataContextSrcGener {
 		return new HashMap<>();
 	}
 
-	
+	@Override
+	protected Class<? extends DataContextSrcGener> thisClass() {
+		// TODO Auto-generated method stub
+		return this.getClass();
+	}
 	
 }

@@ -29,6 +29,7 @@ public abstract class RpcClient {
 		public ProxyHandler(Class serviceInterface) {
 			super();
 			this.serviceInterface = serviceInterface;
+			
 		}
 
 		@Override

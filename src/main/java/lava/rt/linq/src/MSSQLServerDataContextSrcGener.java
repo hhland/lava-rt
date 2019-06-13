@@ -126,4 +126,10 @@ public class MSSQLServerDataContextSrcGener extends DataContextSrcGener {
 		return ret;
 	}
 
+	@Override
+	protected Class<? extends DataContextSrcGener> thisClass() {
+		// TODO Auto-generated method stub
+		return this.getClass();
+	}
+
 }

@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -13,6 +14,7 @@ import java.util.stream.Stream;
 
 import lava.rt.common.ReflectCommon;
 import lava.rt.common.TextCommon;
+
 
 public class Table<M extends Entity> extends View<M> {
 
@@ -108,34 +110,58 @@ public class Table<M extends Entity> extends View<M> {
 		return ret;
 	}
 
-	
-	
-	public <E extends M> int insert(E... entrys) throws SQLException {
-		if (entrys.length == 0)
+	public <E extends M> int insert(Collection<E> entrys) throws SQLException {
+		if (entrys.size() == 0)
 			return 0;
 		String  sql = sqlInsert;
 		
 		int re = 0, insertsize = insertFields.length;
 
-		Object[][] params = new Object[entrys.length][insertsize + 1];
+		Object[][] params = new Object[entrys.size()][insertsize + 1];
 		try {
-			for (int i = 0; i < entrys.length; i++) {
-				M obj = entrys[i];
+			int i=0;
+			//for (int i = 0; i < entrys.length; i++) {
+			for(M obj : entrys) {
+				//M obj = entrys[i];
 				params[i][0] = pkField.get(obj);
 				for (int j = 0; j < insertsize; j++) {
 					Field field = insertFields[j];
 					params[i][j + 1] = field.get(obj);
 				}
+				i++;
 			}
 		} catch (Exception e) {
 			throw new SQLException(e);
 		}
 
-		if (params.length > 1) {
-			re = dataContext.executeBatch(sql, params);
-		} else {
-			re = dataContext.executeUpdate(sql, params[0]);
+		re = dataContext.executeBatch(sql, params);
+		
+
+		return re;
+
+	}
+	
+	
+	
+	public <E extends M> int insert(E entry) throws SQLException {
+		
+		
+		
+		int re = 0, insertsize = insertFields.length;
+
+		Object[] param = new Object[insertsize + 1];
+		try {
+			
+				param[0] = pkField.get(entry);
+				for (int j = 0; j < insertsize; j++) {
+					Field field = insertFields[j];
+					param[j + 1] = field.get(entry);
+				}
+		} catch (Exception e) {
+			throw new SQLException(e);
 		}
+		re = dataContext.executeUpdate(sqlInsert, param);
+		
 
 		return re;
 
@@ -160,7 +186,8 @@ public class Table<M extends Entity> extends View<M> {
 				pkField.set(entry, pk);
 			    re.getAndIncrement();
 			} catch (Exception se) {
-				SQLException nse = new SQLException(se.getMessage() + "\n" + sql);
+				SQLException nse = new SQLException(se);
+				
 				sex.set(nse);
 			} 
 		});
@@ -174,57 +201,91 @@ public class Table<M extends Entity> extends View<M> {
 
 	}
 
-	public <E extends M> int update(E... entrys) throws SQLException {
-		if (entrys.length == 0)
-			return 0;
-		String  sql = sqlUpdate;
+	
+	public <E extends M> int update(E entry) throws SQLException {
 		
 		int updatesize = updateFields.length;
-		Object[][] params = new Object[entrys.length][updatesize + 1];
+		Object[] param = new Object[updatesize + 1];
+		
+        try {
+		for (int j = 0; j < updatesize; j++) {
+			Field field = updateFields[j];
+			param[j] = field.get(entry);
+	    }
+        }catch(Exception ex) {
+        	throw new SQLException(ex);
+        }
+		param[updatesize] = getPk(entry);
+
+			
+		int re = dataContext.executeUpdate(sqlUpdate, param);
+		
+		return re;
+
+	}
+	
+	
+	public <E extends M> int update(Collection<E> entrys) throws SQLException {
+		if (entrys.size() == 0)
+			return 0;
+		
+		
+		int updatesize = updateFields.length;
+		Object[][] params = new Object[entrys.size()][updatesize + 1];
 		try {
-			for (int i = 0; i < entrys.length; i++) {
-				M obj = entrys[i];
+			int i=0;
+			//for (int i = 0; i < entrys.size(); i++) {
+			for(M obj:entrys) {
+				//M obj = entrys[i];
 
 				for (int j = 0; j < updatesize; j++) {
 					Field field = updateFields[j];
 					params[i][j] = field.get(obj);
 				}
 				params[i][updatesize] = getPk(obj);
-
+                i++;
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			throw new SQLException(e);
 		}
-		int re = 0;
-		if (params.length > 1) {
-			re = dataContext.executeBatch(sql, params);
-		} else {
-			re = dataContext.executeUpdate(sql, params[0]);
-		}
+		int re =  dataContext.executeBatch(sqlUpdate, params);
+		
 		return re;
 
 	}
-
-	public <E extends M> int delete(E... entrys) throws SQLException {
-		if (entrys.length == 0)
-			return 0;
-		String sql=sqlDelete;
+	
+	
+	public <E extends M> int delete(Collection<E> entrys) throws SQLException {
+		int re = 0;
+		if (entrys.size() == 0)
+			return re;
 		
-		int dlength = entrys.length;
+		
+		
+		int dlength = entrys.size();
 		Object[][] params = new Object[dlength][1];
-
-		for (int i = 0; i < dlength; i++) {
-			M obj = entrys[i];
-			params[i][0] = getPk(obj);
+        int i=0;
+		for(M entry :entrys) {
+			params[i][0] = getPk(entry);
+			i++;
 		}
+
+		re = dataContext.executeBatch(sqlDelete, params);
+		
+		return re;
+	}
+
+	public <E extends M> int delete(E entry) throws SQLException {
+		
+		
+		
+		Object[] param = new Object[] {getPk(entry)};
 
 		int re = 0;
-		if (params.length > 1) {
-			re = dataContext.executeBatch(sql, params);
-		} else {
-			re = dataContext.executeUpdate(sql, params[0]);
-		}
+		
+		re = dataContext.executeUpdate(sqlDelete, param);
+		
 		return re;
 	}
 

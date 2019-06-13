@@ -28,7 +28,7 @@ import lava.rt.linq.src.MSSQLServerDataContextSrcGener;
 import lava.rt.test.JC2010_ENTERPRISE_DB.CompanyRel;
 
 import lava.rt.test.JC2010_ENTERPRISE_DB.Test_;
-import lava.rt.test.rpc.JC2010_ENTERPRISE_DBRPCImpl;
+
 import net.sourceforge.jtds.jdbcx.JtdsDataSource;
 
 public class DataContextMain {
@@ -41,8 +41,16 @@ public class DataContextMain {
 		   jds.setDatabaseName("JC2010_ENTERPRISE_DB");
 		   jds.setUser("sa");
 		   jds.setPassword("nfha_505");
+		   
+		   JtdsDataSource jds2=new JtdsDataSource();
+		   jds2.setServerName("jc.db");
+		   jds2.setDatabaseName("JC_SH");
+		   jds2.setUser("sa");
+		   jds2.setPassword("nfha_505");
+		   
 		   DataSource ds=jds;
-		   Connection conn=ds.getConnection();
+		   
+		   Connection conn=jds.getConnection();
 		   //conn.getSchema();
 		   DataContextSrcGener gener=new MSSQLServerDataContextSrcGener(conn);
 		   
@@ -51,57 +59,57 @@ public class DataContextMain {
 		   //gener.toFile(srcFile, JC2010_ENTERPRISE_DB.class, "JC2010_ENTERPRISE_DB");
 		   //gener.toSrc(JC2010_ENTERPRISE_DB.class, "JC2010_ENTERPRISE_DB", "TEST_");
 		   //System.out.println(src);
-		   JC2010_ENTERPRISE_DB db=new JC2010_ENTERPRISE_DB(ds);
+		   JC2010_ENTERPRISE_DB db=new JC2010_ENTERPRISE_DB(jds,jds2);
 		   JC2010_ENTERPRISE_DB.Criteria cr= db.CRITERIA;
 		   OutputParam<Float> op0=new OutputParam(90f);
 		   OutputParam<String> op1=new OutputParam<>(String.class);
-		   Object[][] objs=db.getColumns(4,op0, op1);
+		   //Object[][] objs=db.getColumns(4,op0, op1);
 		 
-		   System.out.println(objs[0][2]);
+		   //System.out.println(objs[0][2]);
 		   
 		   
-		   int port=8070;
-		   Registry registry=LocateRegistry.createRegistry(port);
-		   JC2010_ENTERPRISE_DBRPCImpl dbrpcImpl=new JC2010_ENTERPRISE_DBRPCImpl(db);
-		   JC2010_ENTERPRISE_DBRPC.bind(registry, dbrpcImpl);
-		   
-		   Registry registry2=LocateRegistry.getRegistry(port);
-		   
-		   JC2010_ENTERPRISE_DBRPC dbrpc=JC2010_ENTERPRISE_DBRPC.lookup(registry2);
 		  
-		   assertEquals(90, op0.result,0);
+		   
+		 
+		  
+		   //assertEquals(90, op0.result,0);
 		  // assertEquals("10", op1.result);
 		   
-		   List<CompanyRel> companyRels=db.COMPANY_REL.select("");
-		   System.out.println(companyRels.size());
-		   for(CompanyRel companyRel:companyRels) {
-			   System.out.println(companyRel);
-		   }
+//		   List<CompanyRel> companyRels=db.COMPANY_REL.select("");
+//		   System.out.println(companyRels.size());
+//		   for(CompanyRel companyRel:companyRels) {
+//			   System.out.println(companyRel);
+//		   }
 		   
 		   db.TEST_.truncate();
 		   List<Test_> tests=new ArrayList<>();
-		   for(int i=0;i<4000;i++) {
+		   for(int i=0;i<100;i++) {
 			   Test_ test=db.newEntry(Test_.class);
 			   test.setVarchar_(""+i);
-			   
+			   test.setId(i);
 			   tests.add(test);
 			   //db.insert(test);
 		   }
-		  // db.TEST_.insertWithoutPk(tests.toArray(new Test[tests.size()]));
+		   db.setAutoCommit(false);
+		   System.out.println("insert:"+System.currentTimeMillis());
+		   //db.TEST_.insert(tests);
 		   db.insert(tests);
+		   
 		   Random random=new Random();
 		   for(Test_ test:tests) {
 			   test.setFloat_(random.nextDouble());
 		   }
-		   //db.TEST_.update(tests.toArray(new Test[tests.size()]));
-		   //db.update(tests);
+		   System.out.println("update:"+System.currentTimeMillis());
+		   //db.TEST_.update(tests);
+		   db.update(tests);
+		   System.out.println("delete:"+System.currentTimeMillis());
+		   List<Test_> suList=tests.subList(0, 5);
+		   //db.TEST_.delete(suList);
+		   db.delete(suList);
 		   
-		   //db.delete();
+		   db.commit();
 		   
 		   
-		   lava.rt.test.rpc.Test_ test_=new lava.rt.test.rpc.Test_();
-		   test_.setId(4);
-		   dbrpc.delete(test_);
 		   
 		   //db.insert(tests);
 		   

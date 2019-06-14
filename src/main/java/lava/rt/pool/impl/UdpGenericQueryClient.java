@@ -97,7 +97,7 @@ public abstract class UdpGenericQueryClient {
 			try {
 				channel.close();
 			} catch (IOException e) {
-				logger.debug(this, e);
+				logger.info(this);
 			}
 		}
 	}

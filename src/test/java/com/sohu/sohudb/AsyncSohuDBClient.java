@@ -16,7 +16,7 @@ public class AsyncSohuDBClient extends AsyncGenericQueryClient {
 	
 	private static byte[] zeroData = {};
 	
-	private static Log logger = LogFactory.getLog(AsyncSohuDBClient.class);
+	private static Log logger = LogFactory.SYSTEM.getLog(AsyncSohuDBClient.class);
 
 	protected ByteBuffer[] outBuffs = null;
 	protected ByteBuffer[] inBuffs = null;
@@ -163,7 +163,7 @@ public class AsyncSohuDBClient extends AsyncGenericQueryClient {
 					if( retry > 6 ) {
 						// jvm������bug������⵽ĳ��channelʼ�շ��Ͳ���ȥ��
 						String msg = "Can't Send Data thru SChannel! Bug maybe... retry " + retry + " times.";
-						if( log != null && log.isErrorEnabled() ){
+						if( log != null  ){
 							log.error("luke:" + msg);
 						}
 						throw new IOException(msg);
@@ -176,8 +176,8 @@ public class AsyncSohuDBClient extends AsyncGenericQueryClient {
 	
 			return total_len;
 		}catch( BufferOverflowException  e){
-			if( log != null && log.isTraceEnabled() ){
-				log.trace("TinyBufferOverflow:",e);
+			if( log != null ){
+				log.info("TinyBufferOverflow:",e);
 			}
 		}
 		return 0;

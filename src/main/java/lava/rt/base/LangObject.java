@@ -18,18 +18,10 @@ public abstract class LangObject {
 	
 	protected final static Map<Class<? extends LangObject>,Map<String,Field>> CLS_FIELD_MAP=new HashMap<>();
 	
-	private PrintStream[] infoStreams=new PrintStream[] {System.out}
-	,errStreams=new PrintStream[] {System.err}
-	;
+	
 	
 
-	public void setInfoStreams(PrintStream... infoStreams) {
-		this.infoStreams = infoStreams;
-	}
-
-	public void setErrStreams(PrintStream... errStreams) {
-		this.errStreams = errStreams;
-	}
+	
 	
 	
 	protected Map<String,Field> getFieldMap(){
@@ -43,6 +35,29 @@ public abstract class LangObject {
 		return ret;
 	}
 	
+	public <T> T val(String fieldName) throws NoSuchFieldException{
+		Object ret=null;
+		Map<String, Field> fieldMap=getFieldMap();
+		if(!fieldMap.containsKey(fieldName)) throw new NoSuchFieldException();
+		Field field=fieldMap.get(fieldName);
+		field.setAccessible(true);
+		try {
+			ret=field.get(this);
+		} catch (IllegalArgumentException | IllegalAccessException e) {}
+		return (T)ret;
+	}
+	
+	public  void val(String fieldName,Object value) throws NoSuchFieldException{
+		
+		Map<String, Field> fieldMap=getFieldMap();
+		if(!fieldMap.containsKey(fieldName)) throw new NoSuchFieldException();
+		Field field=fieldMap.get(fieldName);
+		field.setAccessible(true);
+		try {
+			field.set(this,value);
+		} catch (IllegalArgumentException | IllegalAccessException e) {}
+		
+	}
 	
     public int fromString(String value) {
     	int ret=0;
@@ -78,15 +93,5 @@ public abstract class LangObject {
 		return sbr.toString();
 	}
 
-	public void printInfo(Object msg) {
-	    for(PrintStream stream:infoStreams) {
-	    	stream.println(msg);
-	    }	
-	}
 	
-	public void printErr(Object msg) {
-	    for(PrintStream stream:errStreams) {
-	    	stream.println(msg);
-	    }	
-	}
 }

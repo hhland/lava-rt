@@ -10,6 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.sql.Statement;
 
 import java.util.ArrayList;
@@ -189,7 +190,7 @@ public abstract class DataContext extends LangObject {
 		int re = 0;
 		PoolList<Connection> connections = localConnection.get();
 		if (connections == null) {
-			printErr("error:" + sql);
+			//printErr("error:" + sql);
 		} else if (connections.size() == 1) {
 			re += SqlCommon.executeUpdate(connections.get(0), sql, param);
 		} else if (connections.size() > 1) {
@@ -207,7 +208,7 @@ public abstract class DataContext extends LangObject {
 						errMsg += _param + ",";
 					}
 					errMsg += "]";
-					printErr(errMsg);
+					//printErr(errMsg);
 					sex.set(e);
 				}
 			});
@@ -392,6 +393,43 @@ public abstract class DataContext extends LangObject {
 			conn.commit();
 
 		}
+	}
+	
+	public void rollback(Savepoint...savepoints) throws SQLException {
+		for (Connection conn : localConnection.get()) {
+			if(savepoints.length==0) {
+			  conn.rollback();
+			}else {
+				conn.rollback(savepoints[0]);
+			}
+
+		}
+	}
+	
+	public Savepoint[] setSavepoint(String...savepoints) throws SQLException {
+		PoolList<Connection> connections=localConnection.get();
+		Savepoint[] ret=new Savepoint[connections.size()];
+		try {
+			connections.each((i,conn)->{
+				try {
+				if(savepoints.length==0) {
+					
+						ret[i]= conn.setSavepoint();
+					
+					}else {
+						ret[i]=conn.setSavepoint(savepoints[0]);
+					}
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					throw e;
+				}
+			});
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			throw new SQLException(e);
+		}
+		
+		return ret;
 	}
 
 	@SuppressWarnings("resource")

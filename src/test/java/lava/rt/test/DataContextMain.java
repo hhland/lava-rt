@@ -56,7 +56,7 @@ public class DataContextMain {
 		   
 		  // String src= gener.toSrc(JC2010_ENTERPRISE_DB.class, "JC2010_ENTERPRISE_DB");
 		   File srcFile=new File("G:\\git\\lava-rt\\src\\test\\java\\lava\\rt\\test\\JC2010_ENTERPRISE_DB.java");
-		   //gener.toFile(srcFile, JC2010_ENTERPRISE_DB.class, "JC2010_ENTERPRISE_DB");
+		   gener.toFile(srcFile, JC2010_ENTERPRISE_DB.class, "JC2010_ENTERPRISE_DB");
 		   //gener.toSrc(JC2010_ENTERPRISE_DB.class, "JC2010_ENTERPRISE_DB", "TEST_");
 		   //System.out.println(src);
 		   JC2010_ENTERPRISE_DB db=new JC2010_ENTERPRISE_DB(jds,jds2);

@@ -13,7 +13,7 @@ import lava.rt.logging.LogFactory;
 
 public class UdpServerStatus {
 	
-	private static Log logger = LogFactory.getLog(UdpServerStatus.class);
+	private static Log logger = LogFactory.SYSTEM.getLog(UdpServerStatus.class);
 
 	Object key;
 	
@@ -67,12 +67,12 @@ public class UdpServerStatus {
 					break;
 				}
 				
-				if( logger.isTraceEnabled() ){
-					logger.trace("Socket TimeOut!!!"+c.requestSent+" "+c.getTime_request()
+				
+					logger.info("Socket TimeOut!!!"+c.requestSent+" "+c.getTime_request()
 							+ " "+(now - c.getTime_request())+" "+pool.serverConfig.getSocketTimeout() 
 							+ "\nIO TimeOut!!! "+c.getTime_connect()
 							+ " "+(now - c.getTime_connect())+" "+ pool.serverConfig.getConnectTimeout());
-				}
+				
 				UdpRequest request = c.getRequest();
 				if( request != null ){
 					request.socketTimeout();
@@ -112,18 +112,18 @@ public class UdpServerStatus {
 		}
 		if( needQueue ){			
 			queueRequest( request );
-			if( logger.isTraceEnabled() ){
-				logger.trace("put a request in the queue");
-			}
+			
+				logger.info("put a request in the queue");
+			
 			request.setConnectionErrorStatus(1);
 			return 1;
 		} else {
 			int sts = innerSendRequest( request );
 			
 			if( sts > 0 ){
-				if( logger.isTraceEnabled() ){
-					logger.trace("No avaliable channal put request in the queue");
-				}
+				
+					logger.info("No avaliable channal put request in the queue");
+				
 				queueRequest( request );
 			}
 			return sts;
@@ -200,9 +200,9 @@ public class UdpServerStatus {
 	int innerSendRequest(UdpRequest request) {
 		
 		if (!isServerAvaliable() && !request.isProbe()) {
-			if( logger.isTraceEnabled()) {
-				logger.trace("server is down, Don't waste Time");
-			}
+			
+				logger.info("server is down, Don't waste Time");
+			
 			request.serverDown();
 			request.setConnectionErrorStatus(-2);
 			return -2;
@@ -211,9 +211,9 @@ public class UdpServerStatus {
 		long now = System.currentTimeMillis();
 		
 		if (now - request.getStartTime() > pool.serverConfig.getQueueTimeout()) { // �Ŷӳ�ʱ
-			if( logger.isTraceEnabled() ){
-				logger.trace("WaitQueue timeOut");
-			}
+			
+				logger.info("WaitQueue timeOut");
+			
 			request.waitTimeout();
 			request.setConnectionErrorStatus(-4);
 			return -4;
@@ -223,9 +223,9 @@ public class UdpServerStatus {
 			UdpGenericQueryClient sc = removeFirstFreeClient();
 
 			if (sc == null){
-				if( logger.isTraceEnabled() ){
-					logger.trace("CLIENT RUNOUT!");
-				}
+				
+					logger.info("CLIENT RUNOUT!");
+				
 				break;
 			}
 
@@ -244,9 +244,9 @@ public class UdpServerStatus {
 						request.time_connect_end();
 						isClientValid = true;
 					} catch (IOException e) {
-						if (logger.isWarnEnabled()) {
-							logger.warn("Sender: open new SocketChannel ", e);
-						}
+						
+							logger.info("Sender: open new SocketChannel ");
+						
 					}
 					if ( !isClientValid ) {
 						request.serverDown();
@@ -262,9 +262,9 @@ public class UdpServerStatus {
 			sc.setRequest(request);
 
 			// ��������
-			if (logger.isTraceEnabled()) {
-				logger.trace("TO SEND REQ!");
-			}
+			
+				logger.info("TO SEND REQ!");
+			
 
 			request.time_connect_end();
 
@@ -275,18 +275,16 @@ public class UdpServerStatus {
 				status = sc.sendRequest();
 			} catch (IOException e) {
 				sendError();
-				if (logger.isWarnEnabled()) {
-					logger.warn("IOE", e);
-				}
+				
 				sc.close();
 			} catch (RuntimeException e) {
-				if (logger.isErrorEnabled()) {
-					logger.error("RTE While sending Request(Non-IOE)", e);
-				}
+				
+					logger.error("RTE While sending Request(Non-IOE)");
+				
 			} catch (Exception e) {
-				if (logger.isErrorEnabled()) {
-					logger.error("Exception While sending Request(Non-IOE)", e);
-				}
+				
+					logger.error("Exception While sending Request(Non-IOE)");
+				
 			}
 
 			if (status > 0) {
@@ -295,16 +293,16 @@ public class UdpServerStatus {
 				 * ���ͳɹ�, ���channel�Ƿ��Ѿ�ע��. ��Ϊǰ��finishConnect�����Ѿ����ӳɹ�,
 				 * ������ֱ�ӷ���,Ȼ�����������ע������.
 				 */
-				if (logger.isTraceEnabled()) {
-					logger.trace("SENT SUCCESS!");
-				}
+				
+					logger.info("SENT SUCCESS!");
+				
 
 				sc.requestSent(true);
 
 				if (!isRegistered) {
-					if (logger.isTraceEnabled()) {
-						logger.trace("NOT REGED!");
-					}
+					
+						logger.info("NOT REGED!");
+					
 					request.time_enqueue();
 					pool.recver.queueChannel(sc);
 					pool.selector.wakeup();
@@ -317,17 +315,17 @@ public class UdpServerStatus {
 				 * ���Ͳ��ɹ� �����ֿ���: socket��request. �����socket������,
 				 * ��ôrecver����ȷ����(close). �����request������, ��ô��֪ͨ�û��̼߳���.
 				 */
-				if (logger.isTraceEnabled()) {
-					logger.trace("ILLEGAL REQUEST!");
-				}
+				
+					logger.info("ILLEGAL REQUEST!");
+				
 
 				request.illegalRequest();
 				try {
 					sc.reset();
 				} catch (Exception e) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Exception while reset client", e);
-					}
+					
+						logger.info("Exception while reset client");
+					
 					// ignore
 				}
 				freeClient(sc);
@@ -344,16 +342,16 @@ public class UdpServerStatus {
 		UdpGenericQueryClient client;
 		synchronized( freeChannelList ){
 			if( freeChannelList.size() > 0 ){
-				if( logger.isTraceEnabled() ){
-					logger.trace("Get One Client From " + freeChannelList.size());
-				}
+				
+					logger.info("Get One Client From " + freeChannelList.size());
+				
 				client = (UdpGenericQueryClient)freeChannelList.removeFirst( );
 				client.using = true;
 				client.requestSent = false;
 			} else {
-				if( logger.isTraceEnabled() ){
-					logger.trace("no Free Client to get");
-				}
+				
+					logger.info("no Free Client to get");
+				
 				return null;
 			}
 		}
@@ -362,9 +360,9 @@ public class UdpServerStatus {
 	void freeClient(UdpGenericQueryClient client) {
 		synchronized (freeChannelList) {
 			if (client.using) {
-				if( logger.isTraceEnabled() ){
-					logger.trace("Free a Client");
-				}
+				
+					logger.info("Free a Client");
+				
 				client.using = false;
 				freeChannelList.addFirst(client);
 			}
@@ -390,9 +388,9 @@ public class UdpServerStatus {
 		synchronized( waitQueue ){
 			client = (UdpRequest)waitQueue.removeFirst( );
 		}
-		if( logger.isTraceEnabled() ){
-			logger.trace("Remove a request from the queue");
-		}
+		
+			logger.info("Remove a request from the queue");
+		
 		return client;
 	}
 
@@ -502,16 +500,16 @@ public class UdpServerStatus {
 	}
 
 	public synchronized void connectTimeout(){
-		if( logger.isTraceEnabled() ){
-			logger.trace("errNumber is " + recentErrorNumber );
-		}
+		
+			logger.info("errNumber is " + recentErrorNumber );
+		
 		this.recentErrorNumber ++;
 		this.downtime = System.currentTimeMillis();
 	}
 	public synchronized void socketTimeout() {
-		if( logger.isTraceEnabled() ){
-			logger.trace("sockettimeout "+ recentErrorNumber);
-		}
+		
+			logger.info("sockettimeout "+ recentErrorNumber);
+		
 		this.recentErrorNumber ++;
 		this.downtime = System.currentTimeMillis();
 	}
@@ -581,9 +579,9 @@ public class UdpServerStatus {
 			sb.append('\n');
 		}
 		
-		if( logger.isInfoEnabled() ){
+		
 			logger.info( sb.toString() );
-		}
+		
 		return sb.toString();
 	}
 	public void finalize(){

@@ -1,7 +1,9 @@
 package lava.rt.base;
 
+import java.net.InterfaceAddress;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.function.Function;
 
 public abstract class PoolList<E> extends ArrayList<E>{
 
@@ -38,5 +40,17 @@ public abstract class PoolList<E> extends ArrayList<E>{
 	}
 	
 	public abstract E newSingle(int i) throws Exception;
+	
+	
+	public void each(Eachable<E> eachable) throws Exception {
+		 for(int i=0;i<this.size();i++) {
+			 eachable.doEach(i, this.get(i));
+		 }
+	}
 
+	
+	public interface Eachable<T>{
+		
+		void doEach(int i,T e) throws Exception;
+	}
 }

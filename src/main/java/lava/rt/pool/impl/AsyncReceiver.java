@@ -20,7 +20,7 @@ import lava.rt.logging.LogFactory;
 
 class AsyncReceiver implements Runnable{
 	
-	private static final Log logger = LogFactory.getLog( AsyncReceiver.class);
+	private static final Log logger = LogFactory.SYSTEM.getLog( AsyncReceiver.class);
 
 	String generation = "(RecverErr)";
 	volatile Thread _thread;
@@ -46,9 +46,9 @@ class AsyncReceiver implements Runnable{
 		synchronized( selectionKeyQueue){
 			selectionKeyQueue.offer( obj );
 		}
-		if( logger.isTraceEnabled() ){
-			logger.trace(this.generation + "Add one Client to Busyqueue");
-		}
+		
+			logger.info(this.generation + "Add one Client to Busyqueue");
+		
 	}
 	
 	public void startThread(){
@@ -76,21 +76,21 @@ class AsyncReceiver implements Runnable{
 		try{
 			status = sc.sendRequest();
 		}catch( IOException e){
-			if( logger.isInfoEnabled() ){
+			
 				logger.info(this.generation+"IOE Sending Request");
-			}
+			
 			request.serverDown("[rcv]�������쳣"+e.getMessage());
 			sc.serverStatus.sendError();
 			sc.close();
 		} catch( RuntimeException e){
-			if( logger.isErrorEnabled() ){
-				logger.error(this.generation+"RTE Sending Request", e);
-			}
+			
+				logger.error(this.generation+"RTE Sending Request");
+			
 			
 		} catch( Exception e){
-			if( logger.isInfoEnabled() ){
-				logger.info(this.generation+"OtherException Sending Request", e);
-			}
+			
+			logger.info(this.generation+"OtherException Sending Request");
+			
 		}
 		request.requestTime();
 		// ��¼������ʱ��, �Ա���鳬ʱ
@@ -104,9 +104,9 @@ class AsyncReceiver implements Runnable{
 			try{
 				sc.reset();
 			}catch( Exception e){
-				if( logger.isWarnEnabled() ){
-					logger.warn(this.generation+"Exception while reseting Request after sendRequest", e);
-				}
+			
+					logger.info(this.generation+"Exception while reseting Request after sendRequest");
+				
 			}
 			sc.serverStatus.freeClient(sc);
 		} else {
@@ -118,9 +118,9 @@ class AsyncReceiver implements Runnable{
 	}
 	private void registerNewChannel(){
 		long start = System.currentTimeMillis();
-		if( logger.isTraceEnabled() ){
-			logger.trace(this.generation+"Register:" + start );
-		}
+		
+			logger.info(this.generation+"Register:" + start );
+		
 		
 		synchronized( selectionKeyQueue ){
 			do {
@@ -155,9 +155,9 @@ class AsyncReceiver implements Runnable{
 					request.serverDown("[reg]�յ�read/conn�������Ϣ");
 					sc.close();
 					sc.serverStatus.freeClient(sc);
-					if( logger.isInfoEnabled() ){
+					
 						logger.info( this.generation + "QuicklyClosedConnection!");
-					}
+					
 					continue;
 				}
 
@@ -174,38 +174,38 @@ class AsyncReceiver implements Runnable{
 					 */
 					request.serverDown("[reg]socket���ر�");
 					sc.serverStatus.sendError();
-					if (logger.isWarnEnabled()) {
-						logger.warn(this.generation
-								+ "Register:Closed SocketChannel!", e);
-					}
+					
+						logger.info(this.generation
+								+ "Register:Closed SocketChannel!");
+					
 
 				} catch (IllegalBlockingModeException e) {
 					// Should Never Happen!
-					if (logger.isWarnEnabled()) {
-						logger.warn(this.generation
-								+ "Register:IllegalBlocking SocketChannel!", e);
-					}
+					
+						logger.info(this.generation
+								+ "Register:IllegalBlocking SocketChannel!");
+					
 					// ����
 				} catch (IllegalSelectorException e) {
 					// Should Never Happen
-					if (logger.isWarnEnabled()) {
-						logger.warn(this.generation
-								+ "Register:IllegalSelector Why?", e);
-					}
+					
+						logger.info(this.generation
+								+ "Register:IllegalSelector Why?");
+					
 					// ����
 				} catch (CancelledKeyException e) {
 					// Should Never Happen
-					if (logger.isWarnEnabled()) {
-						logger.warn(this.generation
-								+ "Register:Cancelled SocketChannel", e);
-					}
+					
+						logger.info(this.generation
+								+ "Register:Cancelled SocketChannel");
+				
 					// ����
 				} catch (IllegalArgumentException e) {
 					// Should Never Happen
-					if (logger.isWarnEnabled()) {
-						logger.warn(this.generation
-								+ "Register:PLEASE CHECK CODE!", e);
-					}
+					
+						logger.info(this.generation
+								+ "Register:PLEASE CHECK CODE!");
+					
 					// ����
 				}
 				if( needReturnClient ){
@@ -214,35 +214,35 @@ class AsyncReceiver implements Runnable{
 			} while (true);
 		}
 		long end = System.currentTimeMillis();
-		if( logger.isTraceEnabled() ){
-			logger.trace(this.generation+"Register:" + (end-start) );
-		}
+		
+			logger.info(this.generation+"Register:" + (end-start) );
+		
 
 	}
 	
 	
 	private void checkSocketTimeoutChannel(){
 		long start = System.currentTimeMillis();
-		if( logger.isTraceEnabled() ){
-			logger.trace(this.generation+"CheckTimeout:" + start );
-		}
+		
+			logger.info(this.generation+"CheckTimeout:" + start );
+		
 		AsyncServerStatus[] sss = this.pool.getAllStatus();
 		if( sss != null ){
 			for( int i =0; i<sss.length; i++ ){
 				long tstart = System.currentTimeMillis();
-				if( logger.isTraceEnabled() ){
-					logger.trace(this.generation+"CheckTimeout:Server:"+ i +"At:" + tstart );
-				}
+				
+					logger.info(this.generation+"CheckTimeout:Server:"+ i +"At:" + tstart );
+				
 				sss[i].checkTimeout();
-				if( logger.isTraceEnabled() ){
-					logger.trace(this.generation+"CheckTimeout:Server:"+ i +"Time:" + (System.currentTimeMillis()-tstart) );
-				}
+				
+					logger.info(this.generation+"CheckTimeout:Server:"+ i +"Time:" + (System.currentTimeMillis()-tstart) );
+				
 			}
 		}
 		long end = System.currentTimeMillis();
-		if( logger.isTraceEnabled() ){
-			logger.trace(this.generation+"CheckTimeoutEnd:" + (end-start) );
-		}
+		
+			logger.info(this.generation+"CheckTimeoutEnd:" + (end-start) );
+		
 	}
 
 	/**
@@ -252,19 +252,19 @@ class AsyncReceiver implements Runnable{
 		while(_thread == Thread.currentThread() ){
 			try{
 				long cycleStart = System.currentTimeMillis();
-				if( logger.isTraceEnabled() ){
-					logger.trace(this.generation+"CycleStart:" + cycleStart);
-				}
+				
+					logger.info(this.generation+"CycleStart:" + cycleStart);
+				
 	//			Thread.yield();
 				registerNewChannel();
 				checkSocketTimeoutChannel();
-				if( logger.isTraceEnabled() ){
-					logger.trace(this.generation+"SelectAt:" + (System.currentTimeMillis()-cycleStart) + ",robin:" + pool.getServerConfig().robinTime);
-				}
+				
+					logger.info(this.generation+"SelectAt:" + (System.currentTimeMillis()-cycleStart) + ",robin:" + pool.getServerConfig().robinTime);
+				
 				int num = pool.selector.select(pool.getServerConfig().robinTime);
-				if( logger.isTraceEnabled() ){
-					logger.trace(this.generation+"SelectEnd,KeyNum( num = )" + num + ",At:" + (System.currentTimeMillis()-cycleStart) );
-				}
+				
+					logger.info(this.generation+"SelectEnd,KeyNum( num = )" + num + ",At:" + (System.currentTimeMillis()-cycleStart) );
+				
 				// caused by timeout
 				if( num == 0 ){
 					continue;
@@ -277,9 +277,9 @@ class AsyncReceiver implements Runnable{
 					it.remove();
 					try{
 						if( key.isReadable() ){
-							if( logger.isTraceEnabled() ){
-								logger.trace(this.generation+"ReadKey:" + (System.currentTimeMillis()-cycleStart) );
-							}
+							
+								logger.info(this.generation+"ReadKey:" + (System.currentTimeMillis()-cycleStart) );
+							
 							AsyncGenericQueryClient conn = (AsyncGenericQueryClient )key.attachment();
 							
 							try{
@@ -288,9 +288,9 @@ class AsyncReceiver implements Runnable{
 									if( conn.finishResponse() ){
 										//debug bart
 										//System.out.println("[pool]finishResponse from "+conn.getRequest().getServerInfo());
-										if( logger.isTraceEnabled() ){
-											logger.trace(this.generation + "Handle InPut End");
-										}
+										
+											logger.info(this.generation + "Handle InPut End");
+										
 										conn.serverStatus.success();
 										conn.reset();
 										conn.serverStatus.freeClient(conn);
@@ -312,9 +312,9 @@ class AsyncReceiver implements Runnable{
 										conn.serverStatus.sendError();
 									}
 		
-									if( logger.isTraceEnabled() ){
-										logger.trace(this.generation + "Handle InPut End, Server Close");
-									}
+									
+										logger.info(this.generation + "Handle InPut End, Server Close");
+									
 									conn.reset();
 									conn.close();
 									conn.serverStatus.freeClient(conn);
@@ -328,17 +328,17 @@ class AsyncReceiver implements Runnable{
 								}
 								conn.close();
 								conn.serverStatus.freeClient(conn);
-								if(logger.isWarnEnabled() ){
-									logger.warn(this.generation + "IOE while Handle Input",e);
-								}
+								
+									logger.info(this.generation + "IOE while Handle Input");
+								
 							}
-							if( logger.isTraceEnabled() ){
-								logger.trace(this.generation+"ReadKeyEnd:" + (System.currentTimeMillis()-cycleStart) );
-							}
+							
+								logger.info(this.generation+"ReadKeyEnd:" + (System.currentTimeMillis()-cycleStart) );
+							
 						} else if( key.isConnectable() ){
-							if( logger.isTraceEnabled() ){
-								logger.trace(this.generation+"ConnKey:" + (System.currentTimeMillis()-cycleStart) );
-							}
+							
+								logger.info(this.generation+"ConnKey:" + (System.currentTimeMillis()-cycleStart) );
+							
 		
 							AsyncGenericQueryClient conn = (AsyncGenericQueryClient )key.attachment();
 							
@@ -351,51 +351,51 @@ class AsyncReceiver implements Runnable{
 							try{
 								if( ((SocketChannel)(key.channel())).finishConnect() ){
 									status = 1;
-									if( logger.isTraceEnabled() ){
-										logger.trace(this.generation + "finishConnect");
-									}
+									
+										logger.info(this.generation + "finishConnect");
+									
 								}
 							}catch( IOException e){
-								if( logger.isWarnEnabled() ){
-									logger.warn(this.generation + ":CONN FAILED: " + e.getMessage(), e );
-								}
+							
+									logger.info(this.generation + ":CONN FAILED: " + e.getMessage() );
+								
 							}
 							
 							if( status == 1 ){
 								status = sendRequest( conn );
-								if( logger.isTraceEnabled() ){
-									logger.trace( this.generation + "Send the Request");
-								}
+								
+									logger.info( this.generation + "Send the Request");
+								
 								if( status < 0 ){
-									if( logger.isTraceEnabled() ){
-										logger.trace( this.generation + "Cancel the key");
-									}
+									
+										logger.info( this.generation + "Cancel the key");
+									
 									key.cancel();
 								} else {
-									if( logger.isTraceEnabled() ){
-										logger.trace(this.generation + "Change the Status to OPREAD");
-									}
+									
+										logger.info(this.generation + "Change the Status to OPREAD");
+									
 									key.interestOps(SelectionKey.OP_READ );
 								}
 							} else {
-								if( logger.isTraceEnabled() ){
-									logger.trace(this.generation + "ServerDown");
-								}
+								
+									logger.info(this.generation + "ServerDown");
+								
 								if( request != null ){
 									request.serverDown("����ʧ��");
 								}
 								conn.serverStatus.connectTimeout();
 								conn.serverStatus.freeClient(conn);
 							}
-							if( logger.isTraceEnabled() ){
-								logger.trace(this.generation+"ConnKeyEnd:" + (System.currentTimeMillis()-cycleStart) );
-							}
+							
+								logger.info(this.generation+"ConnKeyEnd:" + (System.currentTimeMillis()-cycleStart) );
+							
 						}
 					}catch( CancelledKeyException e ){
 						// ignore
-						if( logger.isTraceEnabled() ){
-							logger.trace(this.generation + "CancelledKey!");
-						}
+						
+							logger.info(this.generation + "CancelledKey!");
+						
 					}
 				}
 			}catch(IOException e){

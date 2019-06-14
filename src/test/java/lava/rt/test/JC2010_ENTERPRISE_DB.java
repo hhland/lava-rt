@@ -17,12 +17,17 @@ import java.sql.SQLException;
 import javax.sql.DataSource; 
 
 
+import java.io.Serializable; 
+
+
 /*
  *@Database JC2010_ENTERPRISE_DB
  *@SrcGener lava.rt.linq.src.MSSQLServerDataContextSrcGener
- *@CreateAt Thu Jun 13 16:08:57 CST 2019
+ *@CreateAt Fri Jun 14 13:34:51 CST 2019
 */ 
 public class JC2010_ENTERPRISE_DB extends lava.rt.linq.DataContext{ 
+
+	private static final long serialVersionUID=1L;
 
 	@Override
 	protected Class thisClass() {return this.getClass(); }
@@ -35,9 +40,11 @@ public class JC2010_ENTERPRISE_DB extends lava.rt.linq.DataContext{
 
 
 
-	 public  class Test_ extends Entity {
+	 public  class Test_ extends Entity implements Serializable {
 
 
+
+private static final long serialVersionUID = JC2010_ENTERPRISE_DB.serialVersionUID;
 
 		 private Integer ID ; 
  		 private Integer INT_ ; 
@@ -67,9 +74,11 @@ public class JC2010_ENTERPRISE_DB extends lava.rt.linq.DataContext{
 
 	 } //end TEST_
 
-	 public  class CompanyRel extends Entity {
+	 public  class CompanyRel extends Entity implements Serializable {
 
 
+
+private static final long serialVersionUID = JC2010_ENTERPRISE_DB.serialVersionUID;
 
 		 private String ADMIN_DIVISION_CODE ; 
  		 private String ECONOMIC_AREA_CODE ; 

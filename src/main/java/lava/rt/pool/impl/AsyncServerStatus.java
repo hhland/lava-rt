@@ -13,7 +13,7 @@ import lava.rt.logging.LogFactory;
 
 public class AsyncServerStatus {
 	
-	private static Log logger = LogFactory.getLog(AsyncServerStatus.class);
+	private static Log logger = LogFactory.SYSTEM.getLog(AsyncServerStatus.class);
 
 	Object key;
 	
@@ -108,12 +108,12 @@ public class AsyncServerStatus {
 				if (isConnectTimeout || isSocketFailTimeout)
 				{
 					//�����һ������ʧ���˵�����
-					if( logger.isTraceEnabled() ){
-						logger.trace("Socket TimeOut!!!"+c.requestSent+" "+c.getTime_request()
+					
+						logger.info("Socket TimeOut!!!"+c.requestSent+" "+c.getTime_request()
 								+ " "+(now - c.getTime_request())+" "+pool.getServerConfig().getSocketTimeout() 
 								+ "\nIO TimeOut!!!"+c.isConnected()+" "+c.getTime_connect()
 								+ " "+(now - c.getTime_connect())+" "+ pool.getServerConfig().getConnectTimeout());
-					}
+					
 					if( request != null ){
 						if (isSocketFailTimeout)
 							request.socketTimeout();
@@ -172,7 +172,7 @@ public class AsyncServerStatus {
 			
 			queueRequest( request );
 //			if( logger.isTraceEnabled() ){
-//				logger.trace("put a request in the queue");
+//				logger.info("put a request in the queue");
 //			}
 			return 1;
 		} else {
@@ -180,7 +180,7 @@ public class AsyncServerStatus {
 			
 			if( sts > 0 ){
 //				if( logger.isTraceEnabled() ){
-//					logger.trace("No avaliable channal put request in the queue");
+//					logger.info("No avaliable channal put request in the queue");
 //				}
 				queueRequest(request );
 			}
@@ -258,9 +258,9 @@ public class AsyncServerStatus {
 	int innerSendRequest(AsyncRequest request) {
 		
 		if (!isServerAlive() && request.connectType != AsyncRequest.RETRY_REQUEST) {
-			if( logger.isTraceEnabled()) {
-				logger.trace("server is down, Don't waste Time");
-			}
+			
+				logger.info("server is down, Don't waste Time");
+			
 			request.serverDown("[innerSend]������������");
 			return -2;
 		}
@@ -268,9 +268,9 @@ public class AsyncServerStatus {
 		long now = System.currentTimeMillis();
 		
 		if (now - request.getStartTime() > pool.getServerConfig().getQueueTimeout()) { // �Ŷӳ�ʱ
-			if( logger.isTraceEnabled() ){
-				logger.trace("WaitQueue timeOut");
-			}
+			
+				logger.info("WaitQueue timeOut");
+			
 			queueTimeout();
 			request.waitTimeout();
 			return -4;
@@ -307,9 +307,9 @@ public class AsyncServerStatus {
 			AsyncGenericQueryClient sc = removeFirstFreeClient();
 
 			if (sc == null){
-				if( logger.isTraceEnabled() ){
-					logger.trace("CLIENT RUNOUT!");
-				}
+				
+					logger.info("CLIENT RUNOUT!");
+				
 				break;
 			}
 
@@ -327,9 +327,9 @@ public class AsyncServerStatus {
 						request.time_connect();
 						isClientValid = true;
 					} catch (IOException e) {
-						if (logger.isWarnEnabled()) {
-							logger.warn("Sender: open new SocketChannel ", e);
-						}
+						
+							logger.info("Sender: open new SocketChannel ");
+						
 					}
 					if ( !isClientValid ) {
 						request.serverDown("[innSend]����ʧ��");
@@ -340,9 +340,9 @@ public class AsyncServerStatus {
 				}
 				
 				if (!sc.isConnected()) { // �����첽��������
-					if( logger.isTraceEnabled() ){
-						logger.trace("NOT CONNECTED!");
-					}
+					
+						logger.info("NOT CONNECTED!");
+					
 					sc.setRequest(request);
 
 					sc.requestSent(false);
@@ -357,9 +357,9 @@ public class AsyncServerStatus {
 			sc.setRequest(request);
 
 			// ��������
-			if (logger.isTraceEnabled()) {
-				logger.trace("TO SEND REQ!");
-			}
+			
+				logger.info("TO SEND REQ!");
+			
 
 			request.time_connect_end();
 
@@ -368,18 +368,18 @@ public class AsyncServerStatus {
 				status = sc.sendRequest();
 			} catch (IOException e) {
 				sendError();
-				if (logger.isWarnEnabled()) {
-					logger.warn("IOE", e);
-				}
+				
+					logger.info("IOE");
+				
 				sc.close();
 			} catch (RuntimeException e) {
-				if (logger.isErrorEnabled()) {
-					logger.error("RTE While sending Request(Non-IOE)", e);
-				}
+				
+					logger.info("RTE While sending Request(Non-IOE)");
+				
 			} catch (Exception e) {
-				if (logger.isErrorEnabled()) {
-					logger.error("Exception While sending Request(Non-IOE)", e);
-				}
+				
+					logger.info("Exception While sending Request(Non-IOE)");
+				
 			}
 
 			if (status > 0) {
@@ -388,18 +388,18 @@ public class AsyncServerStatus {
 				 * ���ͳɹ�, ���channel�Ƿ��Ѿ�ע��. ��Ϊǰ��finishConnect�����Ѿ����ӳɹ�,
 				 * ������ֱ�ӷ���,Ȼ�����������ע������.
 				 */
-				if (logger.isTraceEnabled()) {
-					logger.trace("SENT SUCCESS!");
-				}
+				
+					logger.info("SENT SUCCESS!");
+				
 
 				request.requestTime();
 				sc.setTime_request();
 				sc.requestSent(true);
 
 				if (!isRegistered) {
-					if (logger.isTraceEnabled()) {
-						logger.trace("NOT REGED!");
-					}
+					
+						logger.info("NOT REGED!");
+					
 					request.time_enqueue();
 					pool.recver.queueChannel(sc);
 					pool.selector.wakeup();
@@ -412,9 +412,9 @@ public class AsyncServerStatus {
 				 * ���Ͳ��ɹ� �����ֿ���: socket��request. �����socket������,
 				 * ��ôrecver����ȷ����(close). �����request������, ��ô��֪ͨ�û��̼߳���.
 				 */
-				if (logger.isTraceEnabled()) {
-					logger.trace("ILLEGAL REQUEST!");
-				}
+				
+					logger.info("ILLEGAL REQUEST!");
+				
 				if(status == 0) {
 					request.illegalRequest();
 				}else {
@@ -423,9 +423,9 @@ public class AsyncServerStatus {
 				try {
 					sc.reset();
 				} catch (Exception e) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Exception while reset client", e);
-					}
+					
+						logger.info("Exception while reset client");
+					
 					// ignore
 				}
 				freeClient(sc);
@@ -444,16 +444,16 @@ public class AsyncServerStatus {
 		AsyncGenericQueryClient client;
 		synchronized( freeChannelList ){
 			if( freeChannelList.size() > 0 ){
-				if( logger.isTraceEnabled() ){
-					logger.trace("Get One Client From " + freeChannelList.size());
-				}
+				
+					logger.info("Get One Client From " + freeChannelList.size());
+				
 				client = (AsyncGenericQueryClient)freeChannelList.removeFirst( );
 				client.using = true;
 				client.requestSent = false;
 			} else {
-				if( logger.isTraceEnabled() ){
-					logger.trace("no Free Client to get");
-				}
+				
+					logger.info("no Free Client to get");
+				
 				return null;
 			}
 		}
@@ -462,9 +462,9 @@ public class AsyncServerStatus {
 	void freeClient(AsyncGenericQueryClient client) {
 		synchronized (freeChannelList) {
 			if (client.using) {
-				if( logger.isTraceEnabled() ){
-					logger.trace("Free a Client");
-				}
+				
+					logger.info("Free a Client");
+				
 				client.using = false;
 				freeChannelList.addFirst(client);
 			}
@@ -490,9 +490,9 @@ public class AsyncServerStatus {
 		synchronized( waitQueue ){
 			client = (AsyncRequest)waitQueue.removeFirst( );
 		}
-		if( logger.isTraceEnabled() ){
-			logger.trace("Remove a request from the queue");
-		}
+		
+			logger.info("Remove a request from the queue");
+		
 		return client;
 	}
 
@@ -618,17 +618,17 @@ public class AsyncServerStatus {
 	}
 
 	public synchronized void connectTimeout(){
-		if( logger.isTraceEnabled() ){
-			logger.trace("errNumber is " + recentErrorNumber );
-		}
+		
+			logger.info("errNumber is " + recentErrorNumber );
+		
 		this.recentErrorNumber ++;
 		System.out.println("[pool connectError]"+recentErrorNumber+"\t"+serverInfo);
 		this.downtime = System.currentTimeMillis();
 	}
 	public synchronized void socketTimeout() {
-		if( logger.isTraceEnabled() ){
-			logger.trace("sockettimeout "+ recentErrorNumber);
-		}
+		
+			logger.info("sockettimeout "+ recentErrorNumber);
+		
 		this.recentErrorNumber ++;
 		System.out.println("[pool socketError]"+recentErrorNumber+"\t"+serverInfo);
 		this.downtime = System.currentTimeMillis();
@@ -717,9 +717,9 @@ public class AsyncServerStatus {
 			sb.append('\n');
 		}
 		
-		if( logger.isInfoEnabled() ){
+		
 			logger.info( sb.toString() );
-		}
+		
 		return sb.toString();
 	}
 	

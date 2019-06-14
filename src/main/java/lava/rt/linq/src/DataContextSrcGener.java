@@ -39,6 +39,7 @@ import lava.rt.linq.Table;
 import lava.rt.linq.View;
 
 
+
 public abstract class DataContextSrcGener   {
 
 	protected abstract Class<? extends DataContextSrcGener> thisClass();
@@ -81,7 +82,7 @@ public abstract class DataContextSrcGener   {
 		.append("import "+ ArrayList.class.getName()+"; \n")
 		.append("import "+ SQLException.class.getName()+"; \n")
 		.append("import "+DataSource.class.getName()+"; \n\n\n")
-	
+		.append("import "+Serializable.class.getName()+"; \n\n\n")
 		;
 		
 		src
@@ -96,7 +97,9 @@ public abstract class DataContextSrcGener   {
 		
 		src.append("public class "+cls.getSimpleName()+" extends "+DataContext.class.getName()+"{ \n\n");
 		
-		src.append("\t@Override\r\n" + 
+		src
+		.append("\tprivate static final long serialVersionUID=1L;\n\n")
+		.append("\t@Override\r\n" + 
 				"\tprotected Class thisClass() {return this.getClass(); }\n\n")
 		.append("\t public "+cls.getSimpleName()+"("+DataSource.class.getSimpleName()+"... dataSources)throws "+Exception.class.getSimpleName()+"{ super(dataSources);  } \n\n");
 		
@@ -153,14 +156,14 @@ public abstract class DataContextSrcGener   {
 				pkName=tablesPks.get(tn);
 			}
 			TableSrc tableSrc=new TableSrc(tn,pkName);
-			src.append(tableSrc.toSrc());
+			src.append(tableSrc.toSrc(cls));
 		}
 		
 		for(String table:views) {
 			
 			String tn=table;
 			TableSrc tableSrc=new TableSrc(tn,null);
-			src.append(tableSrc.toSrc());
+			src.append(tableSrc.toSrc(cls));
 		}
 		
         for(java.util.Map.Entry<String, List<ProcedureParamSrc>> ent : procs.entrySet() ) {
@@ -297,13 +300,16 @@ public abstract class DataContextSrcGener   {
 		
 		public String tableName,pkName,className;
 		
+		
+		
 		public TableSrc(String tableName,String pkName) {
 			this.tableName=tableName;
 			this.pkName=pkName;
 			this.className=DataContextSrcGener.toClassName(tableName);
+			
 		}
 		
-		public StringBuffer toSrc() throws SQLException{
+		protected StringBuffer toSrc(Class dcClass) throws SQLException{
 	        StringBuffer context=new StringBuffer("");
 	    	
 	        //context.append("\t public    class "+tableName+"Table extend Table<"+tableName+"> { \n\n ")
@@ -317,10 +323,12 @@ public abstract class DataContextSrcGener   {
 	       
 	    	.append("\t public  class "+className+" extends ")
 	    	.append(""+Entity.class.getSimpleName())
-	    	
+	    	.append(" implements "+Serializable.class.getSimpleName())
 	    	.append(" {\n\n")
 	    	//.append("\t\t private static final long serialVersionUID = 1L; ")
 	    	//.append("\t public "+className+"(){ super(); }")
+	    	.append("\n\n")
+	    	.append("private static final long serialVersionUID = "+dcClass.getSimpleName()+".serialVersionUID;")
 	    	.append("\n\n")
 	    	.append(this.genColsSrc())
 	    	.append("\n\n")

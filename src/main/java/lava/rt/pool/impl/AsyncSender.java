@@ -5,7 +5,7 @@ import lava.rt.logging.LogFactory;
 
 class AsyncSender implements Runnable{
 
-	private static final Log log = LogFactory.getLog(AsyncSender.class);
+	private static final Log log = LogFactory.SYSTEM.getLog(AsyncSender.class);
 	
 	private String generation = "(ThreadErr)"; 
 	private volatile Thread _thread = null;
@@ -97,15 +97,15 @@ class AsyncSender implements Runnable{
 	public void run() {
 		while (true) {
 			if( _thread != Thread.currentThread() ){
-				if( log.isInfoEnabled() ){
+				
 					log.info( this.generation + "EXIST. NOT CURRTHREAD");
-				}
+				
 				break;
 			}
 			long cycleStart = System.currentTimeMillis();
-			if( log.isTraceEnabled() ){
-				log.trace(generation +"CycleStart:time:"+cycleStart );
-			}
+			
+				log.info(generation +"CycleStart:time:"+cycleStart );
+			
 			boolean doneSomething = false;
 			do{
 				
@@ -117,26 +117,26 @@ class AsyncSender implements Runnable{
 				
 				for (int i = 0; i < sss.length; i++) {
 					long now = System.currentTimeMillis();
-					if( log.isTraceEnabled() ){
-						log.trace(generation + "CheckServer:"+i+" ,time:"+now);
-					}
+					
+						log.info(generation + "CheckServer:"+i+" ,time:"+now);
+					
 					AsyncServerStatus ss = sss[i];
 					if (ss == null){
-						if( log.isTraceEnabled() ){
-							log.trace(generation + "CheckServer:"+i+",ServerStatus is NULL, toContinue");
-						}
+						
+							log.info(generation + "CheckServer:"+i+",ServerStatus is NULL, toContinue");
+						
 						continue;
 					}
 
 					while(true) {
 
-						if( log.isTraceEnabled() ){
-							log.trace(generation + "CheckServer:"+i+",to innerSendRequest()");
-						}
+						
+							log.info(generation + "CheckServer:"+i+",to innerSendRequest()");
+						
 						int status = ss.innerSendRequest();
-						if( log.isTraceEnabled() ){
-							log.trace(generation + "CheckServer:"+i+",innerSendRequest() returns " + status);
-						}
+						
+							log.info(generation + "CheckServer:"+i+",innerSendRequest() returns " + status);
+						
 
 						if (status == 1) {
 							// ��������ȫ���ѱ�ռ��, ��û������
@@ -148,9 +148,9 @@ class AsyncSender implements Runnable{
 							doneSomething = true;
 						}
 					}
-					if( log.isTraceEnabled() ){
-						log.trace(generation +"SenderServerEnd:"+i+" ,time:"+(System.currentTimeMillis()-now) );
-					}
+					
+						log.info(generation +"SenderServerEnd:"+i+" ,time:"+(System.currentTimeMillis()-now) );
+					
 					Thread.yield();
 				}
 			} while (false);
@@ -158,15 +158,15 @@ class AsyncSender implements Runnable{
 			if (doneSomething) {
 				sleepTime = minSleepTime;
 			}
-			if( log.isTraceEnabled() ){
-				log.trace(generation +"CycleEnd:time:"+(System.currentTimeMillis()-cycleStart)
+			
+				log.info(generation +"CycleEnd:time:"+(System.currentTimeMillis()-cycleStart)
 						+ ",sleepTime:"	+ sleepTime + ",minSleepTime:"  + minSleepTime 
 						+ ",maxSleepTime:" + maxSleepTime );
-			}
+			
 			
 			// spare-time task
 			if (sleepTime >= maxSleepTime) {
-				if( log.isInfoEnabled() ){
+				
 					log.info(generation +"sleepTime Too Long, to Exsit Thread");
 				}
 				synchronized (requestCountLock) {
@@ -176,16 +176,16 @@ class AsyncSender implements Runnable{
 						return;
 					}
 				}
-				if( log.isInfoEnabled() ){
+				
 					log.info(generation +"sleepTime Too Long, doesn't Exsit Thread");
-				}
+				
 				sleepTime = minSleepTime;
 			}
 			try {
 				long now = System.currentTimeMillis();
-				if( log.isInfoEnabled() ){
+				
 					log.info(generation +"CheckSleep(2),requestCount:" + requestCount + ",start:" + now);
-				}
+				
 				synchronized( requestCountLock ){
 					if( requestCount == 0 ){
 						requestCountLock.wait(sleepTime);
@@ -194,22 +194,22 @@ class AsyncSender implements Runnable{
 						requestCountLock.wait(yieldTime);
 					}
 				}
-				if( log.isInfoEnabled() ){
+				
 					log.info(generation +"CheckSleep(2)End, time:" + (System.currentTimeMillis()-now) );
-				}
+				
 			} catch (InterruptedException e) {
 				// δ֪״��, ��֪������ô��.
 				Thread.interrupted();
 				_thread = null;
 				needRestart = true;
 				e.printStackTrace();
-				if( log.isWarnEnabled() ){
-					log.warn(generation +"Interrupted. Farewell");
-				}
-			}
-			if( log.isInfoEnabled() ){
-				log.info(generation +"CycleLoopback, time:" + (System.currentTimeMillis()-cycleStart) );
-			}
+				
+				log.info(generation +"Interrupted. Farewell");
+				
+			
+			
+				//log.info(generation +"CycleLoopback, time:" + (System.currentTimeMillis()-cycleStart) );
+			
 		}
 	}
 	/**
@@ -230,9 +230,9 @@ class AsyncSender implements Runnable{
 			synchronized( requestCountLock ){
 				requestCount ++;
 			}
-			if( log.isTraceEnabled() ){
-				log.trace(this.generation+"request Count is "+ requestCount);
-			}
+			
+				log.info(this.generation+"request Count is "+ requestCount);
+			
 			checkSenderThread();
 		}
 		

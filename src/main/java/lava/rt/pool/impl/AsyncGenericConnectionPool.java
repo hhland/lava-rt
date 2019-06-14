@@ -346,8 +346,8 @@ public abstract class AsyncGenericConnectionPool extends ConnectionPool {
         boolean ret = ss.isServerAvaliable();
         if (!ret) {
             Log logger = getLogger();
-            if (logger != null && logger.isTraceEnabled())
-                logger.trace("server is not avaliable:" + ss.getServerInfo());
+            if (logger != null )
+                logger.info("server is not avaliable:" + ss.getServerInfo());
         }
         return ret;
     }
@@ -435,9 +435,9 @@ public abstract class AsyncGenericConnectionPool extends ConnectionPool {
             status[i].status(sb);
         }
 
-        if (getLogger().isInfoEnabled()) {
-            getLogger().info(sb.toString());
-        }
+       
+         getLogger().info(sb.toString());
+        
         return sb.toString();
     }
 

@@ -22,7 +22,7 @@ import lava.rt.logging.LogFactory;
 
 class UdpReceiver implements Runnable{
 	
-	private static final Log logger = LogFactory.getLog( UdpReceiver.class);
+	private static final Log logger = LogFactory.SYSTEM.getLog( UdpReceiver.class);
 
 	String generation = "(RecverErr)";
 	volatile Thread _thread;
@@ -48,9 +48,9 @@ class UdpReceiver implements Runnable{
 		synchronized( selectionKeyQueue){
 			selectionKeyQueue.offer( obj );
 		}
-		if( logger.isTraceEnabled() ){
-			logger.trace(this.generation + "Add one Client to Busyqueue");
-		}
+		
+			logger.info(this.generation + "Add one Client to Busyqueue");
+		
 	}
 	
 	public void startThread(){
@@ -64,9 +64,9 @@ class UdpReceiver implements Runnable{
 
 	private void registerNewChannel(){
 		long start = System.currentTimeMillis();
-		if( logger.isTraceEnabled() ){
-			logger.trace(this.generation+"Register:" + start );
-		}
+		
+			logger.info(this.generation+"Register:" + start );
+		
 		
 		synchronized( selectionKeyQueue ){
 			do {
@@ -97,38 +97,38 @@ class UdpReceiver implements Runnable{
 					 */
 					request.serverDown();
 					sc.serverStatus.sendError();
-					if (logger.isWarnEnabled()) {
-						logger.warn(this.generation
-								+ "Register:Closed SocketChannel!", e);
-					}
+					
+						logger.info(this.generation
+								+ "Register:Closed SocketChannel!");
+					
 
 				} catch (IllegalBlockingModeException e) {
 					// Should Never Happen!
-					if (logger.isWarnEnabled()) {
-						logger.warn(this.generation
-								+ "Register:IllegalBlocking SocketChannel!", e);
-					}
+					
+						logger.info(this.generation
+								+ "Register:IllegalBlocking SocketChannel!");
+					
 					// ����
 				} catch (IllegalSelectorException e) {
 					// Should Never Happen
-					if (logger.isWarnEnabled()) {
-						logger.warn(this.generation
-								+ "Register:IllegalSelector Why?", e);
-					}
+					
+						logger.info(this.generation
+								+ "Register:IllegalSelector Why?");
+					
 					// ����
 				} catch (CancelledKeyException e) {
 					// Should Never Happen
-					if (logger.isWarnEnabled()) {
-						logger.warn(this.generation
-								+ "Register:Cancelled SocketChannel", e);
-					}
+					
+						logger.info(this.generation
+								+ "Register:Cancelled SocketChannel");
+					
 					// ����
 				} catch (IllegalArgumentException e) {
 					// Should Never Happen
-					if (logger.isWarnEnabled()) {
-						logger.warn(this.generation
-								+ "Register:PLEASE CHECK CODE!", e);
-					}
+					
+						logger.info(this.generation
+								+ "Register:PLEASE CHECK CODE!");
+					
 					// ����
 				}
 				if( needReturnClient ){
@@ -137,35 +137,35 @@ class UdpReceiver implements Runnable{
 			} while (true);
 		}
 		long end = System.currentTimeMillis();
-		if( logger.isTraceEnabled() ){
-			logger.trace(this.generation+"Register:" + (end-start) );
-		}
+		
+			logger.info(this.generation+"Register:" + (end-start) );
+		
 
 	}
 	
 	
 	private void checkSocketTimeoutChannel(){
 		long start = System.currentTimeMillis();
-		if( logger.isTraceEnabled() ){
-			logger.trace(this.generation+"CheckTimeout:" + start );
-		}
+		
+			logger.info(this.generation+"CheckTimeout:" + start );
+		
 		UdpServerStatus[] sss = this.pool.getAllStatus();
 		if( sss != null ){
 			for( int i =0; i<sss.length; i++ ){
 				long tstart = System.currentTimeMillis();
-				if( logger.isTraceEnabled() ){
-					logger.trace(this.generation+"CheckTimeout:Server:"+ i +"At:" + tstart );
-				}
+				
+					logger.info(this.generation+"CheckTimeout:Server:"+ i +"At:" + tstart );
+				
 				sss[i].checkTimeout();
-				if( logger.isTraceEnabled() ){
-					logger.trace(this.generation+"CheckTimeout:Server:"+ i +"Time:" + (System.currentTimeMillis()-tstart) );
-				}
+				
+					logger.info(this.generation+"CheckTimeout:Server:"+ i +"Time:" + (System.currentTimeMillis()-tstart) );
+				
 			}
 		}
 		long end = System.currentTimeMillis();
-		if( logger.isTraceEnabled() ){
-			logger.trace(this.generation+"CheckTimeoutEnd:" + (end-start) );
-		}
+		
+			logger.info(this.generation+"CheckTimeoutEnd:" + (end-start) );
+		
 	}
 
 	/**
@@ -175,19 +175,19 @@ class UdpReceiver implements Runnable{
 		while(_thread == Thread.currentThread() ){
 			try{
 				long cycleStart = System.currentTimeMillis();
-				if( logger.isDebugEnabled() ){
-					logger.debug(this.generation+"CycleStart:" + cycleStart);
-				}
+				
+					logger.info(this.generation+"CycleStart:" + cycleStart);
+				
 	//			Thread.yield();
 				registerNewChannel();
 				checkSocketTimeoutChannel();
-				if( logger.isTraceEnabled() ){
-					logger.trace(this.generation+"SelectAt:" + (System.currentTimeMillis()-cycleStart) + ",robin:" + pool.serverConfig.robinTime);
-				}
+				
+					logger.info(this.generation+"SelectAt:" + (System.currentTimeMillis()-cycleStart) + ",robin:" + pool.serverConfig.robinTime);
+				
 				int num = pool.selector.select(pool.serverConfig.robinTime);
-				if( logger.isDebugEnabled() ){
-					logger.debug(this.generation+"SelectEnd,KeyNum( num = )" + num + ",At:" + (System.currentTimeMillis()-cycleStart) );
-				}
+				
+					logger.info(this.generation+"SelectEnd,KeyNum( num = )" + num + ",At:" + (System.currentTimeMillis()-cycleStart) );
+				
 				// caused by timeout
 				if( num == 0 ){
 					continue;
@@ -200,9 +200,9 @@ class UdpReceiver implements Runnable{
 					it.remove();
 					try{
 						if( key.isReadable() ){
-							if( logger.isTraceEnabled() ){
-								logger.trace(this.generation+"ReadKey:" + (System.currentTimeMillis()-cycleStart) );
-							}
+							
+								logger.info(this.generation+"ReadKey:" + (System.currentTimeMillis()-cycleStart) );
+							
 							UdpGenericQueryClient conn = (UdpGenericQueryClient )key.attachment();
 							
 							UdpRequest request = conn.getRequest();
@@ -214,9 +214,9 @@ class UdpReceiver implements Runnable{
 								int status = conn.handleInput();
 								if( status > 0 ){
 									if( conn.finishResponse() ){
-										if( logger.isTraceEnabled() ){
-											logger.trace(this.generation + "Handle InPut End");
-										}
+										
+											logger.info(this.generation + "Handle InPut End");
+										
 										conn.serverStatus.success();
 										conn.reset();
 										conn.serverStatus.freeClient(conn);
@@ -231,9 +231,9 @@ class UdpReceiver implements Runnable{
 										conn.serverStatus.sendError();
 									}
 		
-									if( logger.isTraceEnabled() ){
-										logger.trace(this.generation + "Handle InPut End, Server Close");
-									}
+									
+										logger.info(this.generation + "Handle InPut End, Server Close");
+									
 									conn.reset();
 									conn.close();
 									conn.serverStatus.freeClient(conn);
@@ -246,19 +246,19 @@ class UdpReceiver implements Runnable{
 								}
 								conn.close();
 								conn.serverStatus.freeClient(conn);
-								if(logger.isWarnEnabled() ){
-									logger.warn(this.generation + "IOE while Handle Input",e);
-								}
+								
+									logger.info(this.generation + "IOE while Handle Input");
+								
 							}
-							if( logger.isTraceEnabled() ){
-								logger.trace(this.generation+"ReadKeyEnd:" + (System.currentTimeMillis()-cycleStart) );
-							}
+							
+								logger.info(this.generation+"ReadKeyEnd:" + (System.currentTimeMillis()-cycleStart) );
+							
 						}
 					}catch( CancelledKeyException e ){
 						// ignore
-						if( logger.isTraceEnabled() ){
-							logger.trace(this.generation + "CancelledKey!");
-						}
+						
+							logger.info(this.generation + "CancelledKey!");
+						
 					}
 				}
 			}catch(IOException e){

@@ -1,96 +1,61 @@
 package lava.rt.logging;
 
-import java.io.IOException;
-import java.nio.BufferOverflowException;
 
-import lava.rt.pool.impl.UdpGenericQueryClient;
 
-public class Log {
+public class Log<E> {
 
-	public Log(Class cls) {
+	final Class<E> cls;
+	final LogFactory factory;
+	
+	
+	
+	
+	
+	protected Log(LogFactory factory, Class<E> cls) {
 		// TODO Auto-generated constructor stub
-	}
-
-	public boolean isTraceEnabled() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	public void trace(Object info) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public boolean isWarnEnabled() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	public void warn(Object info) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public boolean isErrorEnabled() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	public void error(Object info, Exception e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public boolean isDebugEnabled() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	public void debug(Object string, Exception e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public boolean isInfoEnabled() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	public void info(Object info, Exception e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void warn(Object info, IOException e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void warn(Object info, Exception e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void info(Object info) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void debug(Object info) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void trace(Object info, Exception e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void error(Object info) {
-		// TODO Auto-generated method stub
-		
+		this.cls=cls;
+		this.factory=factory;
 	}
 
 	
+    
+
+	
+
+	public void info(Object... vals) {
+		// TODO Auto-generated method stub
+		factory.infoStream.forEach(s->
+	       
+	       s.println(join(vals))
+	    
+	    );
+	}
+
+	public void error(Exception ex) {
+		// TODO Auto-generated method stub
+		factory.errStream.forEach(s->
+	       
+	       ex.printStackTrace(s)
+	    
+	    );
+	}
+	
+
+	public void error(Object... vals) {
+		// TODO Auto-generated method stub
+		factory.errStream.forEach(s->
+	       
+	       s.println(join(vals))
+	    
+	    );
+	}
+
+	public static String join(Object... vals) {
+		String[] ret=new String[vals.length];
+		for(int i=0;i<vals.length;i++) {
+			ret[i]=vals[i]==null?"":vals[i].toString();
+		}
+		return String.join(",", ret);
+	}
 
 }

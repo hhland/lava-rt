@@ -17,8 +17,7 @@ public class AsyncSohuDBPool extends AsyncGenericConnectionPool {
         this("SohuDB");
     }
 
-    private static final Log logger = LogFactory
-                                            .getLog(AsyncSohuDBPool.class);
+    private static final Log logger = LogFactory.SYSTEM.getLog(AsyncSohuDBPool.class);
 
     protected Log getLogger() {
         return logger;

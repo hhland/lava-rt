@@ -25,10 +25,8 @@ public abstract class LangObject {
 	
 	
 	protected Map<String,Field> getFieldMap(){
-		Map<String,Field> ret=null;
-		if(CLS_FIELD_MAP.containsKey(thisClass())) {
-			ret=CLS_FIELD_MAP.get(thisClass());
-		}else {
+		Map<String,Field> ret=CLS_FIELD_MAP.get(thisClass());
+		if(ret==null) {
 			ret=ReflectCommon.allDeclaredFieldMap(thisClass());
 			CLS_FIELD_MAP.put(thisClass(), ret);
 		}

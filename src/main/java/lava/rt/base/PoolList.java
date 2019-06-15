@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.function.Function;
 
-public abstract class PoolList<E> extends ArrayList<E>{
+public abstract class PoolList<E> extends ArrayList<E> {
 
 	
 
@@ -46,6 +46,7 @@ public abstract class PoolList<E> extends ArrayList<E>{
 		 for(int i=0;i<this.size();i++) {
 			 eachable.doEach(i, this.get(i));
 		 }
+		 
 	}
 
 	

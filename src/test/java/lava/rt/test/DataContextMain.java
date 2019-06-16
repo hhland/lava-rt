@@ -25,9 +25,7 @@ import lava.rt.linq.OutputParam;
 import lava.rt.linq.Table;
 import lava.rt.linq.src.DataContextSrcGener;
 import lava.rt.linq.src.MSSQLServerDataContextSrcGener;
-import lava.rt.test.JC2010_ENTERPRISE_DB.CompanyRel;
 
-import lava.rt.test.JC2010_ENTERPRISE_DB.Test_;
 
 import net.sourceforge.jtds.jdbcx.JtdsDataSource;
 
@@ -59,63 +57,63 @@ public class DataContextMain {
 		   gener.toFile(srcFile, JC2010_ENTERPRISE_DB.class, "JC2010_ENTERPRISE_DB");
 		   //gener.toSrc(JC2010_ENTERPRISE_DB.class, "JC2010_ENTERPRISE_DB", "TEST_");
 		   //System.out.println(src);
-		   JC2010_ENTERPRISE_DB db=new JC2010_ENTERPRISE_DB(jds,jds2);
-		   JC2010_ENTERPRISE_DB.Criteria cr= db.CRITERIA;
-		   OutputParam<Float> op0=new OutputParam(90f);
-		   OutputParam<String> op1=new OutputParam<>(String.class);
-		   //Object[][] objs=db.getColumns(4,op0, op1);
-		 
-		   //System.out.println(objs[0][2]);
-		   
-		   
-		  
-		   
-		 
-		  
-		   //assertEquals(90, op0.result,0);
-		  // assertEquals("10", op1.result);
-		   
-//		   List<CompanyRel> companyRels=db.COMPANY_REL.select("");
-//		   System.out.println(companyRels.size());
-//		   for(CompanyRel companyRel:companyRels) {
-//			   System.out.println(companyRel);
+//		   JC2010_ENTERPRISE_DB db=new JC2010_ENTERPRISE_DB(jds,jds2);
+//		   JC2010_ENTERPRISE_DB.Criteria cr= db.CRITERIA;
+//		   OutputParam<Float> op0=new OutputParam(90f);
+//		   OutputParam<String> op1=new OutputParam<>(String.class);
+//		   //Object[][] objs=db.getColumns(4,op0, op1);
+//		 
+//		   //System.out.println(objs[0][2]);
+//		   
+//		   
+//		  
+//		   
+//		 
+//		  
+//		   //assertEquals(90, op0.result,0);
+//		  // assertEquals("10", op1.result);
+//		   
+////		   List<CompanyRel> companyRels=db.COMPANY_REL.select("");
+////		   System.out.println(companyRels.size());
+////		   for(CompanyRel companyRel:companyRels) {
+////			   System.out.println(companyRel);
+////		   }
+//		   
+//		   db.TEST_.truncate();
+//		   List<Test_> tests=new ArrayList<>();
+//		   for(int i=0;i<100;i++) {
+//			   Test_ test=db.newEntry(Test_.class);
+//			   test.setVarchar_(""+i);
+//			   test.setId(i);
+//			   tests.add(test);
+//			   //db.insert(test);
 //		   }
-		   
-		   db.TEST_.truncate();
-		   List<Test_> tests=new ArrayList<>();
-		   for(int i=0;i<100;i++) {
-			   Test_ test=db.newEntry(Test_.class);
-			   test.setVarchar_(""+i);
-			   test.setId(i);
-			   tests.add(test);
-			   //db.insert(test);
-		   }
-		   db.setAutoCommit(false);
-		   System.out.println("insert:"+System.currentTimeMillis());
-		   //db.TEST_.insert(tests);
-		   db.insert(tests);
-		   
-		   Random random=new Random();
-		   for(Test_ test:tests) {
-			   test.setFloat_(random.nextDouble());
-		   }
-		   System.out.println("update:"+System.currentTimeMillis());
-		   //db.TEST_.update(tests);
-		   db.update(tests);
-		   System.out.println("delete:"+System.currentTimeMillis());
-		   List<Test_> suList=tests.subList(0, 5);
-		   //db.TEST_.delete(suList);
-		   db.delete(suList);
-		   
-		   db.commit();
-		   
-		   
-		   
-		   //db.insert(tests);
-		   
-		   //List<JcBizJcJobActualAdditionalTax> list= 
-		//		   db.getTable(JcBizJcJobActualAdditionalTax.class).select("");
-		   
-		  // assertTrue(list.size()>0);
+//		   db.setAutoCommit(false);
+//		   System.out.println("insert:"+System.currentTimeMillis());
+//		   //db.TEST_.insert(tests);
+//		   db.insert(tests);
+//		   
+//		   Random random=new Random();
+//		   for(Test_ test:tests) {
+//			   test.setFloat_(random.nextDouble());
+//		   }
+//		   System.out.println("update:"+System.currentTimeMillis());
+//		   //db.TEST_.update(tests);
+//		   db.update(tests);
+//		   System.out.println("delete:"+System.currentTimeMillis());
+//		   List<Test_> suList=tests.subList(0, 5);
+//		   //db.TEST_.delete(suList);
+//		   db.delete(suList);
+//		   
+//		   db.commit();
+//		   
+//		   
+//		   
+//		   //db.insert(tests);
+//		   
+//		   //List<JcBizJcJobActualAdditionalTax> list= 
+//		//		   db.getTable(JcBizJcJobActualAdditionalTax.class).select("");
+//		   
+//		  // assertTrue(list.size()>0);
 	  }
 }

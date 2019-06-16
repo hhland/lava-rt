@@ -23,20 +23,14 @@ import java.io.Serializable;
 /*
  *@Database JC2010_ENTERPRISE_DB
  *@SrcGener lava.rt.linq.src.MSSQLServerDataContextSrcGener
- *@CreateAt Sun Jun 16 10:39:32 CST 2019
+ *@CreateAt Fri Jun 14 13:34:51 CST 2019
 */ 
-public class JC2010_ENTERPRISE_DB extends lava.rt.linq.DataContext{ 
+public interface IJC2010_ENTERPRISE_DB { 
 
-	private static final long serialVersionUID=1L;
+	static final long serialVersionUID=1L;
 
-	@Override
-	protected Class thisClass() {return this.getClass(); }
-
-	 public JC2010_ENTERPRISE_DB(DataSource... dataSources)throws Exception{ super(dataSources);  } 
-
-	 public final Table<Test_> TEST_=createTable(Test_.class,"TEST_","ID");
-	 public final Table<CompanyRel> COMPANY_REL=createTable(CompanyRel.class,"COMPANY_REL","COP_GB_CODE");
-
+	
+	
 
 
 
@@ -44,7 +38,7 @@ public class JC2010_ENTERPRISE_DB extends lava.rt.linq.DataContext{
 
 
 
-private static final long serialVersionUID = JC2010_ENTERPRISE_DB.serialVersionUID;
+private static final long serialVersionUID = IJC2010_ENTERPRISE_DB.serialVersionUID;
 
 		 private Integer ID ; 
  		 private Integer INT_ ; 
@@ -78,7 +72,7 @@ private static final long serialVersionUID = JC2010_ENTERPRISE_DB.serialVersionU
 
 
 
-private static final long serialVersionUID = JC2010_ENTERPRISE_DB.serialVersionUID;
+private static final long serialVersionUID = IJC2010_ENTERPRISE_DB.serialVersionUID;
 
 		 private String ADMIN_DIVISION_CODE ; 
  		 private String ECONOMIC_AREA_CODE ; 
@@ -365,11 +359,7 @@ private static final long serialVersionUID = JC2010_ENTERPRISE_DB.serialVersionU
 
 
 
-		public Object[][] getColumns(Integer id,OutputParam<Float> name,OutputParam<String> age) throws SQLException {
-
-
-			 return callProcedure("getColumns",id,name,age);
-		} 
+		public Object[][] getColumns(Integer id,OutputParam<Float> name,OutputParam<String> age) throws SQLException;
 
 
 

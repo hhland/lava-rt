@@ -2,12 +2,15 @@ package lava.rt.linq;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.sql.PooledConnection;
@@ -21,7 +24,7 @@ public   class  View<M extends Entity> {
 	
 	protected final String tableName;
 	protected final Class<M> entryClass;
-	protected final Map<String,Field> entryFieldMap;
+	protected final Map<String,Field> entryFieldMap=new HashMap<>();
 	
 	protected final String sqlSelect;
 	
@@ -29,7 +32,13 @@ public   class  View<M extends Entity> {
 		this.dataContext=dataContext;
 		this.tableName=tableName;
 		this.entryClass=entryClass;
-		this.entryFieldMap=ReflectCommon.theDeclaredFieldMap(entryClass);
+		//this.entryFieldMap=ReflectCommon.theDeclaredFieldMap(entryClass);
+		for(Entry<String, Field> ent :ReflectCommon.theDeclaredFieldMap(entryClass).entrySet()){
+			Field field=ent.getValue();
+			boolean isStatic = ReflectCommon.isStatic(field);
+			if(isStatic)continue;
+			this.entryFieldMap.put(ent.getKey(), ent.getValue());
+		}
 		
 		
 		entryFieldMap.forEach((k,v)->v.setAccessible(true));

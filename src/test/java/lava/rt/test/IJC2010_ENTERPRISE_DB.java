@@ -11,26 +11,19 @@ import java.lang.Byte;
 import java.lang.Boolean; 
 import java.lang.Byte; 
 import lava.rt.linq.*; 
-import java.util.List; 
-import java.util.ArrayList; 
+import java.util.*; 
 import java.sql.SQLException; 
-import javax.sql.DataSource; 
-
-
 import java.io.Serializable; 
 
 
 /*
  *@Database JC2010_ENTERPRISE_DB
  *@SrcGener lava.rt.linq.src.MSSQLServerDataContextSrcGener
- *@CreateAt Fri Jun 14 13:34:51 CST 2019
+ *@CreateAt Sun Jun 16 14:54:11 CST 2019
 */ 
-public interface IJC2010_ENTERPRISE_DB { 
+public interface IJC2010_ENTERPRISE_DB extends DataContext{ 
 
-	static final long serialVersionUID=1L;
-
-	
-	
+	public static final long serialVersionUID=1L;
 
 
 
@@ -357,16 +350,7 @@ private static final long serialVersionUID = IJC2010_ENTERPRISE_DB.serialVersion
 
 	 } //end COMPANY_REL
 
-
-
-		public Object[][] getColumns(Integer id,OutputParam<Float> name,OutputParam<String> age) throws SQLException;
-
-
-
-
-
-
-
+		public Object[][] getColumns(Integer id,OutputParam<Float> name,OutputParam<String> age) throws SQLException; 
 	public final static Criteria CRITERIA=new Criteria();
 
 	public  static class Criteria{ 

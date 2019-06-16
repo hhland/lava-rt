@@ -25,8 +25,8 @@ import lava.rt.linq.OutputParam;
 import lava.rt.linq.Table;
 import lava.rt.linq.src.DataContextSrcGener;
 import lava.rt.linq.src.MSSQLServerDataContextSrcGener;
-
-
+import lava.rt.test.IJC2010_ENTERPRISE_DB.Test_;
+import lava.rt.test.impl.JC2010_ENTERPRISE_DBImpl;
 import net.sourceforge.jtds.jdbcx.JtdsDataSource;
 
 public class DataContextMain {
@@ -53,11 +53,24 @@ public class DataContextMain {
 		   DataContextSrcGener gener=new MSSQLServerDataContextSrcGener(conn);
 		   
 		  // String src= gener.toSrc(JC2010_ENTERPRISE_DB.class, "JC2010_ENTERPRISE_DB");
-		   File srcFile=new File("G:\\git\\lava-rt\\src\\test\\java\\lava\\rt\\test\\JC2010_ENTERPRISE_DB.java");
-		   gener.toFile(srcFile, JC2010_ENTERPRISE_DB.class, "JC2010_ENTERPRISE_DB");
+		   String dir="I:/git/lava-rt/src/test/java/lava/rt/test/";
+		   File srcFile=new File(dir+"/JC2010_ENTERPRISE_DB.java")
+				   ,intfFile=new File(dir+"IJC2010_ENTERPRISE_DB.java")
+						   ,implFile=new File(dir+"JC2010_ENTERPRISE_DBimpl.java")
+				   ;
+		  // gener.toFile(srcFile, JC2010_ENTERPRISE_DB.class, "JC2010_ENTERPRISE_DB");
+		   //gener.toFile(intfFile, IJC2010_ENTERPRISE_DB.class,implFile,JC2010_ENTERPRISE_DBImpl.class, "JC2010_ENTERPRISE_DB");
 		   //gener.toSrc(JC2010_ENTERPRISE_DB.class, "JC2010_ENTERPRISE_DB", "TEST_");
 		   //System.out.println(src);
-//		   JC2010_ENTERPRISE_DB db=new JC2010_ENTERPRISE_DB(jds,jds2);
+		   JC2010_ENTERPRISE_DB db=new JC2010_ENTERPRISE_DB();
+		   db.setDataSource(jds,jds2);
+		   
+		   JC2010_ENTERPRISE_DBImpl db0=new JC2010_ENTERPRISE_DBImpl();
+		   db0.setDataSource(jds,jds2);
+		   
+		   IJC2010_ENTERPRISE_DB idb=db0;
+		   
+		   
 //		   JC2010_ENTERPRISE_DB.Criteria cr= db.CRITERIA;
 //		   OutputParam<Float> op0=new OutputParam(90f);
 //		   OutputParam<String> op1=new OutputParam<>(String.class);
@@ -79,19 +92,22 @@ public class DataContextMain {
 ////			   System.out.println(companyRel);
 ////		   }
 //		   
-//		   db.TEST_.truncate();
-//		   List<Test_> tests=new ArrayList<>();
-//		   for(int i=0;i<100;i++) {
-//			   Test_ test=db.newEntry(Test_.class);
-//			   test.setVarchar_(""+i);
-//			   test.setId(i);
-//			   tests.add(test);
+		   db.TEST_.truncate();
+		   
+		   List<Test_> tests=new ArrayList<>();
+		   for(int i=0;i<100;i++) {
+			   Test_ test= new Test_(); //db.newEntry(Test_.class);
+			   test.setVarchar_(""+i);
+			   test.setId(i);
+			   tests.add(test);
+		   }
 //			   //db.insert(test);
 //		   }
 //		   db.setAutoCommit(false);
 //		   System.out.println("insert:"+System.currentTimeMillis());
 //		   //db.TEST_.insert(tests);
 //		   db.insert(tests);
+			   idb.insert(tests);
 //		   
 //		   Random random=new Random();
 //		   for(Test_ test:tests) {

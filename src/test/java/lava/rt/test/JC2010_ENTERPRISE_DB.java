@@ -11,8 +11,7 @@ import java.lang.Byte;
 import java.lang.Boolean; 
 import java.lang.Byte; 
 import lava.rt.linq.*; 
-import java.util.List; 
-import java.util.ArrayList; 
+import java.util.*; 
 import java.sql.SQLException; 
 import javax.sql.DataSource; 
 
@@ -23,16 +22,16 @@ import java.io.Serializable;
 /*
  *@Database JC2010_ENTERPRISE_DB
  *@SrcGener lava.rt.linq.src.MSSQLServerDataContextSrcGener
- *@CreateAt Sun Jun 16 10:39:32 CST 2019
+ *@CreateAt Sun Jun 16 14:54:09 CST 2019
 */ 
-public class JC2010_ENTERPRISE_DB extends lava.rt.linq.DataContext{ 
+public class JC2010_ENTERPRISE_DB extends lava.rt.linq.DataSourceContext{ 
 
 	private static final long serialVersionUID=1L;
 
 	@Override
 	protected Class thisClass() {return this.getClass(); }
 
-	 public JC2010_ENTERPRISE_DB(DataSource... dataSources)throws Exception{ super(dataSources);  } 
+	 //public JC2010_ENTERPRISE_DB(DataSource... dataSources)throws Exception{ super(dataSources);  } 
 
 	 public final Table<Test_> TEST_=createTable(Test_.class,"TEST_","ID");
 	 public final Table<CompanyRel> COMPANY_REL=createTable(CompanyRel.class,"COMPANY_REL","COP_GB_CODE");

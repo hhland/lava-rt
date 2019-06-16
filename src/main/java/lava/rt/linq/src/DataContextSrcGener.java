@@ -32,7 +32,7 @@ import javax.sql.DataSource;
 import lava.rt.common.TextCommon;
 import lava.rt.linq.Column;
 import lava.rt.linq.DataContext;
-
+import lava.rt.linq.DataSourceContext;
 import lava.rt.linq.Entity;
 import lava.rt.linq.OutputParam;
 import lava.rt.linq.Table;
@@ -52,9 +52,9 @@ public abstract class DataContextSrcGener   {
 		this.connection=connection;
 	}
 	
-	public void toFile(File srcFile,Class<? extends DataContext> cls,String databaseName,String...justTables) throws SQLException, IOException {
+	public void toFile(File srcFile,Class cls,String databaseName,String...justTables) throws SQLException, IOException {
 		
-		String src=toSrc(cls, databaseName, justTables);
+		String src=toSingleSrc(cls, databaseName, justTables);
 		srcFile.delete();
 		srcFile.createNewFile();
 		srcFile.setWritable(true);
@@ -63,7 +63,26 @@ public abstract class DataContextSrcGener   {
 		}
 	}
 	
-	public String toSrc(Class<? extends DataContext> cls,String databaseName,String...justTables) throws SQLException {
+    public  void toFile(File srcIntf,Class clsIntf,File srcImpl,Class clsImpl,String databaseName,String...justTables) throws SQLException, IOException {
+		
+    	String src=toIntfSrc(clsIntf, databaseName, justTables);
+    	srcIntf.delete();
+    	srcIntf.createNewFile();
+    	srcIntf.setWritable(true);
+		try(FileWriter fw=new FileWriter(srcIntf)){
+			fw.write(src);
+		}
+		
+		src=toImplSrc(clsIntf,clsImpl, databaseName, justTables);
+		srcImpl.delete();
+		srcImpl.createNewFile();
+		srcImpl.setWritable(true);
+		try(FileWriter fw=new FileWriter(srcImpl)){
+			fw.write(src);
+		}
+	}
+	
+	public String toSingleSrc(Class cls,String databaseName,String...justTables) throws SQLException {
 		StringBuffer src=new StringBuffer("");
 		if(cls.getPackage()!=null) {
 		 src.append("package "+cls.getPackage().getName()+"; \n\n");
@@ -78,8 +97,8 @@ public abstract class DataContextSrcGener   {
 		src.append("import "+DataContext.class.getPackage().getName()+".*; \n")
 		
 		
-		.append("import "+ List.class.getName()+"; \n")
-		.append("import "+ ArrayList.class.getName()+"; \n")
+		.append("import "+ List.class.getPackage().getName()+".*; \n")
+		
 		.append("import "+ SQLException.class.getName()+"; \n")
 		.append("import "+DataSource.class.getName()+"; \n\n\n")
 		.append("import "+Serializable.class.getName()+"; \n\n\n")
@@ -95,13 +114,14 @@ public abstract class DataContextSrcGener   {
 		
 		;
 		
-		src.append("public class "+cls.getSimpleName()+" extends "+DataContext.class.getName()+"{ \n\n");
+		src.append("public class "+cls.getSimpleName()+" extends "+DataSourceContext.class.getName()+"{ \n\n");
 		
 		src
 		.append("\tprivate static final long serialVersionUID=1L;\n\n")
 		.append("\t@Override\r\n" + 
 				"\tprotected Class thisClass() {return this.getClass(); }\n\n")
-		.append("\t public "+cls.getSimpleName()+"("+DataSource.class.getSimpleName()+"... dataSources)throws "+Exception.class.getSimpleName()+"{ super(dataSources);  } \n\n");
+		.append("\t public "+cls.getSimpleName()+"("+DataSource.class.getSimpleName()+"... dataSources)throws "+Exception.class.getSimpleName()+"{ super(dataSources);  } \n\n")
+		;
 		
 		Set<String> tables=new HashSet<>(),views=loadViews(databaseName);
 		
@@ -192,6 +212,215 @@ public abstract class DataContextSrcGener   {
 	}
 	
 	
+	public String toIntfSrc(Class cls,String databaseName,String...justTables) throws SQLException {
+		StringBuffer src=new StringBuffer("");
+		if(cls.getPackage()!=null) {
+		 src.append("package "+cls.getPackage().getName()+"; \n\n");
+		}
+		for(ColumnStruct columnStruct : ColumnStruct.values()) {
+			String fieldClsName=columnStruct.fieldCls.getName();
+			if(fieldClsName.startsWith("[L")) {
+				fieldClsName=fieldClsName.substring(2,fieldClsName.length()-1);
+			}
+			src.append("import "+fieldClsName+"; \n");
+		}
+		src
+		.append("import "+DataContext.class.getPackage().getName()+".*; \n")
+		
+		
+		.append("import "+ List.class.getPackage().getName()+".*; \n")
+		
+		.append("import "+ SQLException.class.getName()+"; \n")
+		//.append("import "+DataSource.class.getName()+"; \n\n\n")
+		.append("import "+Serializable.class.getName()+"; \n\n\n")
+		;
+		
+		src
+		.append("/*\r\n" + 
+				 
+				" *@Database "+databaseName+"\r\n" + 
+				" *@SrcGener "+thisClass().getName()+"\r\n" + 
+				" *@CreateAt "+Calendar.getInstance().getTime()+"\r\n" + 
+				"*/ \n")
+		
+		;
+		
+		src.append("public interface "+cls.getSimpleName()+"{ \n\n");
+		
+		src
+		.append("\tpublic static final long serialVersionUID=1L;\n\n")
+		//.append("\t@Override\r\n" + 
+		//		"\tprotected Class thisClass() {return this.getClass(); }\n\n")
+		//.append("\t public "+cls.getSimpleName()+"("+DataSource.class.getSimpleName()+"... dataSources)throws "+Exception.class.getSimpleName()+"{ super(dataSources);  } \n\n")
+		;
+		
+		Set<String> tables=new HashSet<>(),views=loadViews(databaseName);
+		
+		Map<String, List<ProcedureParamSrc>>procs=loadProcedures(databaseName);
+		
+		Map<String, String> tablesPks=loadTablesPks(databaseName);
+		
+		if(justTables.length>0) {
+			for(String justTable:justTables) {
+				tables.add(justTable);
+			}
+		}else {
+			tables=tablesPks.keySet();
+		}
+		
+		
+		
+		
+		
+		src.append("\n\n");
+		
+		//tables.addAll(views);
+		for(String table:tables) {
+			String pkName=null;
+			String tn=table;
+			if(tablesPks.containsKey(tn)) {
+				pkName=tablesPks.get(tn);
+			}
+			TableSrc tableSrc=new TableSrc(tn,pkName);
+			src.append(tableSrc.toSrc(cls));
+		}
+		
+		for(String table:views) {
+			
+			String tn=table;
+			TableSrc tableSrc=new TableSrc(tn,null);
+			src.append(tableSrc.toSrc(cls));
+		}
+		
+        for(java.util.Map.Entry<String, List<ProcedureParamSrc>> ent : procs.entrySet() ) {
+			
+			String tn=ent.getKey();
+			ProcedureSrc tableSrc=new ProcedureSrc(tn,ent.getValue());
+			src.append(tableSrc.toIntfSrc());
+		}
+		
+		src
+		.append("\tpublic final static Criteria CRITERIA=new Criteria();\n\n")
+		.append("\tpublic  static class Criteria{ \n\n")
+		.append("\t\tprivate Criteria() {} \n\n")
+		.append("\t\tpublic static final Column \n");
+		
+		for(String colName:columnNames) {
+			src.append("\t\t"+ toClassName(colName)+" = new Column(\""+colName+"\"),\n" );
+		}
+		src.deleteCharAt(src.length()-2);
+		src.append( "\t\t;\n\n")
+		.append("\t} \n\n")
+		;
+		src.append("\n\n\n} //end");
+		
+		return src.toString();
+	}
+	
+	
+	
+	public String toImplSrc(Class intfCls,Class cls,String databaseName,String...justTables) throws SQLException {
+		StringBuffer src=new StringBuffer("");
+		if(cls.getPackage()!=null) {
+		 src.append("package "+cls.getPackage().getName()+"; \n\n");
+		}
+		for(ColumnStruct columnStruct : ColumnStruct.values()) {
+			String fieldClsName=columnStruct.fieldCls.getName();
+			if(fieldClsName.startsWith("[L")) {
+				fieldClsName=fieldClsName.substring(2,fieldClsName.length()-1);
+			}
+			src.append("import "+fieldClsName+"; \n");
+		}
+		src.append("import "+DataContext.class.getPackage().getName()+".*; \n")
+		
+		
+		.append("import "+ List.class.getPackage().getName()+".*; \n")
+		
+		.append("import "+ SQLException.class.getName()+"; \n")
+		.append("import "+DataSource.class.getName()+"; \n\n\n")
+		.append("import "+Serializable.class.getName()+"; \n\n\n")
+		;
+		
+		src
+		.append("/*\r\n" + 
+				 
+				" *@Database "+databaseName+"\r\n" + 
+				" *@SrcGener "+thisClass().getName()+"\r\n" + 
+				" *@CreateAt "+Calendar.getInstance().getTime()+"\r\n" + 
+				"*/ \n")
+		
+		;
+		
+		src.append("public class "+cls.getSimpleName()+" extends "+DataSourceContext.class.getName()+" implements "+intfCls.getName()+"{ \n\n");
+		
+		src
+		//.append("\tprivate static final long serialVersionUID=1L;\n\n")
+		.append("\t@Override\r\n" + 
+				"\tprotected Class thisClass() {return this.getClass(); }\n\n")
+		//.append("\t public "+cls.getSimpleName()+"("+DataSource.class.getSimpleName()+"... dataSources)throws "+Exception.class.getSimpleName()+"{ super(dataSources);  } \n\n")
+		;
+		
+		Set<String> tables=new HashSet<>(),views=loadViews(databaseName);
+		
+		Map<String, List<ProcedureParamSrc>>procs=loadProcedures(databaseName);
+		
+		Map<String, String> tablesPks=loadTablesPks(databaseName);
+		
+		if(justTables.length>0) {
+			for(String justTable:justTables) {
+				tables.add(justTable);
+			}
+		}else {
+			tables=tablesPks.keySet();
+		}
+		
+		
+		
+		for(String table:tables) {
+			
+			String pkName="ID";
+			
+			String tn=table.toUpperCase()
+					,cn=toClassName(tn)
+					;
+			if(views.contains(tn))continue;
+			
+			if(tablesPks.containsKey(tn)) {
+				pkName=tablesPks.get(tn);
+			}
+			src.append("\t public final Table<"+cn+"> "+tn+"=createTable("+cn+".class,\""+table+"\",\""+pkName+"\");\n");
+		}
+		
+		src.append("\n\n");
+		
+		for(String table:views) {
+			
+			
+			String tn=table.toUpperCase()
+					,cn=toClassName(tn)
+					;
+			
+			src.append("\t public final View<"+cn+"> "+tn+"=createView("+cn+".class,\""+table+"\");\n");
+		}
+		
+		src.append("\n\n");
+		
+		
+		
+        for(java.util.Map.Entry<String, List<ProcedureParamSrc>> ent : procs.entrySet() ) {
+			
+			String tn=ent.getKey();
+			ProcedureSrc tableSrc=new ProcedureSrc(tn,ent.getValue());
+			src.append(tableSrc.toSrc());
+		}
+	
+		
+		src.append("\n\n\n} //end");
+		
+		return src.toString();
+	}
+	
+	
 	
 	
 	protected abstract Map<String,List<ProcedureParamSrc>> loadProcedures(String databaseName) throws SQLException;
@@ -226,6 +455,33 @@ public abstract class DataContextSrcGener   {
 			this.paramSrcs=paramSrcs;
 		}
 
+		public String toIntfSrc() {
+			// TODO Auto-generated method stub
+			 //StringBuffer context=new StringBuffer("");
+		    	
+			 StringBuffer src=new StringBuffer("");
+				String[] funParams=new String[paramSrcs.size()]
+						,callParams=new String[paramSrcs.size()];
+				for(int i=0;i<paramSrcs.size();i++) {
+					ProcedureParamSrc paramSrc=paramSrcs.get(i);
+					String paramName=paramSrc.paramName.replace("@", "");
+					if(paramSrc.isOutput) {
+						funParams[i]=OutputParam.class.getSimpleName()+"<" +paramSrc.cls.getSimpleName()+"> "+paramName;
+					}else {
+					   funParams[i]=paramSrc.cls.getSimpleName()+" "+paramName;
+					}
+					callParams[i]=","+paramName;
+				}
+				src
+				//.append("\t\t@"+Override.class.getSimpleName()+"\n")
+				.append("\t\tpublic Object[][] "+procName+"(")
+				.append(String.join(",", funParams))
+				.append(") throws SQLException; ")
+				.append("\n");
+		        
+		        return src.toString();
+		}
+		
 		public Object toSrc() {
 			// TODO Auto-generated method stub
 			 StringBuffer context=new StringBuffer("");
@@ -258,8 +514,10 @@ public abstract class DataContextSrcGener   {
 		        
 		        return context;
 		}
+		
+		
 
-		private Object genOveriderSrc() {
+		private String genOveriderSrc() {
 			// TODO Auto-generated method stub
 			StringBuffer src=new StringBuffer("");
 			String[] funParams=new String[paramSrcs.size()]

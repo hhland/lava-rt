@@ -52,9 +52,9 @@ public abstract class DataContextSrcGener   {
 		this.connection=connection;
 	}
 	
-	public void toFile(File srcFile,Class cls,String databaseName,String...justTables) throws SQLException, IOException {
+	public void saveLocalSrcTo(File srcFile,Class cls,String databaseName,String...justTables) throws SQLException, IOException {
 		
-		String src=toSingleSrc(cls, databaseName, justTables);
+		String src=toLocalSrc(cls, databaseName, justTables);
 		srcFile.delete();
 		srcFile.createNewFile();
 		srcFile.setWritable(true);
@@ -63,9 +63,9 @@ public abstract class DataContextSrcGener   {
 		}
 	}
 	
-    public  void toFile(File srcIntf,Class clsIntf,File srcImpl,Class clsImpl,String databaseName,String...justTables) throws SQLException, IOException {
+    public  void saveRpcSrcTo(File srcIntf,File srcImpl,Class clsIntf,Class clsImpl,String databaseName,String...justTables) throws SQLException, IOException {
 		
-    	String src=toIntfSrc(clsIntf, databaseName, justTables);
+    	String src=toRpcIntfSrc(clsIntf, databaseName, justTables);
     	srcIntf.delete();
     	srcIntf.createNewFile();
     	srcIntf.setWritable(true);
@@ -73,7 +73,7 @@ public abstract class DataContextSrcGener   {
 			fw.write(src);
 		}
 		
-		src=toImplSrc(clsIntf,clsImpl, databaseName, justTables);
+		src=toRpcImplSrc(clsIntf,clsImpl, databaseName, justTables);
 		srcImpl.delete();
 		srcImpl.createNewFile();
 		srcImpl.setWritable(true);
@@ -82,7 +82,7 @@ public abstract class DataContextSrcGener   {
 		}
 	}
 	
-	public String toSingleSrc(Class cls,String databaseName,String...justTables) throws SQLException {
+	public String toLocalSrc(Class cls,String databaseName,String...justTables) throws SQLException {
 		StringBuffer src=new StringBuffer("");
 		if(cls.getPackage()!=null) {
 		 src.append("package "+cls.getPackage().getName()+"; \n\n");
@@ -200,7 +200,7 @@ public abstract class DataContextSrcGener   {
 		.append("\t\tpublic static final Column \n");
 		
 		for(String colName:columnNames) {
-			src.append("\t\t"+ toClassName(colName)+" = new Column(\""+colName+"\"),\n" );
+			src.append("\t\t"+ toPropName(colName)+" = new Column(\""+colName+"\"),\n" );
 		}
 		src.deleteCharAt(src.length()-2);
 		src.append( "\t\t;\n\n")
@@ -212,7 +212,7 @@ public abstract class DataContextSrcGener   {
 	}
 	
 	
-	public String toIntfSrc(Class cls,String databaseName,String...justTables) throws SQLException {
+	public String toRpcIntfSrc(Class cls,String databaseName,String...justTables) throws SQLException {
 		StringBuffer src=new StringBuffer("");
 		if(cls.getPackage()!=null) {
 		 src.append("package "+cls.getPackage().getName()+"; \n\n");
@@ -245,7 +245,7 @@ public abstract class DataContextSrcGener   {
 		
 		;
 		
-		src.append("public interface "+cls.getSimpleName()+"{ \n\n");
+		src.append("public interface "+cls.getSimpleName()+" extends "+DataContext.class+"{ \n\n");
 		
 		src
 		.append("\tpublic static final long serialVersionUID=1L;\n\n")
@@ -306,7 +306,7 @@ public abstract class DataContextSrcGener   {
 		.append("\t\tpublic static final Column \n");
 		
 		for(String colName:columnNames) {
-			src.append("\t\t"+ toClassName(colName)+" = new Column(\""+colName+"\"),\n" );
+			src.append("\t\t"+ toPropName(colName)+" = new Column(\""+colName+"\"),\n" );
 		}
 		src.deleteCharAt(src.length()-2);
 		src.append( "\t\t;\n\n")
@@ -319,7 +319,7 @@ public abstract class DataContextSrcGener   {
 	
 	
 	
-	public String toImplSrc(Class intfCls,Class cls,String databaseName,String...justTables) throws SQLException {
+	public String toRpcImplSrc(Class intfCls,Class cls,String databaseName,String...justTables) throws SQLException {
 		StringBuffer src=new StringBuffer("");
 		if(cls.getPackage()!=null) {
 		 src.append("package "+cls.getPackage().getName()+"; \n\n");
@@ -721,6 +721,13 @@ public abstract class DataContextSrcGener   {
 			ret.append("_");
 		}
 		return ret.toString();
+	}
+	
+	
+	public static String toPropName(String name) {
+		String ret=toClassName(name);
+		
+		return ret.substring(0, 1).toLowerCase()+ret.substring(1, ret.length());
 	}
 
 	

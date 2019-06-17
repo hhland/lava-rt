@@ -8,7 +8,7 @@ public interface  DataContext  {
 
 	
 
-	
+	public <E extends Entity> E load(Class<E> cls,Object pk) throws SQLException;
 	
 	
 	

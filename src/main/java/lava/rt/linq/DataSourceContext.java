@@ -36,7 +36,7 @@ import lava.rt.logging.LogFactory;
 
 public abstract class DataSourceContext extends LangObject implements DataContext {
 
-	public static boolean DEBUG = false;
+	
 
 	private final Map<Class, Table> tableMap = new HashMap<>();
 
@@ -87,6 +87,20 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 		View<M> ret = (View<M>) viewMap.get(mcls);
 		return ret;
 	};
+	
+	
+
+	@Override
+	public <E extends Entity> E load(Class<E> cls, Object pk) throws SQLException {
+		// TODO Auto-generated method stub
+		Table<E> table=getTable(cls);
+		E ret=table.load(pk);
+		return ret;
+	}
+
+
+
+
 
 	public <M extends Entity> List<M> executeQueryList(Class<M> cls, String sql, Object... params) throws SQLException {
 		Connection connection = getConnection();

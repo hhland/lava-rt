@@ -8,13 +8,14 @@ public class Column {
 
 	
 	
-	public final String column,asc ,desc ;
+	public final String column,asc ,desc,propName ;
 	
 	
 	public Column(String column) {
 		this.column=column;
 		asc = column + " asc";
 		desc =column + " desc";
+		propName=toPropName(column);
 	}
 	
 	public String eq(Object val) {return sql_eq(true,column,val);}
@@ -33,9 +34,13 @@ public class Column {
 	public String notLike(String val) {return sql_like(false, column,val);}	
 	
 	
+	public String asProp() {
+		return as(propName);
+	}
 	
-	
-	
+	public String as(String name) {
+		return this.column+" as "+name;
+	}
 
 	@Override
 	public String toString() {
@@ -150,6 +155,24 @@ public class Column {
 		return str;
 	}
 	
+	public static String toPropName(String name) {
+		String ret=toClassName(name);
+		
+		return ret.substring(0, 1).toLowerCase()+ret.substring(1, ret.length());
+	}
 	
+	protected static String toClassName(String name) {
+		StringBuffer ret=new StringBuffer("");
+		for(String _colName:name.split("_")) {
+			ret
+			.append(_colName.substring(0, 1).toUpperCase())
+			.append(_colName.substring(1).toLowerCase());
+			
+		}
+		if(name.endsWith("_")) {
+			ret.append("_");
+		}
+		return ret.toString();
+	}
 	
 }

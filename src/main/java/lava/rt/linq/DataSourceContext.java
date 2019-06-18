@@ -2,6 +2,8 @@ package lava.rt.linq;
 
 import static org.junit.Assert.assertNotNull;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.sql.CallableStatement;
@@ -34,7 +36,7 @@ import lava.rt.common.SqlCommon;
 import lava.rt.logging.Log;
 import lava.rt.logging.LogFactory;
 
-public abstract class DataSourceContext extends LangObject implements DataContext {
+public abstract class DataSourceContext extends LangObject implements DataContext,Closeable {
 
 	
 
@@ -48,20 +50,11 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 	
 	
 	public void setDataSource(DataSource... dataSources) throws Exception{
-		PoolList<Connection> connections = new PoolList<Connection>(dataSources.length) {
-
-			@Override
-			public Connection newSingle(int i) throws Exception {
-				// TODO Auto-generated method stub
-				return dataSources[i].getConnection();
-			}
-
-		};
-
-		localConnection.set(connections);
+		this.dataSources=dataSources;
+		
 	}
 	
-	
+	DataSource[] dataSources;
 
 	
 
@@ -202,7 +195,7 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 
 	public int executeUpdate(String sql, Object... param) throws SQLException {
 		int re = 0;
-		PoolList<Connection> connections = localConnection.get();
+		PoolList<Connection> connections = getConnections();
 		if (connections == null) {
 			//printErr("error:" + sql);
 		} else if (connections.size() == 1) {
@@ -236,7 +229,7 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 
 	public int executeInsertReturnPk(String sql, Object... param) throws SQLException {
 		int pk = 0;
-		for (Connection connection : localConnection.get()) {
+		Connection connection = getConnection();
 
 			try (PreparedStatement preparedStatement = connection.prepareStatement(sql,
 					Statement.RETURN_GENERATED_KEYS);) {
@@ -251,7 +244,7 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 					}
 				}
 			}
-		}
+		
 		return pk;
 	}
 
@@ -259,7 +252,7 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 	
 	public int executeBatch(String sql, Object[]... params) throws SQLException {
 		int re = 0;
-		PoolList<Connection> connections = localConnection.get();
+		PoolList<Connection> connections = getConnections();
 		if (connections.size() == 1) {
 			re += SqlCommon.executeBatch(connections.get(0), sql, params);
 		} else if (connections.size() > 1) {
@@ -446,9 +439,36 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 		return ret;
 	}
 
+	protected PoolList<Connection> getConnections() throws SQLException{
+       PoolList<Connection> connections = localConnection.get();
+		
+		if(connections==null) {
+			
+			 try {
+				connections = new PoolList<Connection>(dataSources.length) {
+
+					@Override
+					public Connection newSingle(int i) throws Exception {
+						// TODO Auto-generated method stub
+						return dataSources[i].getConnection();
+					}
+
+				};
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				throw new SQLException(e);
+			}
+
+			localConnection.set(connections);
+			
+		}
+		return connections;
+	}
+	
 	@SuppressWarnings("resource")
 	protected Connection getConnection() throws SQLException {
-		PoolList<Connection> connections = localConnection.get();
+		PoolList<Connection> connections = getConnections();
+		
 		Connection ret = connections.getNext();
 		while (!ret.isValid(0)) {
 			ret = connections.getNext();
@@ -534,6 +554,29 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 		return ret.toArray(new Object[ret.size()][cc]);
 
 	}
+
+
+
+
+
+	@Override
+	public void close() throws IOException {
+		// TODO Auto-generated method stub
+		for(Connection conn:localConnection.get()) {
+			try {
+				conn.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				throw new IOException(e);
+			}
+		}
+	}
+
+
+
+
+
+	
 	
 	
 

@@ -58,8 +58,8 @@ public class DataContextMain {
 				   ,intfFile=new File(dir+"IJC2010_ENTERPRISE_DB.java")
 						   ,implFile=new File(dir+"JC2010_ENTERPRISE_DBimpl.java")
 				   ;
-		  // gener.toFile(srcFile, JC2010_ENTERPRISE_DB.class, "JC2010_ENTERPRISE_DB");
-		   //gener.toFile(intfFile, IJC2010_ENTERPRISE_DB.class,implFile,JC2010_ENTERPRISE_DBImpl.class, "JC2010_ENTERPRISE_DB");
+		  gener.saveLocalSrcTo(srcFile, JC2010_ENTERPRISE_DB.class, "JC2010_ENTERPRISE_DB");
+		   gener.saveRpcSrcTo(intfFile,implFile, IJC2010_ENTERPRISE_DB.class,JC2010_ENTERPRISE_DBImpl.class, "JC2010_ENTERPRISE_DB");
 		   //gener.toSrc(JC2010_ENTERPRISE_DB.class, "JC2010_ENTERPRISE_DB", "TEST_");
 		   //System.out.println(src);
 		   JC2010_ENTERPRISE_DB db=new JC2010_ENTERPRISE_DB();

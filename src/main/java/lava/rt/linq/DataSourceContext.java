@@ -49,12 +49,25 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 	
 	
 	
+	public DataSourceContext() {
+		super();
+	}
+
+	public DataSourceContext(DataSource... dataSources) {
+		super();
+		this.dataSources = dataSources;
+	}
+
 	public void setDataSource(DataSource... dataSources) throws Exception{
 		this.dataSources=dataSources;
 		
 	}
 	
-	DataSource[] dataSources;
+	private DataSource[] dataSources;
+
+	protected  DataSource[] getDataSources() {
+		return dataSources;
+	}
 
 	
 
@@ -175,11 +188,17 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 						String colName = metaData.getColumnName(i + 1), colValue = colObject.toString();
 
 						ret.append(colName).append(":");
-						if (colObject instanceof String || colObject instanceof java.sql.Date) {
+						if (colObject instanceof String 
+								|| colObject instanceof java.sql.Date
+								|| colObject instanceof Date
+								) {
 							ret.append("\"").append(colValue).append("\"");
 
 						} else {
 							ret.append(colValue);
+						}
+						if(i<cc-1) {
+							ret.append(",");
 						}
 
 					}
@@ -443,14 +462,14 @@ public abstract class DataSourceContext extends LangObject implements DataContex
        PoolList<Connection> connections = localConnection.get();
 		
 		if(connections==null) {
-			
+			 DataSource[] dss=getDataSources();
 			 try {
-				connections = new PoolList<Connection>(dataSources.length) {
+				connections = new PoolList<Connection>(dss.length) {
 
 					@Override
 					public Connection newSingle(int i) throws Exception {
 						// TODO Auto-generated method stub
-						return dataSources[i].getConnection();
+						return dss[i].getConnection();
 					}
 
 				};
@@ -470,9 +489,7 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 		PoolList<Connection> connections = getConnections();
 		
 		Connection ret = connections.getNext();
-		while (!ret.isValid(0)) {
-			ret = connections.getNext();
-		}
+		
 		return ret;
 	}
 

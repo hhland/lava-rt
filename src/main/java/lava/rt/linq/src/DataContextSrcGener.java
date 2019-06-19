@@ -63,7 +63,7 @@ public abstract class DataContextSrcGener   {
 		}
 	}
 	
-    public  void saveRpcSrcTo(File srcIntf,File srcImpl,Class clsIntf,Class clsImpl,String databaseName,String...justTables) throws SQLException, IOException {
+    public  void saveRpcIntfSrcTo(File srcIntf,Class clsIntf,String databaseName,String...justTables) throws SQLException, IOException {
 		
     	String src=toRpcIntfSrc(clsIntf, databaseName, justTables);
     	srcIntf.delete();
@@ -73,7 +73,12 @@ public abstract class DataContextSrcGener   {
 			fw.write(src);
 		}
 		
-		src=toRpcImplSrc(clsIntf,clsImpl, databaseName, justTables);
+		
+	}
+    
+     public  void saveRpcImplSrcTo(File srcImpl,Class clsIntf,Class clsImpl,String databaseName,String...justTables) throws SQLException, IOException {
+		
+    	 String src=toRpcImplSrc(clsIntf,clsImpl, databaseName, justTables);
 		srcImpl.delete();
 		srcImpl.createNewFile();
 		srcImpl.setWritable(true);
@@ -245,7 +250,7 @@ public abstract class DataContextSrcGener   {
 		
 		;
 		
-		src.append("public interface "+cls.getSimpleName()+" extends "+DataContext.class+"{ \n\n");
+		src.append("public interface "+cls.getSimpleName()+" extends "+DataContext.class.getName()+"{ \n\n");
 		
 		src
 		.append("\tpublic static final long serialVersionUID=1L;\n\n")

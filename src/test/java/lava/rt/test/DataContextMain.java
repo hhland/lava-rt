@@ -20,7 +20,7 @@ import java.util.Random;
 import javax.sql.DataSource;
 
 
-import lava.rt.linq.Criteria;
+import lava.rt.linq.Criterias;
 import lava.rt.linq.OutputParam;
 import lava.rt.linq.Table;
 import lava.rt.linq.src.DataContextSrcGener;
@@ -58,8 +58,9 @@ public class DataContextMain {
 				   ,intfFile=new File(dir+"IJC2010_ENTERPRISE_DB.java")
 						   ,implFile=new File(dir+"JC2010_ENTERPRISE_DBimpl.java")
 				   ;
-		  gener.saveLocalSrcTo(srcFile, JC2010_ENTERPRISE_DB.class, "JC2010_ENTERPRISE_DB");
-		   gener.saveRpcSrcTo(intfFile,implFile, IJC2010_ENTERPRISE_DB.class,JC2010_ENTERPRISE_DBImpl.class, "JC2010_ENTERPRISE_DB");
+		  // gener.saveLocalSrcTo(srcFile, JC2010_ENTERPRISE_DB.class, "JC2010_ENTERPRISE_DB");
+		   gener.saveRpcIntfSrcTo(intfFile, IJC2010_ENTERPRISE_DB.class, "JC");
+		   gener.saveRpcImplSrcTo(implFile, IJC2010_ENTERPRISE_DB.class,JC2010_ENTERPRISE_DBImpl.class, "JC");
 		   //gener.toSrc(JC2010_ENTERPRISE_DB.class, "JC2010_ENTERPRISE_DB", "TEST_");
 		   //System.out.println(src);
 		   JC2010_ENTERPRISE_DB db=new JC2010_ENTERPRISE_DB();

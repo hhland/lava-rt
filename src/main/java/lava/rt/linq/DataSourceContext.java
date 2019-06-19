@@ -168,6 +168,7 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 	public String executeQueryJsonArray(String sql, Object... params) throws SQLException {
 
 		StringBuffer ret = new StringBuffer("[");
+		int size=0;
 		try (PreparedStatement preparedStatement = getConnection().prepareStatement(sql);) {
 			for (int i = 0; i < params.length; i++) {
 				preparedStatement.setObject(i + 1, params[i]);
@@ -177,6 +178,7 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 				int cc = metaData.getColumnCount();
 				// String[] row=new String[cc];
 				// Map<String, Object> rowMap = null;
+				
 				while (resultSet.next()) {
 					ret.append("{");
 
@@ -187,7 +189,7 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 						}
 						String colName = metaData.getColumnName(i + 1), colValue = colObject.toString();
 
-						ret.append(colName).append(":");
+						ret.append("\"").append(colName).append("\"").append(":");
 						if (colObject instanceof String 
 								|| colObject instanceof java.sql.Date
 								|| colObject instanceof Date
@@ -204,12 +206,15 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 					}
 
 					ret.append("},");
+					size++;
 					// list.add(rowMap);
 				}
 			}
 		}
-		
-		ret.append("]");
+		if(size>0) {
+			ret.deleteCharAt(ret.length()-1);
+		}
+		ret.append("],size:").append(size);
 		return ret.toString();
 	}
 

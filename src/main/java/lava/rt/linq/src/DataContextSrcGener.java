@@ -356,7 +356,11 @@ public abstract class DataContextSrcGener   {
 		
 		;
 		
+		beforeRpcImplSrcClass(src);
+		
 		src.append("public class "+cls.getSimpleName()+" extends "+DataSourceContext.class.getName()+" implements "+intfCls.getName()+"{ \n\n");
+		
+		innerRpcImplSrcClass(src);
 		
 		src
 		//.append("\tprivate static final long serialVersionUID=1L;\n\n")
@@ -428,6 +432,16 @@ public abstract class DataContextSrcGener   {
 	
 	
 	
+	protected void innerRpcImplSrcClass(StringBuffer src) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	protected void beforeRpcImplSrcClass(StringBuffer src) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	protected abstract Map<String,List<ProcedureParamSrc>> loadProcedures(String databaseName) throws SQLException;
 
 	public abstract Set<String> loadViews(String databaseName) throws SQLException;

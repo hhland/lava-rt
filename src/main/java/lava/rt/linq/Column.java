@@ -8,13 +8,16 @@ public class Column {
 
 	
 	
-	public final String column,asc ,desc,propName ;
+	public final String column,asc ,desc,propName,groupBy,orderBy,distinct ;
 	
 	
 	public Column(String column) {
 		this.column=column;
 		asc = column + " asc";
 		desc =column + " desc";
+		groupBy= "group by "+column;
+		orderBy= "order by "+column;
+		distinct="distinct "+column;
 		propName=toPropName(column);
 	}
 	
@@ -32,6 +35,8 @@ public class Column {
 	public <T> String notBetween(T from,T to) {return sql_between(false,column,from,to);}
 	public String like(String val) {return sql_like(true, column,val);}
 	public String notLike(String val) {return sql_like(false, column,val);}	
+	
+	
 	
 	
 	public String asProp() {

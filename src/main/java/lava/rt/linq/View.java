@@ -38,6 +38,8 @@ public   class  View<M extends Entity> {
 			boolean isStatic = ReflectCommon.isStatic(field);
 			if(isStatic)continue;
 			this.entryFieldMap.put(ent.getKey(), ent.getValue());
+			Column column=new Column(ent.getKey());
+			Criterias.addColumn(entryClass, column);
 		}
 		
 		
@@ -100,7 +102,10 @@ public   class  View<M extends Entity> {
 
 
 
-
+	public View<M> duplicate(String tableName){
+		View<M> ret=new View<>(this.dataContext, this.entryClass, tableName);
+		return ret;
+	}
 
 	
 	

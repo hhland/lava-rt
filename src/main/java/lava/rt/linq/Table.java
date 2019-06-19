@@ -303,5 +303,10 @@ public class Table<M extends Entity> extends View<M> {
 		}
 		return ret;
 	}
+	
+	public Table<M> duplicate(String tableName){
+		Table<M> ret=new Table<>(this.dataContext, this.entryClass, tableName, pkName);
+		return ret;
+	}
 
 }

@@ -203,11 +203,12 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 
 					}
 
-					ret.append("}");
+					ret.append("},");
 					// list.add(rowMap);
 				}
 			}
 		}
+		
 		ret.append("]");
 		return ret.toString();
 	}

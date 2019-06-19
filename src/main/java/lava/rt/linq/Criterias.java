@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import lava.rt.common.TextCommon;
-import net.sourceforge.jtds.jdbc.ColInfo;
+
 
 public final class Criterias {
 
@@ -76,7 +76,7 @@ public final class Criterias {
 		columnSet.put(column.column,column);
 	}
 	
-	protected static Map<String,Column> getColumnMap(Class cls){
+	public static Map<String,Column> getColumnMap(Class cls){
 		return clsColumnsMap.get(cls);
 	}
 	

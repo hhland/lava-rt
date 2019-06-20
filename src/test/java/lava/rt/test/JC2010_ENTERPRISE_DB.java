@@ -482,6 +482,14 @@ private static final long serialVersionUID = JC2010_ENTERPRISE_DB.serialVersionU
 		Varchar_ = new Column("VARCHAR_")
 		;
 
+	}
+
+
+
+	@Override
+	protected DataSource[] getDataSources() {
+		// TODO Auto-generated method stub
+		return null;
 	} 
 
 

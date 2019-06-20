@@ -63,11 +63,11 @@ public class DataContextMain {
 		   gener.saveRpcImplSrcTo(implFile, IJC2010_ENTERPRISE_DB.class,JC2010_ENTERPRISE_DBImpl.class, "JC");
 		   //gener.toSrc(JC2010_ENTERPRISE_DB.class, "JC2010_ENTERPRISE_DB", "TEST_");
 		   //System.out.println(src);
-		   JC2010_ENTERPRISE_DB db=new JC2010_ENTERPRISE_DB();
-		   db.setDataSource(jds,jds2);
+		  JC2010_ENTERPRISE_DB db=new JC2010_ENTERPRISE_DB();
+		  // db.setDataSource(jds,jds2);
 		   
 		   JC2010_ENTERPRISE_DBImpl db0=new JC2010_ENTERPRISE_DBImpl();
-		   db0.setDataSource(jds,jds2);
+		  // db0.setDataSource(jds,jds2);
 		   
 		   IJC2010_ENTERPRISE_DB idb=db0;
 		   

@@ -1,10 +1,10 @@
 package lava.rt.linq;
 
-import static org.junit.Assert.assertNotNull;
+
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.PrintStream;
+
 import java.lang.reflect.Field;
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.sql.DataSource;
-import javax.sql.PooledConnection;
+
 
 import lava.rt.base.LangObject;
 
@@ -53,21 +53,11 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 		super();
 	}
 
-	public DataSourceContext(DataSource... dataSources) {
-		super();
-		this.dataSources = dataSources;
-	}
-
-	public void setDataSource(DataSource... dataSources) throws Exception{
-		this.dataSources=dataSources;
-		
-	}
 	
-	private DataSource[] dataSources;
+	
+	
 
-	protected  DataSource[] getDataSources() {
-		return dataSources;
-	}
+	protected abstract  DataSource[] getDataSources() ;
 
 	
 
@@ -591,7 +581,7 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 		return ret;
 	}
 
-	protected PoolList<Connection> getConnections() throws SQLException{
+	protected final PoolList<Connection> getConnections() throws SQLException{
        PoolList<Connection> connections = localConnection.get();
 		
 		if(connections==null) {
@@ -618,7 +608,7 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 	}
 	
 	@SuppressWarnings("resource")
-	protected Connection getConnection() throws SQLException {
+	protected final Connection getConnection() throws SQLException {
 		PoolList<Connection> connections = getConnections();
 		
 		Connection ret = connections.getNext();

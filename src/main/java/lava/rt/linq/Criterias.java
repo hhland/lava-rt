@@ -31,7 +31,8 @@ public abstract class Criterias {
 	
 	public abstract String toDate(Date date);
 	
-    protected static final Map<Class,String> clsJoinAsPropMap=new HashMap<>();
+    protected static final Map<Class,String> clsJoinAsPropMap=new HashMap<>()
+   , clsTableMap=new HashMap<>();
 	
 	public final static Criterias mssql=new Criterias() {
 		
@@ -174,18 +175,22 @@ public abstract class Criterias {
 	}
 	
 	public static String tableName(Class cls){
-		String para=cls.getSimpleName();
-        StringBuilder sb=new StringBuilder(para);
-        int temp=0;//定位
+		String ret=clsTableMap.get(cls);
+		if (ret == null) {
+			String para = cls.getSimpleName();
+			StringBuilder sb = new StringBuilder(para);
+			int temp = 0;// 定位
+
+			for (int i = 0; i < para.length(); i++) {
+				if (Character.isUpperCase(para.charAt(i)) && i > 0) {
+					sb.insert(i + temp, "_");
+					temp += 1;
+				}
+			}
+			ret = sb.toString().toUpperCase();
+		}
         
-        for(int i=0;i<para.length();i++){
-              if(Character.isUpperCase(para.charAt(i))&&i>0){
-                    sb.insert(i+temp, "_");
-                    temp+=1;
-              }
-        }
-        
-        return sb.toString().toUpperCase();
+        return ret;
     }
 
 	

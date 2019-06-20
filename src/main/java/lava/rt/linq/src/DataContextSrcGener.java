@@ -42,7 +42,7 @@ import lava.rt.linq.View;
 
 public abstract class DataContextSrcGener   {
 
-	public  final long serialVersionUID=1L;
+	public  long serialVersionUID=1L;
 	
 	protected abstract Class<? extends DataContextSrcGener> thisClass();
 	
@@ -104,40 +104,46 @@ public abstract class DataContextSrcGener   {
 		if(cls.getPackage()!=null) {
 		 src.append("package "+cls.getPackage().getName()+"; \n\n");
 		}
-		for(ColumnStruct columnStruct : ColumnStruct.values()) {
-			String fieldClsName=columnStruct.fieldCls.getName();
-			if(fieldClsName.startsWith("[L")) {
-				fieldClsName=fieldClsName.substring(2,fieldClsName.length()-1);
-			}
-			src.append("import "+fieldClsName+"; \n");
-		}
+		
 		src.append("import "+DataContext.class.getPackage().getName()+".*; \n")
 		
 		
 		.append("import "+ List.class.getPackage().getName()+".*; \n")
+		.append("import "+ BigDecimal.class.getPackage().getName()+".*; \n")
 		
-		.append("import "+ SQLException.class.getName()+"; \n")
-		.append("import "+DataSource.class.getName()+"; \n\n\n")
-		.append("import "+Serializable.class.getName()+"; \n\n\n")
+		.append("import "+ SQLException.class.getPackage().getName()+".*; \n")
+		.append("import "+DataSource.class.getPackage().getName()+".*; \n\n\n")
+		.append("import "+Serializable.class.getPackage().getName()+".*; \n\n\n")
 		;
 		
 		
 		
 		
-		onClassSrcOutter(src);
+		onClassSrcOutter(src,cls);
 		
 		
 		src.append("public class "+cls.getSimpleName()+" extends "+DataSourceContext.class.getName()+"{ \n\n");
 		
 		
-		onClassSrcInner(src);
+		onClassSrcInner(src,cls);
 		
 		
 		src
+		.append("\tDataSource[] dataSources;\r\n" + 
+				"		\r\n" + 
+				//"	 public "+cls.getSimpleName()+"(DataSource dataSource){ dataSources=new DataSource[] {dataSource}; } \r\n" + 
+				"	 \r\n" + 
+				"	 @Override\r\n" + 
+				"		protected DataSource[] getDataSources() {\r\n" + 
+				"			// TODO Auto-generated method stub\r\n" + 
+				"			return dataSources;\r\n" + 
+				"		}\n\n")
+		
 		.append("\tprivate static final long serialVersionUID="+serialVersionUID+";\n\n")
 		.append("\t@Override\r\n" + 
 				"\tprotected Class thisClass() {return this.getClass(); }\n\n")
-		.append("\t public "+cls.getSimpleName()+"("+DataSource.class.getSimpleName()+"... dataSources)throws "+Exception.class.getSimpleName()+"{ super(dataSources);  } \n\n")
+		//.append("\t public "+cls.getSimpleName()+"("+DataSource.class.getSimpleName()+" dataSource)throws "+Exception.class.getSimpleName()+"{ this.dataSources=new DataSource[]{dataSource};  } \n\n")
+		.append("\t public "+cls.getSimpleName()+"("+DataSource.class.getSimpleName()+"... dataSources)throws "+Exception.class.getSimpleName()+"{ this.dataSources=dataSources;  } \n\n")
 		;
 		
 		Set<String> tables=new HashSet<>(),views=loadViews(databaseName);
@@ -229,20 +235,20 @@ public abstract class DataContextSrcGener   {
 	}
 	
 	
-	private void onClassSrcInner(StringBuffer src) {
+	private void onClassSrcInner(StringBuffer src,Class contextCls) {
 		// TODO Auto-generated method stub
 		src.append("//onClassSrcInner----start\n\n");
-		srcEvent.onClassSrcInner(src);
-		src.append("//onClassSrcInner----end\n\n");
+		srcEvent.onClassSrcInner(src,contextCls);
+		src.append("\n\n//onClassSrcInner----end\n\n");
 	}
 
 
 
-	private void onClassSrcOutter(StringBuffer src) {
+	private void onClassSrcOutter(StringBuffer src,Class contextCls) {
 		// TODO Auto-generated method stub
 		src.append("//onClassSrcOutter----start\n\n");
-		srcEvent.onClassSrcOutter(src);
-		src.append("//onClassSrcOutter----end\n\n");
+		srcEvent.onClassSrcOutter(src,contextCls);
+		src.append("\n");
 	}
 
 
@@ -252,22 +258,16 @@ public abstract class DataContextSrcGener   {
 		if(cls.getPackage()!=null) {
 		 src.append("package "+cls.getPackage().getName()+"; \n\n");
 		}
-		for(ColumnStruct columnStruct : ColumnStruct.values()) {
-			String fieldClsName=columnStruct.fieldCls.getName();
-			if(fieldClsName.startsWith("[L")) {
-				fieldClsName=fieldClsName.substring(2,fieldClsName.length()-1);
-			}
-			src.append("import "+fieldClsName+"; \n");
-		}
+		
 		src
 		.append("import "+DataContext.class.getPackage().getName()+".*; \n")
 		
 		
 		.append("import "+ List.class.getPackage().getName()+".*; \n")
 		
-		.append("import "+ SQLException.class.getName()+"; \n")
-		//.append("import "+DataSource.class.getName()+"; \n\n\n")
-		.append("import "+Serializable.class.getName()+"; \n\n\n")
+		.append("import "+ SQLException.class.getPackage().getName()+".*; \n")
+		.append("import "+BigDecimal.class.getPackage().getName()+".*; \n\n\n")
+		.append("import "+Serializable.class.getPackage().getName()+".*; \n\n\n")
 		;
 		
 		
@@ -354,32 +354,26 @@ public abstract class DataContextSrcGener   {
 		
 		
 		
-		for(ColumnStruct columnStruct : ColumnStruct.values()) {
-			String fieldClsName=columnStruct.fieldCls.getName();
-			if(fieldClsName.startsWith("[L")) {
-				fieldClsName=fieldClsName.substring(2,fieldClsName.length()-1);
-			}
-			src.append("import "+fieldClsName+"; \n");
-		}
+		
 		src.append("import "+DataContext.class.getPackage().getName()+".*; \n")
 		
 		
 		.append("import "+ List.class.getPackage().getName()+".*; \n")
 		
-		.append("import "+ SQLException.class.getName()+"; \n")
-		.append("import "+DataSource.class.getName()+"; \n\n\n")
-		.append("import "+Serializable.class.getName()+"; \n\n\n")
+		.append("import "+ SQLException.class.getPackage().getName()+".*; \n")
+		.append("import "+DataSource.class.getPackage().getName()+".*; \n\n\n")
+		//.append("import "+Serializable.class.getName()+"; \n\n\n")
 		;
 		
 		
 		
-		onClassSrcOutter(src);
+		onClassSrcOutter(src,cls);
 		
 		
 		src.append("public class "+cls.getSimpleName()+" extends "+DataSourceContext.class.getName()+" implements "+intfCls.getName()+"{ \n\n");
 		
 		
-		onClassSrcInner(src);
+		onClassSrcInner(src,cls);
 		
 		src
 		//.append("\tprivate static final long serialVersionUID=1L;\n\n")
@@ -626,7 +620,7 @@ public abstract class DataContextSrcGener   {
 	    	//.append("\t\t private static final long serialVersionUID = 1L; ")
 	    	//.append("\t public "+className+"(){ super(); }")
 	    	.append("\n\n")
-	    	.append("private static final long serialVersionUID = "+dcClass.getSimpleName()+".serialVersionUID;")
+	    	.append("\t\tprivate static final long serialVersionUID = "+dcClass.getSimpleName()+".serialVersionUID;")
 	    	.append("\n\n")
 	    	.append(this.genColsSrc())
 	    	.append("\n\n")
@@ -694,14 +688,14 @@ public abstract class DataContextSrcGener   {
 		
 	}
 	
-	protected class SrcEvent{
+	public class SrcEvent{
 		
-		protected void onClassSrcOutter(StringBuffer src) {
+		protected void onClassSrcOutter(StringBuffer src,Class contextCls) {
 			// TODO Auto-generated method stub
 			
 		}
 
-		protected void onClassSrcInner(StringBuffer src) {
+		protected void onClassSrcInner(StringBuffer src,Class contextCls) {
 			// TODO Auto-generated method stub
 			
 		}
@@ -781,5 +775,12 @@ public abstract class DataContextSrcGener   {
 		return ret.substring(0, 1).toLowerCase()+ret.substring(1, ret.length());
 	}
 
+	
+	public static String refSrcPath(Class cls) {
+		String ret=cls.getName();
+		ret=ret.replace(".", "/");
+		ret+=".java";
+		return ret;
+	}
 	
 }

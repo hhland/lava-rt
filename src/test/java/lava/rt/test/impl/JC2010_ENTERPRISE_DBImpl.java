@@ -41,6 +41,17 @@ public class JC2010_ENTERPRISE_DBImpl extends lava.rt.linq.DataSourceContext imp
 
 
 			 return callProcedure("getColumns",id,name,age);
+		}
+
+
+
+
+
+
+		@Override
+		protected DataSource[] getDataSources() {
+			// TODO Auto-generated method stub
+			return null;
 		} 
 
 

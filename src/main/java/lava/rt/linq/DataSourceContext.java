@@ -153,6 +153,12 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 					list.add(m);
 				}
 			}
+		}catch(SQLException seq) {
+			Log log=getLog();
+			log.error(seq);
+			log.error("sql:"+sql+"\nparams:");
+			log.error(params);
+			throw seq;
 		}
 
 		return list;
@@ -160,12 +166,96 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 
 	public Object[][] executeQueryArray(String sql, Object... params) throws SQLException {
 		Connection connection = getConnection();
-		Object[][] re = SqlCommon.executeQueryArray(connection, sql, params);
-
+		Object[][] re =null;
+		try {
+		re=SqlCommon.executeQueryArray(connection, sql, params);
+		}
+		catch(SQLException seq) {
+			Log log=getLog();
+			log.error(seq);
+			log.error("sql:"+sql+"\nparams:");
+			log.error(params);
+			throw seq;
+		}
 		return re;
 	}
-
+	
 	public String executeQueryJsonArray(String sql, Object... params) throws SQLException {
+
+		StringBuffer ret = new StringBuffer("[");
+		String[] columns=null;
+		int size=0;
+		try (PreparedStatement preparedStatement = getConnection().prepareStatement(sql);) {
+			for (int i = 0; i < params.length; i++) {
+				preparedStatement.setObject(i + 1, params[i]);
+			}
+			try (ResultSet resultSet = preparedStatement.executeQuery();) {
+				ResultSetMetaData metaData = resultSet.getMetaData();
+				int cc = metaData.getColumnCount();
+				// String[] row=new String[cc];
+				// Map<String, Object> rowMap = null;
+				columns=new String[cc];
+				for (int i = 0; i < cc; i++) {
+					String colName = metaData.getColumnName(i + 1);
+					columns[i]=colName;
+				}
+				
+				while (resultSet.next()) {
+					ret.append("[");
+
+					for (int i = 0; i < cc; i++) {
+						Object colObject = resultSet.getObject(i + 1);
+						
+						//ret.append("\"").append(colName).append("\"").append(":");
+						if(colObject ==null) {
+							ret.append("null"); 
+						}else if (colObject instanceof String 
+								|| colObject instanceof java.sql.Date
+								|| colObject instanceof Date
+								) {
+							String colValue = colObject.toString();
+							ret.append("\"").append(colValue).append("\"");
+
+						} else {
+							String colValue = colObject.toString();
+							ret.append(colValue);
+						}
+						if(i<cc-1) {
+							ret.append(",");
+						}
+
+					}
+
+					ret.append("],");
+					size++;
+					// list.add(rowMap);
+				}
+			}
+		}catch(SQLException seq) {
+			Log log=getLog();
+			log.error(seq);
+			log.error("sql:"+sql+"\nparams:");
+			log.error(params);
+			throw seq;
+		}
+		if(size>0) {
+			ret.deleteCharAt(ret.length()-1);
+		}
+		ret.append("],size:").append(size)
+		.append(",columns:[\"")
+		.append(String.join("\",\"", columns))
+		.append("\"]")
+		;
+		
+		return ret.toString();
+	}
+
+	protected Log getLog() {
+		// TODO Auto-generated method stub
+		return LogFactory.SYSTEM.getLog(this.thisClass());
+	}
+
+	public String executeQueryJsonList(String sql, Object... params) throws SQLException {
 
 		StringBuffer ret = new StringBuffer("[");
 		int size=0;
@@ -210,6 +300,12 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 					// list.add(rowMap);
 				}
 			}
+		}catch(SQLException seq) {
+			Log log=getLog();
+			log.error(seq);
+			log.error("sql:"+sql+"\nparams:");
+			log.error(params);
+			throw seq;
 		}
 		if(size>0) {
 			ret.deleteCharAt(ret.length()-1);
@@ -224,7 +320,15 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 		if (connections == null) {
 			//printErr("error:" + sql);
 		} else if (connections.size() == 1) {
+			try {
 			re += SqlCommon.executeUpdate(connections.get(0), sql, param);
+			}catch(SQLException seq) {
+				Log log=getLog();
+				log.error(seq);
+				log.error("sql:"+sql+"\nparams:");
+				log.error(param);
+				throw seq;
+			}
 		} else if (connections.size() > 1) {
 			AtomicInteger are = new AtomicInteger(0);
 			AtomicReference<SQLException> sex = new AtomicReference<>();
@@ -232,16 +336,13 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 
 				try {
 					are.getAndAdd(SqlCommon.executeUpdate(conn, sql, param));
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					String errMsg = "errorSql:" + sql;
-					errMsg += "\nerrorParam:[";
-					for (Object _param : param) {
-						errMsg += _param + ",";
-					}
-					errMsg += "]";
-					//printErr(errMsg);
-					sex.set(e);
+				} catch (SQLException seq) {
+					Log log=getLog();
+					log.error(seq);
+					log.error("sql:"+sql+"\nparams:");
+					log.error(param);
+					
+					sex.set(seq);
 				}
 			});
 			if (sex.get() != null)
@@ -268,6 +369,12 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 						pk = resultSet.getInt(1);
 					}
 				}
+			}catch(SQLException seq) {
+				Log log=getLog();
+				log.error(seq);
+				log.error("sql:"+sql+"\nparams:");
+				log.error(param);
+				throw seq;
 			}
 		
 		return pk;
@@ -279,7 +386,15 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 		int re = 0;
 		PoolList<Connection> connections = getConnections();
 		if (connections.size() == 1) {
+			try {
 			re += SqlCommon.executeBatch(connections.get(0), sql, params);
+			} catch(SQLException seq) {
+				Log log=getLog();
+				log.error(seq);
+				log.error("sql:"+sql+"\nparams:");
+				log.error(params);
+				throw seq;
+			}
 		} else if (connections.size() > 1) {
 			AtomicInteger are = new AtomicInteger(0);
 			AtomicReference<SQLException> sex = new AtomicReference<>();
@@ -287,9 +402,12 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 
 				try {
 					are.getAndAdd(SqlCommon.executeBatch(conn, sql, params));
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					sex.set(e);
+				} catch(SQLException seq) {
+					Log log=getLog();
+					log.error(seq);
+					log.error("sql:"+sql+"\nparams:");
+					log.error(params);
+					sex.set(seq);
 				}
 			});
 			if (sex.get() != null)

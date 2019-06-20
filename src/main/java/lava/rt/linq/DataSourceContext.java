@@ -237,14 +237,14 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 			log.error("sql:"+sql+"\nparams:");
 			log.error(params);
 			throw seq;
-		}
+		} 
 		if(size>0) {
 			ret.deleteCharAt(ret.length()-1);
 		}
-		ret.append("],size:").append(size)
-		.append(",columns:[\"")
+		ret
+		.append("],columns:[\"")
 		.append(String.join("\",\"", columns))
-		.append("\"]")
+		.append("\"],size:").append(size)
 		;
 		
 		return ret.toString();

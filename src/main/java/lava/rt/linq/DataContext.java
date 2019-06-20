@@ -17,6 +17,8 @@ public interface  DataContext  {
 	public Object[][] executeQueryArray(String sql, Object... params) throws SQLException ;
 
 	public String executeQueryJsonArray(String sql, Object... params) throws SQLException ;
+	
+	public String executeQueryJsonList(String sql, Object... params) throws SQLException ;
 
 	public int executeUpdate(String sql, Object... param) throws SQLException ;
 

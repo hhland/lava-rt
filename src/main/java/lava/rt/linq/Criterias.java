@@ -20,16 +20,16 @@ import lava.rt.common.TextCommon;
 public abstract class Criterias {
 
 	
-	abstract String concat(Collection<String> columns);
+	public abstract String concat(Collection<String> columns);
 	
-	abstract String toPaging(String sql,int start,int size);
+	public abstract String toPaging(String sql,int start,int size);
 	
     protected static final Map<Class,String> clsJoinAsPropMap=new HashMap<>();
 	
 	public final static Criterias mssql=new Criterias() {
 		
 		@Override
-		String toPaging(String sql,int start,int size) {
+		public String toPaging(String sql,int start,int size) {
 			// TODO Auto-generated method stub
 			//SELECT id,dtime FROM dbo.TestTab ORDER BY id OFFSET 1 ROWS FETCH NEXT 100 ROWS ONLY
 			StringBuffer ret=new StringBuffer(sql);
@@ -44,7 +44,7 @@ public abstract class Criterias {
 		}
 		
 		@Override
-		String concat(Collection<String> columns) {
+		public String concat(Collection<String> columns) {
 			// TODO Auto-generated method stub
 			String ret="CONCAT("+String.join(",", columns)+")";
 			return ret;
@@ -54,7 +54,7 @@ public abstract class Criterias {
    public final static Criterias mysql=new Criterias() {
 		
 		@Override
-		String toPaging(String sql,int start,int size) {
+		public String toPaging(String sql,int start,int size) {
 			// TODO Auto-generated method stub
 			StringBuffer ret=new StringBuffer(sql);
 			ret.append(start).append(",").append(size);
@@ -62,7 +62,7 @@ public abstract class Criterias {
 		}
 		
 		@Override
-		String concat(Collection<String> columns) {
+		public String concat(Collection<String> columns) {
 			// TODO Auto-generated method stub
 			String ret=String.join("+", columns);
 			return ret;
@@ -72,7 +72,7 @@ public abstract class Criterias {
     public final static Criterias oracle=new Criterias() {
 		
 		@Override
-		String toPaging(String sql,int start,int size) {
+		public String toPaging(String sql,int start,int size) {
 			// TODO Auto-generated method stub
 			/*SELECT *
 
@@ -99,7 +99,7 @@ public abstract class Criterias {
 		}
 		
 		@Override
-		String concat(Collection<String> columns) {
+		public String concat(Collection<String> columns) {
 			// TODO Auto-generated method stub
 			String ret=String.join("||", columns);
 			return ret;
@@ -161,13 +161,16 @@ public abstract class Criterias {
     }
 
 	
-	public static String joinColumnAsProp(Class<Entity> entityCls) {
+	public static String joinColumnAsProp(Class<? extends Entity> entityCls) {
 		String sql=clsJoinAsPropMap.get(entityCls);
 		if(sql==null) {
 			Map<String,Field> fieldMap= ReflectCommon.theDeclaredFieldMap(entityCls);
 			List<String> joins=new ArrayList<>();
 			for(Entry<String, Field> ent:fieldMap.entrySet()) {
+				boolean isStatic = ReflectCommon.isStatic(ent.getValue());
+				if(isStatic)continue;
 				String cn=ent.getValue().getName(),asn=Column.toClassName(cn);
+				asn=asn.substring(0, 1).toLowerCase()+asn.substring(1);
 				joins.add(cn+" as "+asn);
 				
 			}

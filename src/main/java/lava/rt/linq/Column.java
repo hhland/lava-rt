@@ -8,7 +8,8 @@ public class Column {
 
 	
 	
-	public final String column,asc ,desc,propName,groupBy,orderBy,distinct ;
+	public final String column,asc ,desc,propName,groupBy,orderBy,distinct,count,max,min ;
+	
 	
 	
 	public Column(String column) {
@@ -18,6 +19,9 @@ public class Column {
 		groupBy= "group by "+column;
 		orderBy= "order by "+column;
 		distinct="distinct "+column;
+		count="count("+column+")";
+		max="max("+column+")";
+		min="min("+column+")";
 		propName=toPropName(column);
 	}
 	

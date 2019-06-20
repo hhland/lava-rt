@@ -50,10 +50,20 @@ public abstract class DataContextSrcGener   {
 	
 	protected Set<String> columnNames=new HashSet<>();
 	
+	private SrcEvent srcEvent=new SrcEvent();
+	
 	public DataContextSrcGener(Connection connection) {
 		this.connection=connection;
 	}
 	
+	
+	
+	public void setSrcEvent(SrcEvent srcEvent) {
+		this.srcEvent = srcEvent;
+	}
+
+
+
 	public void saveLocalSrcTo(File srcFile,Class cls,String databaseName,String...justTables) throws SQLException, IOException {
 		
 		String src=toLocalSrc(cls, databaseName, justTables);
@@ -113,14 +123,15 @@ public abstract class DataContextSrcGener   {
 		
 		
 		
-		src.append("//onClassSrcOutter----start");
+		
 		onClassSrcOutter(src);
+		
 		
 		src.append("public class "+cls.getSimpleName()+" extends "+DataSourceContext.class.getName()+"{ \n\n");
 		
-		src.append("//onClassSrcInner----start");
+		
 		onClassSrcInner(src);
-		src.append("//onClassSrcInner----end");
+		
 		
 		src
 		.append("\tprivate static final long serialVersionUID="+serialVersionUID+";\n\n")
@@ -218,6 +229,24 @@ public abstract class DataContextSrcGener   {
 	}
 	
 	
+	private void onClassSrcInner(StringBuffer src) {
+		// TODO Auto-generated method stub
+		src.append("//onClassSrcInner----start\n\n");
+		srcEvent.onClassSrcInner(src);
+		src.append("//onClassSrcInner----end\n\n");
+	}
+
+
+
+	private void onClassSrcOutter(StringBuffer src) {
+		// TODO Auto-generated method stub
+		src.append("//onClassSrcOutter----start\n\n");
+		srcEvent.onClassSrcOutter(src);
+		src.append("//onClassSrcOutter----end\n\n");
+	}
+
+
+
 	public String toRpcIntfSrc(Class cls,String databaseName,String...justTables) throws SQLException {
 		StringBuffer src=new StringBuffer(getFileInfo(databaseName));
 		if(cls.getPackage()!=null) {
@@ -343,14 +372,14 @@ public abstract class DataContextSrcGener   {
 		;
 		
 		
-		src.append("//onClassSrcOutter----start");
+		
 		onClassSrcOutter(src);
+		
 		
 		src.append("public class "+cls.getSimpleName()+" extends "+DataSourceContext.class.getName()+" implements "+intfCls.getName()+"{ \n\n");
 		
-		src.append("//onClassSrcInner----start");
+		
 		onClassSrcInner(src);
-		src.append("//onClassSrcInner----end");
 		
 		src
 		//.append("\tprivate static final long serialVersionUID=1L;\n\n")
@@ -432,15 +461,7 @@ public abstract class DataContextSrcGener   {
 				"*/ \n";
 	}
 
-	protected void onClassSrcOutter(StringBuffer src) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	protected void onClassSrcInner(StringBuffer src) {
-		// TODO Auto-generated method stub
-		
-	}
+	
 
 	protected abstract Map<String,List<ProcedureParamSrc>> loadProcedures(String databaseName) throws SQLException;
 
@@ -673,7 +694,18 @@ public abstract class DataContextSrcGener   {
 		
 	}
 	
-	
+	protected class SrcEvent{
+		
+		protected void onClassSrcOutter(StringBuffer src) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		protected void onClassSrcInner(StringBuffer src) {
+			// TODO Auto-generated method stub
+			
+		}
+	}
 	
 	public enum ColumnStruct{
 		STRING(String.class,Types.VARCHAR,Types.CHAR,Types.NVARCHAR,Types.LONGNVARCHAR,Types.NCHAR,Types.LONGVARCHAR,Types.CLOB)

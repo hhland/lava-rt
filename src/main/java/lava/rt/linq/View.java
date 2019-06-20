@@ -22,7 +22,7 @@ public   class  View<M extends Entity> {
 
 	protected final DataContext dataContext;
 	
-	protected final String tableName;
+	public final String tableName;
 	protected final Class<M> entryClass;
 	protected final Map<String,Field> entryFieldMap=new HashMap<>();
 	

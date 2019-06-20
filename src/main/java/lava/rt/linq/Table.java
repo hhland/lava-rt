@@ -24,7 +24,7 @@ public class Table<M extends Entity> extends View<M> {
 
 	protected final Field[] insertFields, updateFields;
 
-	protected final String sqlInsert,sqlInsertWithoutPk, sqlUpdate, sqlDelete,sqlLoad;
+	protected final String sqlInsert,sqlInsertWithoutPk, sqlUpdate, sqlDelete,sqlLoad,sqlColumns;
 
 	public Table(DataContext dataContext, Class<M> entryClass, String tableName, String pkName) {
 		super(dataContext, entryClass, tableName);
@@ -68,6 +68,7 @@ public class Table<M extends Entity> extends View<M> {
 		}
 		cols = TextCommon.trim(cols, ",");
 		vals = TextCommon.trim(vals, ",");
+		sqlColumns=cols;
 		sqlInsert = MessageFormat.format(sqlPattern, tableName, pkName+","+cols, "?,"+vals);
 		sqlInsertWithoutPk = MessageFormat.format(sqlPattern, tableName, cols, vals);
 		
@@ -304,9 +305,25 @@ public class Table<M extends Entity> extends View<M> {
 		return ret;
 	}
 	
-	public Table<M> duplicate(String tableName){
-		Table<M> ret=new Table<>(this.dataContext, this.entryClass, tableName, pkName);
+	public Table<M> duplicate(String newTableName){
+		Table<M> ret=new Table<>(this.dataContext, this.entryClass, newTableName, pkName);
 		return ret;
 	}
 
+	public Table<M> selectInto(String newTableName,String where,Object...param) throws SQLException{
+		Table<M> ret=null;
+		String sql="select * into "+newTableName+" from "+tableName+" "+where;
+		dataContext.executeUpdate(sql, param);
+		ret=new Table<>(this.dataContext, this.entryClass, newTableName, pkName);
+		return ret;
+	}
+	
+	public int insertInto(String newTableName,String where,Object...param) throws SQLException{
+		//Table<M> ret=null;
+		String sql=" insert into "+newTableName+"("+sqlColumns+") select ("+sqlColumns+") from "+tableName+" "+where;
+		int ret= dataContext.executeUpdate(sql, param);
+		//ret=new Table<>(this.dataContext, this.entryClass, newTableName, pkName);
+		return ret;
+	}
+	
 }

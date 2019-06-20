@@ -42,6 +42,8 @@ import lava.rt.linq.View;
 
 public abstract class DataContextSrcGener   {
 
+	public  final long serialVersionUID=1L;
+	
 	protected abstract Class<? extends DataContextSrcGener> thisClass();
 	
 	protected Connection connection;
@@ -88,7 +90,7 @@ public abstract class DataContextSrcGener   {
 	}
 	
 	public String toLocalSrc(Class cls,String databaseName,String...justTables) throws SQLException {
-		StringBuffer src=new StringBuffer("");
+		StringBuffer src=new StringBuffer(getFileInfo(databaseName));
 		if(cls.getPackage()!=null) {
 		 src.append("package "+cls.getPackage().getName()+"; \n\n");
 		}
@@ -109,20 +111,19 @@ public abstract class DataContextSrcGener   {
 		.append("import "+Serializable.class.getName()+"; \n\n\n")
 		;
 		
-		src
-		.append("/*\r\n" + 
-				 
-				" *@Database "+databaseName+"\r\n" + 
-				" *@SrcGener "+thisClass().getName()+"\r\n" + 
-				" *@CreateAt "+Calendar.getInstance().getTime()+"\r\n" + 
-				"*/ \n")
 		
-		;
+		
+		src.append("//onClassSrcOutter----start");
+		onClassSrcOutter(src);
 		
 		src.append("public class "+cls.getSimpleName()+" extends "+DataSourceContext.class.getName()+"{ \n\n");
 		
+		src.append("//onClassSrcInner----start");
+		onClassSrcInner(src);
+		src.append("//onClassSrcInner----end");
+		
 		src
-		.append("\tprivate static final long serialVersionUID=1L;\n\n")
+		.append("\tprivate static final long serialVersionUID="+serialVersionUID+";\n\n")
 		.append("\t@Override\r\n" + 
 				"\tprotected Class thisClass() {return this.getClass(); }\n\n")
 		.append("\t public "+cls.getSimpleName()+"("+DataSource.class.getSimpleName()+"... dataSources)throws "+Exception.class.getSimpleName()+"{ super(dataSources);  } \n\n")
@@ -218,7 +219,7 @@ public abstract class DataContextSrcGener   {
 	
 	
 	public String toRpcIntfSrc(Class cls,String databaseName,String...justTables) throws SQLException {
-		StringBuffer src=new StringBuffer("");
+		StringBuffer src=new StringBuffer(getFileInfo(databaseName));
 		if(cls.getPackage()!=null) {
 		 src.append("package "+cls.getPackage().getName()+"; \n\n");
 		}
@@ -240,20 +241,12 @@ public abstract class DataContextSrcGener   {
 		.append("import "+Serializable.class.getName()+"; \n\n\n")
 		;
 		
-		src
-		.append("/*\r\n" + 
-				 
-				" *@Database "+databaseName+"\r\n" + 
-				" *@SrcGener "+thisClass().getName()+"\r\n" + 
-				" *@CreateAt "+Calendar.getInstance().getTime()+"\r\n" + 
-				"*/ \n")
 		
-		;
 		
 		src.append("public interface "+cls.getSimpleName()+" extends "+DataContext.class.getName()+"{ \n\n");
 		
 		src
-		.append("\tpublic static final long serialVersionUID=1L;\n\n")
+		.append("\tpublic static final long serialVersionUID="+serialVersionUID+";\n\n")
 		//.append("\t@Override\r\n" + 
 		//		"\tprotected Class thisClass() {return this.getClass(); }\n\n")
 		//.append("\t public "+cls.getSimpleName()+"("+DataSource.class.getSimpleName()+"... dataSources)throws "+Exception.class.getSimpleName()+"{ super(dataSources);  } \n\n")
@@ -325,10 +318,13 @@ public abstract class DataContextSrcGener   {
 	
 	
 	public String toRpcImplSrc(Class intfCls,Class cls,String databaseName,String...justTables) throws SQLException {
-		StringBuffer src=new StringBuffer("");
+		StringBuffer src=new StringBuffer(getFileInfo(databaseName));
 		if(cls.getPackage()!=null) {
 		 src.append("package "+cls.getPackage().getName()+"; \n\n");
 		}
+		
+		
+		
 		for(ColumnStruct columnStruct : ColumnStruct.values()) {
 			String fieldClsName=columnStruct.fieldCls.getName();
 			if(fieldClsName.startsWith("[L")) {
@@ -346,21 +342,15 @@ public abstract class DataContextSrcGener   {
 		.append("import "+Serializable.class.getName()+"; \n\n\n")
 		;
 		
-		src
-		.append("/*\r\n" + 
-				 
-				" *@Database "+databaseName+"\r\n" + 
-				" *@SrcGener "+thisClass().getName()+"\r\n" + 
-				" *@CreateAt "+Calendar.getInstance().getTime()+"\r\n" + 
-				"*/ \n")
 		
-		;
-		
-		beforeRpcImplSrcClass(src);
+		src.append("//onClassSrcOutter----start");
+		onClassSrcOutter(src);
 		
 		src.append("public class "+cls.getSimpleName()+" extends "+DataSourceContext.class.getName()+" implements "+intfCls.getName()+"{ \n\n");
 		
-		innerRpcImplSrcClass(src);
+		src.append("//onClassSrcInner----start");
+		onClassSrcInner(src);
+		src.append("//onClassSrcInner----end");
 		
 		src
 		//.append("\tprivate static final long serialVersionUID=1L;\n\n")
@@ -432,12 +422,22 @@ public abstract class DataContextSrcGener   {
 	
 	
 	
-	protected void innerRpcImplSrcClass(StringBuffer src) {
+	private String getFileInfo(String databaseName) {
+		// TODO Auto-generated method stub
+		return "/*\r\n" + 
+				 
+				" *@Database "+databaseName+"\r\n" + 
+				" *@SrcGener "+thisClass().getName()+"\r\n" + 
+				" *@CreateAt "+Calendar.getInstance().getTime()+"\r\n" + 
+				"*/ \n";
+	}
+
+	protected void onClassSrcOutter(StringBuffer src) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	protected void beforeRpcImplSrcClass(StringBuffer src) {
+	protected void onClassSrcInner(StringBuffer src) {
 		// TODO Auto-generated method stub
 		
 	}

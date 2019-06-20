@@ -37,12 +37,6 @@ public class Column {
 	public String notLike(String val) {return sql_like(false, column,val);}	
 	
 	
-	
-	
-	public String asProp() {
-		return as(propName);
-	}
-	
 	public String as(String name) {
 		return this.column+" as "+name;
 	}

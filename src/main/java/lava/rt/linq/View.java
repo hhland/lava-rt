@@ -38,8 +38,7 @@ public   class  View<M extends Entity> {
 			boolean isStatic = ReflectCommon.isStatic(field);
 			if(isStatic)continue;
 			this.entryFieldMap.put(ent.getKey(), ent.getValue());
-			Column column=new Column(ent.getKey());
-			Criterias.addColumn(entryClass, column);
+			
 		}
 		
 		
@@ -59,7 +58,12 @@ public   class  View<M extends Entity> {
 		return dataContext.executeQueryList(entryClass,sql,params);
 	}
     
-	
+    public List<M> selectByPaging(Criterias criterias,int start,int size,String where,Object...params) throws SQLException{
+    	
+    	String sql=sqlSelect+" "+where;
+    	sql=criterias.toPaging(sql, start, size);
+		return dataContext.executeQueryList(entryClass,sql,params);
+	}
 	
 	public int count(String column,String where,Object...params) throws SQLException{
 		String pattern="select count({0}) from {1} ";

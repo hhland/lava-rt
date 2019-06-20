@@ -28,6 +28,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.sql.DataSource;
 
+import org.omg.Dynamic.Parameter;
 
 import lava.rt.base.LangObject;
 
@@ -681,13 +682,16 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 
 			if (isOutputParam) {
 				call.getMoreResults();
+				Object[] outRe=new Object[params.length];
 				for (int i = 0; i < params.length; i++) {
 					if (params[i] instanceof OutputParam) {
 						OutputParam outputParam = (OutputParam) params[i];
 						outputParam.result = call.getObject(i + 1);
+						outRe[i]=outputParam.result;
 					}
 
 				}
+				ret.add(outRe);
 			}
 
 		}

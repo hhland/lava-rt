@@ -210,13 +210,18 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 						if(colObject ==null) {
 							ret.append("null"); 
 						}else if (colObject instanceof String 
-								|| colObject instanceof java.sql.Date
-								|| colObject instanceof Date
+								
 								) {
-							String colValue = colObject.toString();
-							ret.append("\"").append(colValue).append("\"");
+							
+							ret.append("\"").append(colObject).append("\"");
 
-						} else {
+						}else if(colObject instanceof java.sql.Date
+							|| colObject instanceof Date){
+							ret.append("\"")
+							.append(format((Date)(colObject)))
+							.append("\"");
+							}
+						else {
 							String colValue = colObject.toString();
 							ret.append(colValue);
 						}
@@ -281,11 +286,15 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 
 						ret.append("\"").append(colName).append("\"").append(":");
 						if (colObject instanceof String 
-								|| colObject instanceof java.sql.Date
-								|| colObject instanceof Date
+								
 								) {
 							ret.append("\"").append(colValue).append("\"");
 
+						}else if(colObject instanceof java.sql.Date
+								|| colObject instanceof Date) {
+							ret.append("\"")
+							.append(format((Date)colObject))
+							.append("\"");
 						} else {
 							ret.append(colValue);
 						}
@@ -716,7 +725,9 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 
 
 
-
+     protected String format(Date date) {
+    	 return date.toString();
+     }
 	
 	
 	

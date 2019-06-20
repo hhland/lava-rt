@@ -4,8 +4,10 @@ import static org.junit.Assume.assumeNotNull;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -19,10 +21,15 @@ import lava.rt.common.TextCommon;
 
 public abstract class Criterias {
 
+	private final static SimpleDateFormat SDF_YMD=new SimpleDateFormat("yyyy-MM-dd")
+			,SDF_YMDHMS=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+			;
 	
 	public abstract String concat(Collection<String> columns);
 	
 	public abstract String toPaging(String sql,int start,int size);
+	
+	public abstract String toDate(Date date);
 	
     protected static final Map<Class,String> clsJoinAsPropMap=new HashMap<>();
 	
@@ -49,6 +56,13 @@ public abstract class Criterias {
 			String ret="CONCAT("+String.join(",", columns)+")";
 			return ret;
 		}
+
+		@Override
+		public String toDate(Date date) {
+			// TODO Auto-generated method stub
+			String ret="convert(datetime,'"+SDF_YMDHMS.format(date)+"', 20)";
+			return ret;
+		}
 	};
 	
    public final static Criterias mysql=new Criterias() {
@@ -65,6 +79,13 @@ public abstract class Criterias {
 		public String concat(Collection<String> columns) {
 			// TODO Auto-generated method stub
 			String ret=String.join("+", columns);
+			return ret;
+		}
+
+		@Override
+		public String toDate(Date date) {
+			// TODO Auto-generated method stub
+			String ret="'"+SDF_YMD.format(date)+"'";
 			return ret;
 		}
 	};
@@ -102,6 +123,13 @@ public abstract class Criterias {
 		public String concat(Collection<String> columns) {
 			// TODO Auto-generated method stub
 			String ret=String.join("||", columns);
+			return ret;
+		}
+
+		@Override
+		public String toDate(Date date) {
+			// TODO Auto-generated method stub
+			String ret="to_date('"+SDF_YMD.format(date)+"','yyyy-mm-dd')";
 			return ret;
 		}
 	};

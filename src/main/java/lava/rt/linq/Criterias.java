@@ -27,9 +27,14 @@ public abstract class Criterias {
 	
 	public abstract String concat(Collection<String> columns);
 	
-	public abstract String toPaging(String sql,int start,int size);
+	public abstract String toPaging(String sql,int start,int limit);
 	
-	public abstract String toDate(Date date);
+	public abstract String format(Date date);
+	
+	public  PagingParam<Criterias> createPagingParam(int start,int limit){
+		PagingParam<Criterias> ret=new PagingParam<>(this, start, limit);
+		return ret;
+	}
 	
     protected static final Map<Class,String> clsJoinAsPropMap=new HashMap<>()
    , clsTableMap=new HashMap<>();
@@ -59,7 +64,7 @@ public abstract class Criterias {
 		}
 
 		@Override
-		public String toDate(Date date) {
+		public String format(Date date) {
 			// TODO Auto-generated method stub
 			String ret="convert(datetime,'"+SDF_YMDHMS.format(date)+"', 20)";
 			return ret;
@@ -84,7 +89,7 @@ public abstract class Criterias {
 		}
 
 		@Override
-		public String toDate(Date date) {
+		public String format(Date date) {
 			// TODO Auto-generated method stub
 			String ret="'"+SDF_YMD.format(date)+"'";
 			return ret;
@@ -128,7 +133,7 @@ public abstract class Criterias {
 		}
 
 		@Override
-		public String toDate(Date date) {
+		public String format(Date date) {
 			// TODO Auto-generated method stub
 			String ret="to_date('"+SDF_YMD.format(date)+"','yyyy-mm-dd')";
 			return ret;
@@ -213,4 +218,9 @@ public abstract class Criterias {
 		return sql;
 	}
 	
+	
+	public static String toCount(String sql) {
+		String ret="select count(*) "+sql.substring(sql.toLowerCase().indexOf("from"));
+		return ret;
+	}
 }

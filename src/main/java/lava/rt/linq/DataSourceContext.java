@@ -193,9 +193,12 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 				
 				while (resultSet.next()) {
 					
-					if(total<start||total>=start+limit) {
+					if(total<start) {
 						total++;
 						continue;
+					}else if(total>=start+limit){
+						total++;
+						break;
 					}else {
 						total++;
 						
@@ -249,8 +252,8 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 		ret
 		.append("],columns:[\"")
 		.append(String.join("\",\"", columns))
-		.append("\"],total:").append(total)
-		.append(",size:").append(size)
+		//.append("\"],total:").append(total)
+		.append("],size:").append(size)
 		
 		;
 		
@@ -278,9 +281,12 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 
 				while (resultSet.next()) {
 					
-					if(total<start||total>=start+limit) {
+					if(total<start) {
 						total++;
 						continue;
+					}else if(total>=start+limit){
+						total++;
+						break;
 					}else {
 						total++;
 						
@@ -331,12 +337,76 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 			ret.deleteCharAt(ret.length()-1);
 		}
 		ret
-		.append("],total:").append(total)
-		.append(",size:").append(size)
+		//.append("],total:").append(total)
+		.append("],size:").append(size)
 		
 		;
 		return ret.toString();
 	}
+	
+	
+	
+	
+
+	@Override
+	public String executeQueryJsonArray(PagingParam<Criterias> pagingParam, String sql, Object... params)
+			throws SQLException {
+		// TODO Auto-generated method stub
+		String psql=pagingParam.toPaging(sql);
+		StringBuffer ret=new StringBuffer(executeQueryJsonArray(pagingParam.start,pagingParam.limit,psql, params));
+		
+		int size=Integer.parseInt(
+				  ret.substring(ret.lastIndexOf("size:")+5)
+				  ),total=pagingParam.start+size;
+		if(size==pagingParam.limit) {
+			String csql=Criterias.toCount(sql);
+			total=(int)executeQueryArray(csql, params)[0][0];
+		}
+		ret
+		.append(",total:")
+		.append(total)
+		;
+		return ret.toString();
+	}
+
+
+
+
+
+	@Override
+	public String executeQueryJsonList(PagingParam<Criterias> pagingParam, String sql, Object... params)
+			throws SQLException {
+		// TODO Auto-generated method stub
+				String psql=pagingParam.toPaging(sql);
+				StringBuffer ret=new StringBuffer(executeQueryJsonList(pagingParam.start,pagingParam.limit,psql, params));
+				
+				int size=Integer.parseInt(
+						  ret.substring(ret.lastIndexOf("size:")+5)
+						  ),total=pagingParam.start+size;
+				if(size==pagingParam.limit) {
+					String csql=Criterias.toCount(sql);
+					total=(int)executeQueryArray(csql, params)[0][0];
+				}
+				ret
+				.append(",total:")
+				.append(total)
+				;
+				return ret.toString();
+	}
+
+
+
+
+
+	@Override
+	protected Class<? extends LangObject> thisClass() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+
+
 
 	public int executeUpdate(String sql, Object... param) throws SQLException {
 		int re = 0;

@@ -171,11 +171,11 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 		return re;
 	}
 	
-	public String executeQueryJsonArray(int start,int size,String sql, Object... params) throws SQLException {
+	public String executeQueryJsonArray(int start,int limit,String sql, Object... params) throws SQLException {
 
 		StringBuffer ret = new StringBuffer("[");
 		String[] columns=null;
-		int total=0,rsize=0;
+		int total=0,size=0;
 		try (PreparedStatement preparedStatement = getConnection().prepareStatement(sql);) {
 			for (int i = 0; i < params.length; i++) {
 				preparedStatement.setObject(i + 1, params[i]);
@@ -193,7 +193,7 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 				
 				while (resultSet.next()) {
 					
-					if(total<start||total>=start+size) {
+					if(total<start||total>=start+limit) {
 						total++;
 						continue;
 					}else {
@@ -232,7 +232,7 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 					}
 
 					ret.append("],");
-					rsize++;
+					size++;
 					// list.add(rowMap);
 				}
 			}
@@ -250,7 +250,7 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 		.append("],columns:[\"")
 		.append(String.join("\",\"", columns))
 		.append("\"],total:").append(total)
-		.append(",size:").append(rsize)
+		.append(",size:").append(size)
 		
 		;
 		
@@ -262,10 +262,10 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 		return LogFactory.SYSTEM.getLog(this.thisClass());
 	}
 
-	public String executeQueryJsonList(int start,int size,String sql, Object... params) throws SQLException {
+	public String executeQueryJsonList(int start,int limit,String sql, Object... params) throws SQLException {
 
 		StringBuffer ret = new StringBuffer("[");
-		int rsize=0,total=0;
+		int size=0,total=0;
 		try (PreparedStatement preparedStatement = getConnection().prepareStatement(sql);) {
 			for (int i = 0; i < params.length; i++) {
 				preparedStatement.setObject(i + 1, params[i]);
@@ -278,7 +278,7 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 
 				while (resultSet.next()) {
 					
-					if(total<start||total>=start+size) {
+					if(total<start||total>=start+limit) {
 						total++;
 						continue;
 					}else {
@@ -332,7 +332,7 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 		}
 		ret
 		.append("],total:").append(total)
-		.append(",size:").append(rsize)
+		.append(",size:").append(size)
 		
 		;
 		return ret.toString();

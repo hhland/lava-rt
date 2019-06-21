@@ -171,11 +171,11 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 		return re;
 	}
 	
-	public String executeQueryJsonArray(int start,int limit,String sql, Object... params) throws SQLException {
+	public String executeQueryJsonArray(String sql, Object... params) throws SQLException {
 
 		StringBuffer ret = new StringBuffer("[");
 		String[] columns=null;
-		int total=0,size=0;
+		int size=0;
 		try (PreparedStatement preparedStatement = getConnection().prepareStatement(sql);) {
 			for (int i = 0; i < params.length; i++) {
 				preparedStatement.setObject(i + 1, params[i]);
@@ -193,16 +193,7 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 				
 				while (resultSet.next()) {
 					
-					if(total<start) {
-						total++;
-						continue;
-					}else if(total>=start+limit){
-						total++;
-						break;
-					}else {
-						total++;
-						
-					}
+					
 					
 					ret.append("[");
 
@@ -265,10 +256,10 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 		return LogFactory.SYSTEM.getLog(this.thisClass());
 	}
 
-	public String executeQueryJsonList(int start,int limit,String sql, Object... params) throws SQLException {
+	public String executeQueryJsonList(String sql, Object... params) throws SQLException {
 
 		StringBuffer ret = new StringBuffer("[");
-		int size=0,total=0;
+		int size=0;
 		try (PreparedStatement preparedStatement = getConnection().prepareStatement(sql);) {
 			for (int i = 0; i < params.length; i++) {
 				preparedStatement.setObject(i + 1, params[i]);
@@ -281,16 +272,7 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 
 				while (resultSet.next()) {
 					
-					if(total<start) {
-						total++;
-						continue;
-					}else if(total>=start+limit){
-						total++;
-						break;
-					}else {
-						total++;
-						
-					}
+					
 					
 					ret.append("{");
 
@@ -353,7 +335,7 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 			throws SQLException {
 		// TODO Auto-generated method stub
 		String psql=pagingParam.toPaging(sql);
-		StringBuffer ret=new StringBuffer(executeQueryJsonArray(pagingParam.start,pagingParam.limit,psql, params));
+		StringBuffer ret=new StringBuffer(executeQueryJsonArray(psql, params));
 		
 		int size=Integer.parseInt(
 				  ret.substring(ret.lastIndexOf("size:")+5)
@@ -378,7 +360,7 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 			throws SQLException {
 		// TODO Auto-generated method stub
 				String psql=pagingParam.toPaging(sql);
-				StringBuffer ret=new StringBuffer(executeQueryJsonList(pagingParam.start,pagingParam.limit,psql, params));
+				StringBuffer ret=new StringBuffer(executeQueryJsonList(psql, params));
 				
 				int size=Integer.parseInt(
 						  ret.substring(ret.lastIndexOf("size:")+5)

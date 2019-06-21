@@ -15,8 +15,9 @@ import java.util.Set;
 
 import javax.sql.PooledConnection;
 
-
+import lava.rt.adapter.UnsafeAdapter;
 import lava.rt.common.ReflectCommon;
+import sun.misc.Unsafe;
 
 public   class  View<M extends Entity> {
 
@@ -26,20 +27,28 @@ public   class  View<M extends Entity> {
 	protected final Class<M> entryClass;
 	protected final Map<String,Field> entryFieldMap=new HashMap<>();
 	
+	protected final Map<String,Long> entryFieldOffsetMap=new HashMap<>();
+	
 	protected final String sqlSelect;
+	
+	protected static Unsafe unsafe=ReflectCommon.UNSAFE;
+	
+	protected static UnsafeAdapter unsafeAdapter=new UnsafeAdapter(unsafe);
 	
 	protected View (DataContext dataContext,Class<M> entryClass,String tableName) {
 		this.dataContext=dataContext;
 		this.tableName=tableName;
 		this.entryClass=entryClass;
 		//this.entryFieldMap=ReflectCommon.theDeclaredFieldMap(entryClass);
+		
 		for(Entry<String, Field> ent :ReflectCommon.theDeclaredFieldMap(entryClass).entrySet()){
 			Field field=ent.getValue();
 			boolean isStatic = ReflectCommon.isStatic(field);
 			if(isStatic)continue;
 			this.entryFieldMap.put(ent.getKey(), ent.getValue());
-			
+			entryFieldOffsetMap.put(ent.getKey(), unsafe.objectFieldOffset(ent.getValue()));
 		}
+		
 		
 		
 		entryFieldMap.forEach((k,v)->v.setAccessible(true));

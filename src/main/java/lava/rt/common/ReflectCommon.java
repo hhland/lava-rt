@@ -19,6 +19,8 @@ import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Stream;
+
+import lava.rt.adapter.UnsafeAdapter;
 import sun.misc.Unsafe;
 
 @SuppressWarnings("restriction")
@@ -28,6 +30,21 @@ public final class ReflectCommon {
 	
 	
 	
+	
+    public  static Unsafe UNSAFE;
+    
+    static {
+    	try {
+			Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
+			theUnsafe.setAccessible(true);
+			UNSAFE= (Unsafe) theUnsafe.get(null);
+		} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		   
+    	
+    }
 	
 	
     
@@ -144,6 +161,8 @@ public final class ReflectCommon {
     	
     	return fieldMap;
     }
+    
+    
     
     
     

@@ -12,7 +12,7 @@ public abstract class Entity extends LangObject  {
 
 	
      
-	protected Date _createTime,_updateTime;
+	protected Date _createTime,_updateTime,_timeoutTime;
      
      
      

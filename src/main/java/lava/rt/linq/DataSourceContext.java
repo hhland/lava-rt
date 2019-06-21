@@ -118,6 +118,8 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 				}
 
 				View<M> view = getView(cls);
+				
+				
 
 				while (resultSet.next()) {
 					M m = newEntry(cls);
@@ -187,8 +189,8 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 				// Map<String, Object> rowMap = null;
 				columns=new String[cc];
 				for (int i = 0; i < cc; i++) {
-					String colName = metaData.getColumnName(i + 1);
-					columns[i]=colName;
+					
+					columns[i]= metaData.getColumnName(i + 1);
 				}
 				
 				while (resultSet.next()) {
@@ -260,6 +262,7 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 
 		StringBuffer ret = new StringBuffer("[");
 		int size=0;
+		String[] columns=null;
 		try (PreparedStatement preparedStatement = getConnection().prepareStatement(sql);) {
 			for (int i = 0; i < params.length; i++) {
 				preparedStatement.setObject(i + 1, params[i]);
@@ -267,8 +270,12 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 			try (ResultSet resultSet = preparedStatement.executeQuery();) {
 				ResultSetMetaData metaData = resultSet.getMetaData();
 				int cc = metaData.getColumnCount();
-				// String[] row=new String[cc];
-				// Map<String, Object> rowMap = null;
+				
+				columns=new String[cc];
+				for (int i = 0; i < cc; i++) {
+					
+					columns[i]=metaData.getColumnName(i + 1);
+				}
 
 				while (resultSet.next()) {
 					
@@ -281,9 +288,9 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 						if (colObject == null) {
 							continue;
 						}
-						String colName = metaData.getColumnName(i + 1), colValue = colObject.toString();
+						String colValue = colObject.toString();
 
-						ret.append("\"").append(colName).append("\"").append(":");
+						ret.append("\"").append(columns[i]).append("\"").append(":");
 						if (colObject instanceof String 
 								
 								) {

@@ -21,8 +21,12 @@ public class Table<M extends Entity> extends View<M> {
 	protected final String pkName;
 
 	protected final Field pkField;
+	
+	protected final Long pkFieldOffset;
 
 	protected final Field[] insertFields, updateFields;
+	
+	protected final Long[] insertFieldOffsets, updateFieldOffsets;
 
 	protected final String sqlInsert,sqlInsertWithoutPk, sqlUpdate, sqlDelete,sqlLoad,sqlColumns;
 
@@ -32,6 +36,8 @@ public class Table<M extends Entity> extends View<M> {
 
 		pkField = entryFieldMap.get(pkName);
 		pkField.setAccessible(true);
+		
+		pkFieldOffset=unsafe.objectFieldOffset(pkField);
 
 		List<Field> linsertFields = new ArrayList<Field>();
 		for (Field f : entryFieldMap.values()) {
@@ -43,6 +49,12 @@ public class Table<M extends Entity> extends View<M> {
 			linsertFields.add(f);
 		}
 		insertFields = linsertFields.toArray(new Field[linsertFields.size()]);
+		
+		insertFieldOffsets=new Long[insertFields.length];
+		
+		for(int i=0;i<insertFieldOffsets.length;i++) {
+			insertFieldOffsets[i]=unsafe.objectFieldOffset(insertFields[i]);
+		}
 
 		List<Field> lupdateFields = new ArrayList<Field>();
 
@@ -55,6 +67,12 @@ public class Table<M extends Entity> extends View<M> {
 			lupdateFields.add(f);
 		}
 		updateFields = lupdateFields.toArray(new Field[lupdateFields.size()]);
+		
+		updateFieldOffsets=new Long[updateFields.length];
+		
+		for(int i=0;i<updateFieldOffsets.length;i++) {
+			updateFieldOffsets[i]=unsafe.objectFieldOffset(updateFields[i]);
+		}
 
 		String sqlPattern = "insert into {0} ({1}) values ({2})", cols =  "", vals = "";
 
@@ -119,21 +137,22 @@ public class Table<M extends Entity> extends View<M> {
 		int re = 0, insertsize = insertFields.length;
 
 		Object[][] params = new Object[entrys.size()][insertsize + 1];
-		try {
+		//try {
 			int i=0;
 			//for (int i = 0; i < entrys.length; i++) {
 			for(M obj : entrys) {
 				//M obj = entrys[i];
-				params[i][0] = pkField.get(obj);
+				params[i][0] =unsafe.getObject(obj, pkFieldOffset);
 				for (int j = 0; j < insertsize; j++) {
 					Field field = insertFields[j];
-					params[i][j + 1] = field.get(obj);
+					//params[i][j + 1] = field.get(obj);
+					params[i][j + 1] =unsafe.getObject(obj, insertFieldOffsets[j]);
 				}
 				i++;
 			}
-		} catch (Exception e) {
-			throw new SQLException(e);
-		}
+		//} catch (Exception e) {
+		//	throw new SQLException(e);
+		//}
 
 		re = dataContext.executeBatch(sql, params);
 		
@@ -151,16 +170,18 @@ public class Table<M extends Entity> extends View<M> {
 		int re = 0, insertsize = insertFields.length;
 
 		Object[] param = new Object[insertsize + 1];
-		try {
+		//try {
 			
-				param[0] = pkField.get(entry);
+				//param[0] = pkField.get(entry);
+		        param[0] = getPk(entry);
 				for (int j = 0; j < insertsize; j++) {
-					Field field = insertFields[j];
-					param[j + 1] = field.get(entry);
+					//Field field = insertFields[j];
+					//param[j + 1] = field.get(entry);
+					param[j+1]=unsafe.getObject(entry, insertFieldOffsets[j]);
 				}
-		} catch (Exception e) {
-			throw new SQLException(e);
-		}
+		//} catch (Exception e) {
+		//	throw new SQLException(e);
+		//}
 		re = dataContext.executeUpdate(sqlInsert, param);
 		
 
@@ -208,14 +229,15 @@ public class Table<M extends Entity> extends View<M> {
 		int updatesize = updateFields.length;
 		Object[] param = new Object[updatesize + 1];
 		
-        try {
+        //try {
 		for (int j = 0; j < updatesize; j++) {
-			Field field = updateFields[j];
-			param[j] = field.get(entry);
+			//Field field = updateFields[j];
+			//param[j] = field.get(entry);
+			param[j]=unsafe.getObject(entry, updateFieldOffsets[j]);
 	    }
-        }catch(Exception ex) {
-        	throw new SQLException(ex);
-        }
+      //  }catch(Exception ex) {
+       // 	throw new SQLException(ex);
+       // }
 		param[updatesize] = getPk(entry);
 
 			
@@ -233,23 +255,24 @@ public class Table<M extends Entity> extends View<M> {
 		
 		int updatesize = updateFields.length;
 		Object[][] params = new Object[entrys.size()][updatesize + 1];
-		try {
+		//try {
 			int i=0;
 			//for (int i = 0; i < entrys.size(); i++) {
 			for(M obj:entrys) {
 				//M obj = entrys[i];
 
 				for (int j = 0; j < updatesize; j++) {
-					Field field = updateFields[j];
-					params[i][j] = field.get(obj);
+					//Field field = updateFields[j];
+					//params[i][j] = field.get(obj);
+					params[i][j]=unsafe.getObject(obj, updateFieldOffsets[j]);
 				}
 				params[i][updatesize] = getPk(obj);
                 i++;
 			}
-		} catch (Exception e) {
+		//} catch (Exception e) {
 			// TODO Auto-generated catch block
-			throw new SQLException(e);
-		}
+		//	throw new SQLException(e);
+		//}
 		int re =  dataContext.executeBatch(sqlUpdate, params);
 		
 		return re;
@@ -298,10 +321,11 @@ public class Table<M extends Entity> extends View<M> {
 
 	public <E extends M,R> R getPk(E entry) {
 		R ret = null;
-		try {
-			ret = (R)pkField.get(entry);
-		} catch (IllegalArgumentException | IllegalAccessException e) {
-		}
+		//try {
+			//ret = (R)pkField.get(entry);
+		    ret=(R)unsafe.getObject(entry, pkFieldOffset);
+		//} catch (IllegalArgumentException | IllegalAccessException e) {
+		//}
 		return ret;
 	}
 	

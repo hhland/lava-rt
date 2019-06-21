@@ -7,7 +7,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import lava.rt.adapter.UnsafeAdapter;
 import lava.rt.common.ReflectCommon;
+import sun.misc.Unsafe;
 
 
 public abstract class LangObject {
@@ -18,10 +20,12 @@ public abstract class LangObject {
 	
 	protected final static Map<Class<? extends LangObject>,Map<String,Field>> CLS_FIELD_MAP=new HashMap<>();
 	
-	
-	
+	protected final static Map<Class<? extends LangObject>,Map<String,Long>> CLS_FIELDOFFSET_MAP=new HashMap<>();
 
-	
+	@SuppressWarnings("restriction")
+	protected static Unsafe unsafe=ReflectCommon.UNSAFE;
+
+	protected static UnsafeAdapter unsafeAdapter=new UnsafeAdapter(unsafe);
 	
 	
 	protected Map<String,Field> getFieldMap(){
@@ -33,6 +37,16 @@ public abstract class LangObject {
 		return ret;
 	}
 	
+	protected Map<String,Long> getFieldOffsetMap(){
+		Map<String,Long> ret=CLS_FIELDOFFSET_MAP.get(thisClass());
+		if(ret==null) {
+			ret=unsafeAdapter.allDeclaredFieldOffsetMap(thisClass());
+			CLS_FIELDOFFSET_MAP.put(thisClass(), ret);
+		}
+		return ret;
+	}
+	
+	@SuppressWarnings("unchecked")
 	public <T> T val(String fieldName) throws NoSuchFieldException{
 		Object ret=null;
 		Map<String, Field> fieldMap=getFieldMap();
@@ -54,6 +68,23 @@ public abstract class LangObject {
 		try {
 			field.set(this,value);
 		} catch (IllegalArgumentException | IllegalAccessException e) {}
+		
+	}
+	
+	@SuppressWarnings("restriction")
+	public <T> T val(Long offset) {
+		Object ret=null;
+		//Map<String, Field> fieldMap=getFieldMap();
+		
+		ret=unsafe.getObject(this, offset);
+		
+		return (T)ret;
+	}
+	
+	@SuppressWarnings("restriction")
+	public  void val(Long offset,Object value) {
+		
+		unsafe.putObject(this, offset, value);
 		
 	}
 	

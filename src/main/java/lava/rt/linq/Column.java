@@ -8,7 +8,7 @@ public class Column {
 
 	
 	
-	public final String column,asc ,desc,propName,groupBy,orderBy,distinct,count,max,min ;
+	public final String column,asc ,desc,propName,groupBy,orderBy,distinct,count,max,min,sum ;
 	
 	
 	
@@ -22,6 +22,7 @@ public class Column {
 		count="count("+column+")";
 		max="max("+column+")";
 		min="min("+column+")";
+		sum="sum("+column+")";
 		propName=toPropName(column);
 	}
 	

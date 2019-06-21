@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.sql.DataSource;
 
-import org.omg.Dynamic.Parameter;
+
 
 import lava.rt.base.LangObject;
 
@@ -171,11 +171,11 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 		return re;
 	}
 	
-	public String executeQueryJsonArray(String sql, Object... params) throws SQLException {
+	public String executeQueryJsonArray(int start,int size,String sql, Object... params) throws SQLException {
 
 		StringBuffer ret = new StringBuffer("[");
 		String[] columns=null;
-		int size=0;
+		int total=0,rsize=0;
 		try (PreparedStatement preparedStatement = getConnection().prepareStatement(sql);) {
 			for (int i = 0; i < params.length; i++) {
 				preparedStatement.setObject(i + 1, params[i]);
@@ -192,6 +192,15 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 				}
 				
 				while (resultSet.next()) {
+					
+					if(total<start||total>=start+size) {
+						total++;
+						continue;
+					}else {
+						total++;
+						
+					}
+					
 					ret.append("[");
 
 					for (int i = 0; i < cc; i++) {
@@ -223,7 +232,7 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 					}
 
 					ret.append("],");
-					size++;
+					rsize++;
 					// list.add(rowMap);
 				}
 			}
@@ -240,7 +249,9 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 		ret
 		.append("],columns:[\"")
 		.append(String.join("\",\"", columns))
-		.append("\"],size:").append(size)
+		.append("\"],total:").append(total)
+		.append(",size:").append(rsize)
+		
 		;
 		
 		return ret.toString();
@@ -251,10 +262,10 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 		return LogFactory.SYSTEM.getLog(this.thisClass());
 	}
 
-	public String executeQueryJsonList(String sql, Object... params) throws SQLException {
+	public String executeQueryJsonList(int start,int size,String sql, Object... params) throws SQLException {
 
 		StringBuffer ret = new StringBuffer("[");
-		int size=0;
+		int rsize=0,total=0;
 		try (PreparedStatement preparedStatement = getConnection().prepareStatement(sql);) {
 			for (int i = 0; i < params.length; i++) {
 				preparedStatement.setObject(i + 1, params[i]);
@@ -264,8 +275,17 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 				int cc = metaData.getColumnCount();
 				// String[] row=new String[cc];
 				// Map<String, Object> rowMap = null;
-				
+
 				while (resultSet.next()) {
+					
+					if(total<start||total>=start+size) {
+						total++;
+						continue;
+					}else {
+						total++;
+						
+					}
+					
 					ret.append("{");
 
 					for (int i = 0; i < cc; i++) {
@@ -310,7 +330,11 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 		if(size>0) {
 			ret.deleteCharAt(ret.length()-1);
 		}
-		ret.append("],size:").append(size);
+		ret
+		.append("],total:").append(total)
+		.append(",size:").append(rsize)
+		
+		;
 		return ret.toString();
 	}
 

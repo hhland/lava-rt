@@ -3,6 +3,7 @@ package lava.rt.linq;
 import static org.junit.Assume.assumeNotNull;
 
 import java.io.File;
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -17,9 +18,16 @@ import java.util.Set;
 
 import lava.rt.common.ReflectCommon;
 import lava.rt.common.TextCommon;
+import lava.rt.sqlparser.SelectSqlParser;
+import lava.rt.sqlparser.SqlSegment;
 
 
-public abstract class Criterias {
+public abstract class Criterias implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	private final static SimpleDateFormat SDF_YMD=new SimpleDateFormat("yyyy-MM-dd")
 			,SDF_YMDHMS=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
@@ -31,13 +39,12 @@ public abstract class Criterias {
 	
 	public abstract String format(Date date);
 	
-	public  PagingParam<Criterias> createPagingParam(int start,int limit){
-		PagingParam<Criterias> ret=new PagingParam<>(this, start, limit);
-		return ret;
-	}
+	protected static final Map<String,StringBuffer>  countSqlMap=new HashMap<>();
 	
     protected static final Map<Class,String> clsJoinAsPropMap=new HashMap<>()
-   , clsTableMap=new HashMap<>();
+   , clsTableMap=new HashMap<>()
+   
+   ;
 	
 	public final static Criterias mssql=new Criterias() {
 		
@@ -220,7 +227,20 @@ public abstract class Criterias {
 	
 	
 	public static String toCount(String sql) {
-		String ret="select count(*) "+sql.substring(sql.toLowerCase().indexOf("from"));
-		return ret;
+		
+		StringBuffer ret=countSqlMap.get(sql);
+		if(ret==null) {
+			 ret=new StringBuffer();
+			String csql="select count(*) "+sql.substring(sql.toLowerCase().indexOf("from"));
+			SelectSqlParser parser=new SelectSqlParser(csql);
+		    List<SqlSegment> segments=	parser.getSegments();
+		    for(SqlSegment segment:segments) {
+		    	if(segment.getStart().toLowerCase().equals("order by")) continue;
+		    	ret.append(" ").append(segment.toSql());
+		    }
+		    countSqlMap.put(sql, ret);
+		}
+		
+		return ret.toString();
 	}
 }

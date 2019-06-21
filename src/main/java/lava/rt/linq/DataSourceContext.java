@@ -331,18 +331,18 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 	
 
 	@Override
-	public String executeQueryJsonArray(PagingParam<Criterias> pagingParam, String sql, Object... params)
+	public String executeQueryJsonArray(PagingParam pagingParam)
 			throws SQLException {
 		// TODO Auto-generated method stub
-		String psql=pagingParam.toPaging(sql);
-		StringBuffer ret=new StringBuffer(executeQueryJsonArray(psql, params));
+		
+		StringBuffer ret=new StringBuffer(executeQueryJsonArray(pagingParam.psql, pagingParam.param));
 		
 		int size=Integer.parseInt(
 				  ret.substring(ret.lastIndexOf("size:")+5)
 				  ),total=pagingParam.start+size;
 		if(size==pagingParam.limit) {
-			String csql=Criterias.toCount(sql);
-			total=(int)executeQueryArray(csql, params)[0][0];
+			String csql=Criterias.toCount(pagingParam.sql);
+			total=(int)executeQueryArray(csql, pagingParam.param)[0][0];
 		}
 		ret
 		.append(",total:")
@@ -356,24 +356,22 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 
 
 	@Override
-	public String executeQueryJsonList(PagingParam<Criterias> pagingParam, String sql, Object... params)
+	public String executeQueryJsonList(PagingParam pagingParam)
 			throws SQLException {
-		// TODO Auto-generated method stub
-				String psql=pagingParam.toPaging(sql);
-				StringBuffer ret=new StringBuffer(executeQueryJsonList(psql, params));
-				
-				int size=Integer.parseInt(
-						  ret.substring(ret.lastIndexOf("size:")+5)
-						  ),total=pagingParam.start+size;
-				if(size==pagingParam.limit) {
-					String csql=Criterias.toCount(sql);
-					total=(int)executeQueryArray(csql, params)[0][0];
-				}
-				ret
-				.append(",total:")
-				.append(total)
-				;
-				return ret.toString();
+       StringBuffer ret=new StringBuffer(executeQueryJsonList(pagingParam.psql, pagingParam.param));
+		
+		int size=Integer.parseInt(
+				  ret.substring(ret.lastIndexOf("size:")+5)
+				  ),total=pagingParam.start+size;
+		if(size==pagingParam.limit) {
+			String csql=Criterias.toCount(pagingParam.sql);
+			total=(int)executeQueryArray(csql, pagingParam.param)[0][0];
+		}
+		ret
+		.append(",total:")
+		.append(total)
+		;
+		return ret.toString();
 	}
 
 

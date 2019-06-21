@@ -151,7 +151,7 @@ public class SqlCommon {
           sql=sql.replaceAll("\\s{1,}", " ");
           sql=""+sql+" ENDOFSQL";
           //System.out.println(sql);
-          return SingleSqlParserFactory.generateParser(sql).RetrunSqlSegments();
+          return SingleSqlParserFactory.generateParser(sql).getSegments();
       }
       
       

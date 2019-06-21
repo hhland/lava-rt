@@ -1,9 +1,14 @@
 package lava.rt.linq;
 
+import java.io.Serializable;
 import java.sql.Types;
 
-public class  OutputParam<E>{
+public class  OutputParam<E> implements Serializable{
 	 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	public E result,value;
     public final int sqlType;
     final Class<E> reslutCls;

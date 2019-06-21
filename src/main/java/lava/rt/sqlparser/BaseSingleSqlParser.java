@@ -68,18 +68,8 @@ public abstract class BaseSingleSqlParser{
 	  * 得到解析的Sql片段
 	  * @return
 	  */
-	  public List<SqlSegment> RetrunSqlSegments()
+	  public List<SqlSegment> getSegments()
 	  {
-	      int SegmentLength=this.segments.size();
-	      if(SegmentLength!=0)
-	      {
-	        List<SqlSegment> result=this.segments;
-	        return result;
-	      }
-	      else
-	      {
-	          //throw new Exception();
-	          return null;
-	      }
+	      return this.segments;
 	  }
 }

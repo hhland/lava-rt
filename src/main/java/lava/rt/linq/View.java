@@ -58,10 +58,10 @@ public   class  View<M extends Entity> {
 		return dataContext.executeQueryList(entryClass,sql,params);
 	}
     
-    public List<M> selectByPaging(PagingParam<Criterias> pagingParam,String where,Object...params) throws SQLException{
+    public List<M> select(Criterias criterias,int start,int limit,String where,Object...params) throws SQLException{
     	
     	String sql=sqlSelect+" "+where;
-    	sql=pagingParam.toPaging(sql);
+    	sql=criterias.toPaging(sql,start,limit);
 		return dataContext.executeQueryList(entryClass,sql,params);
 	}
 	

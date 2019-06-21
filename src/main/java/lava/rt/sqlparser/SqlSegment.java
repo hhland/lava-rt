@@ -125,6 +125,16 @@ public class SqlSegment{
 	      }
 	      return sb.toString();
 	  }
+	  
+	  public String toSql(){
+	      StringBuffer sb=new StringBuffer();
+	      sb.append(start);
+	      for(String piece:bodyPieces)
+	      {
+	          sb.append(piece);
+	      }
+	      return sb.toString();
+	  }
 
 	  public String getBody()
 	  {

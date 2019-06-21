@@ -688,18 +688,7 @@ public abstract class DataContextSrcGener   {
 		
 	}
 	
-	public class SrcEvent{
-		
-		protected void onClassSrcOutter(StringBuffer src,Class contextCls) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		protected void onClassSrcInner(StringBuffer src,Class contextCls) {
-			// TODO Auto-generated method stub
-			
-		}
-	}
+	
 	
 	public enum ColumnStruct{
 		STRING(String.class,Types.VARCHAR,Types.CHAR,Types.NVARCHAR,Types.LONGNVARCHAR,Types.NCHAR,Types.LONGVARCHAR,Types.CLOB)

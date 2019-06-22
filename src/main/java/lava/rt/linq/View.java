@@ -31,9 +31,9 @@ public   class  View<M extends Entity> {
 	
 	protected final String sqlSelect;
 	
-	protected static Unsafe unsafe=ReflectCommon.UNSAFE;
 	
-	protected static UnsafeAdapter unsafeAdapter=new UnsafeAdapter(unsafe);
+	
+	protected static UnsafeAdapter unsafeAdapter= UnsafeAdapter.getInstance();
 	
 	protected View (DataContext dataContext,Class<M> entryClass,String tableName) {
 		this.dataContext=dataContext;
@@ -46,7 +46,7 @@ public   class  View<M extends Entity> {
 			boolean isStatic = ReflectCommon.isStatic(field);
 			if(isStatic)continue;
 			this.entryFieldMap.put(ent.getKey(), ent.getValue());
-			entryFieldOffsetMap.put(ent.getKey(), unsafe.objectFieldOffset(ent.getValue()));
+			entryFieldOffsetMap.put(ent.getKey(), unsafeAdapter.objectFieldOffset(ent.getValue()));
 		}
 		
 		

@@ -6,6 +6,7 @@ import java.io.Closeable;
 import java.io.IOException;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -28,7 +29,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.sql.DataSource;
 
-
+import org.omg.CORBA.Environment;
 
 import lava.rt.base.LangObject;
 
@@ -37,23 +38,22 @@ import lava.rt.common.SqlCommon;
 import lava.rt.logging.Log;
 import lava.rt.logging.LogFactory;
 
-public abstract class DataSourceContext extends LangObject implements DataContext,Closeable {
+public abstract class DataSourceContext  implements DataContext,Closeable {
 
 	
 
-	private final Map<Class, Table> tableMap = new HashMap<>();
+	//private final Map<Class, Table> tableMap = new HashMap<>();
 
-	private final Map<Class, View> viewMap = new HashMap<>();
+	private final Map<Class,View> viewMap = new HashMap<>();
 
 	private final ThreadLocal<PoolList<Connection>> localConnection = new ThreadLocal<>();
 
-	
-	
-	
-	public DataSourceContext() {
-		super();
+	public  <E extends Entity> E newEntity(Class<E> entryClass) throws Exception{
+          E ret=Entity.newEntitys(1,entryClass)[0];
+          return ret;
 	}
-
+	
+	
 	
 	
 	
@@ -64,7 +64,7 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 
 	public <M extends Entity> Table<M> createTable(Class<M> cls, String tableName, String pkName) {
 		Table<M> table = new Table<M>(this, cls, tableName, pkName);
-		tableMap.put(cls, table);
+		//tableMap.put(cls, table);
 		viewMap.put(cls, table);
 		return table;
 	}
@@ -76,7 +76,7 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 	};
 
 	public <M extends Entity> Table<M> getTable(Class<M> mcls) {
-		Table<M> ret = (Table<M>) tableMap.get(mcls);
+		Table<M> ret = (Table<M>) viewMap.get(mcls);
 		return ret;
 	}
 
@@ -122,11 +122,16 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 				
 
 				while (resultSet.next()) {
-					M m = newEntry(cls);
-
-					if (m == null) {
+					M m=null;
+					try {
+						m = newEntity(cls);
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						getLog().error(e1);
 						throw new SQLException(cls.getName() + " can't be instance");
 					}
+
+					
 					int c = 0;
 					for (Iterator<String> it = view.entryFieldMap.keySet().iterator(); c < metaData.getColumnCount()
 							&& it.hasNext();) {
@@ -255,7 +260,7 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 
 	protected Log getLog() {
 		// TODO Auto-generated method stub
-		return LogFactory.SYSTEM.getLog(this.thisClass());
+		return LogFactory.SYSTEM.getLog(this.getClass());
 	}
 
 	public String executeQueryJsonList(String sql, Object... params) throws SQLException {
@@ -384,12 +389,6 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 
 
 
-
-	@Override
-	protected Class<? extends LangObject> thisClass() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 
 
@@ -698,18 +697,9 @@ public abstract class DataSourceContext extends LangObject implements DataContex
 		return ret;
 	}
 
-	public <E extends Entity> E newEntry(Class<E> entryClass) {
-		E ret = null;
-		try {
-
-			ret = (E) entryClass.getConstructors()[0].newInstance(this);
-			ret._createTime = now();
-		} catch (Exception e) {
-			e.printStackTrace();
-
-		}
-		return ret;
-	}
+	
+	
+	
 
 	protected static Date now() {
 		// TODO Auto-generated method stub

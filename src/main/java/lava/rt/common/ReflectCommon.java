@@ -31,20 +31,7 @@ public final class ReflectCommon {
 	
 	
 	
-    public  static Unsafe UNSAFE;
     
-    static {
-    	try {
-			Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
-			theUnsafe.setAccessible(true);
-			UNSAFE= (Unsafe) theUnsafe.get(null);
-		} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		   
-    	
-    }
 	
 	
     

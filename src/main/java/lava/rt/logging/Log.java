@@ -2,16 +2,16 @@ package lava.rt.logging;
 
 
 
-public class Log<E> {
+public class Log {
 
-	final Class<E> cls;
+	final Class cls;
 	final LogFactory factory;
 	
 	
 	
 	
 	
-	protected Log(LogFactory factory, Class<E> cls) {
+	protected Log(LogFactory factory, Class cls) {
 		// TODO Auto-generated constructor stub
 		this.cls=cls;
 		this.factory=factory;

@@ -22,10 +22,9 @@ public abstract class LangObject {
 	
 	protected final static Map<Class<? extends LangObject>,Map<String,Long>> CLS_FIELDOFFSET_MAP=new HashMap<>();
 
-	@SuppressWarnings("restriction")
-	protected static Unsafe unsafe=ReflectCommon.UNSAFE;
+	
 
-	protected static UnsafeAdapter unsafeAdapter=new UnsafeAdapter(unsafe);
+	protected static UnsafeAdapter unsafeAdapter=UnsafeAdapter.getInstance();
 	
 	
 	protected Map<String,Field> getFieldMap(){
@@ -76,7 +75,7 @@ public abstract class LangObject {
 		Object ret=null;
 		//Map<String, Field> fieldMap=getFieldMap();
 		
-		ret=unsafe.getObject(this, offset);
+		ret=unsafeAdapter.getObject(this, offset);
 		
 		return (T)ret;
 	}
@@ -84,18 +83,11 @@ public abstract class LangObject {
 	@SuppressWarnings("restriction")
 	public  void val(Long offset,Object value) {
 		
-		unsafe.putObject(this, offset, value);
+		unsafeAdapter.putObject(this, offset, value);
 		
 	}
 	
-    public int fromString(String value) {
-    	int ret=0;
-    	Pattern pattern= Pattern.compile(this.getClass().getSimpleName()+" [*]");
-    	Matcher matcher=pattern.matcher(value);
-    	if(!matcher.find())return ret;
-    	String v= matcher.group(0);
-    	return ret;
-	}
+   
 	
 	@Override
 	public String toString() {

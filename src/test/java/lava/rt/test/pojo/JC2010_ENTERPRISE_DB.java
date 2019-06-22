@@ -1,29 +1,22 @@
-package lava.rt.test; 
-
-import java.lang.String; 
-import java.lang.Integer; 
-import java.lang.Float; 
-import java.lang.Double; 
-import java.sql.Date; 
-import java.sql.Timestamp; 
-import java.math.BigDecimal; 
-import java.lang.Byte; 
-import java.lang.Boolean; 
-import java.lang.Byte; 
-import lava.rt.linq.*; 
-import java.util.*; 
-import java.sql.SQLException; 
-import java.io.Serializable; 
-
-
 /*
  *@Database JC2010_ENTERPRISE_DB
  *@SrcGener lava.rt.linq.src.MSSQLServerDataContextSrcGener
- *@CreateAt Sun Jun 16 14:54:11 CST 2019
+ *@CreateAt Sat Jun 22 22:34:01 CST 2019
 */ 
-public interface IJC2010_ENTERPRISE_DB extends DataContext{ 
+package lava.rt.test.pojo; 
 
-	public static final long serialVersionUID=1L;
+import lava.rt.linq.*; 
+import java.util.*; 
+import java.sql.*; 
+import java.math.*; 
+
+
+import java.io.*; 
+
+
+public interface JC2010_ENTERPRISE_DB extends lava.rt.linq.DataContext{ 
+
+	public static final long serialVersionUID=1;
 
 
 
@@ -31,7 +24,7 @@ public interface IJC2010_ENTERPRISE_DB extends DataContext{
 
 
 
-private static final long serialVersionUID = IJC2010_ENTERPRISE_DB.serialVersionUID;
+		private static final long serialVersionUID = JC2010_ENTERPRISE_DB.serialVersionUID;
 
 		 private Integer ID ; 
  		 private Integer INT_ ; 
@@ -65,7 +58,7 @@ private static final long serialVersionUID = IJC2010_ENTERPRISE_DB.serialVersion
 
 
 
-private static final long serialVersionUID = IJC2010_ENTERPRISE_DB.serialVersionUID;
+		private static final long serialVersionUID = JC2010_ENTERPRISE_DB.serialVersionUID;
 
 		 private String ADMIN_DIVISION_CODE ; 
  		 private String ECONOMIC_AREA_CODE ; 
@@ -358,103 +351,103 @@ private static final long serialVersionUID = IJC2010_ENTERPRISE_DB.serialVersion
 		private Criteria() {} 
 
 		public static final Column 
-		CopFax = new Column("COP_FAX"),
-		AccoNo = new Column("ACCO_NO"),
-		EnFullCo = new Column("EN_FULL_CO"),
-		AccountAgentTel = new Column("ACCOUNT_AGENT_TEL"),
-		BrokerType = new Column("BROKER_TYPE"),
-		Decimal_ = new Column("DECIMAL_"),
-		TaxyRgNo = new Column("TAXY_RG_NO"),
-		AddrCo = new Column("ADDR_CO"),
-		Id = new Column("ID"),
-		FirstRgDate = new Column("FIRST_RG_DATE"),
-		BusinessPlaceType = new Column("BUSINESS_PLACE_TYPE"),
-		Datetime_ = new Column("DATETIME_"),
-		ContacCo = new Column("CONTAC_CO"),
-		SuperiorFullName = new Column("SUPERIOR_FULL_NAME"),
-		AccountAgentContac = new Column("ACCOUNT_AGENT_CONTAC"),
-		GlobalCreditMark = new Column("GLOBAL_CREDIT_MARK"),
-		CoClass = new Column("CO_CLASS"),
-		ApprId = new Column("APPR_ID"),
-		ContacEmail = new Column("CONTAC_EMAIL"),
-		SocialCreditCode = new Column("SOCIAL_CREDIT_CODE"),
-		SignoutFlag = new Column("SIGNOUT_FLAG"),
-		CopNote = new Column("COP_NOTE"),
-		StaffQuantity = new Column("STAFF_QUANTITY"),
-		RgDate = new Column("RG_DATE"),
-		SuperiorSocialCreditCode = new Column("SUPERIOR_SOCIAL_CREDIT_CODE"),
-		SuperiorCopGbCode = new Column("SUPERIOR_COP_GB_CODE"),
-		AccountAgentAddr = new Column("ACCOUNT_AGENT_ADDR"),
-		InvFundTCurr = new Column("INV_FUND_T_CURR"),
-		IdNumber = new Column("ID_NUMBER"),
-		DirectFlag = new Column("DIRECT_FLAG"),
-		LawManTel = new Column("LAW_MAN_TEL"),
-		IsExpress = new Column("IS_EXPRESS"),
-		FinanceSoftware = new Column("FINANCE_SOFTWARE"),
-		LawManCredential = new Column("LAW_MAN_CREDENTIAL"),
-		Int_ = new Column("INT_"),
-		ActFund = new Column("ACT_FUND"),
-		LawManEmail = new Column("LAW_MAN_EMAIL"),
-		ContacFax = new Column("CONTAC_FAX"),
-		SuperiorRelation = new Column("SUPERIOR_RELATION"),
-		AccountAgentName = new Column("ACCOUNT_AGENT_NAME"),
-		AccountSocialCreditCode = new Column("ACCOUNT_SOCIAL_CREDIT_CODE"),
-		CustomsCode = new Column("CUSTOMS_CODE"),
-		Float_ = new Column("FLOAT_"),
-		SecondAddrCo = new Column("SECOND_ADDR_CO"),
-		AgentType = new Column("AGENT_TYPE"),
-		RegCode = new Column("REG_CODE"),
-		CurrCode = new Column("CURR_CODE"),
-		AutoPassFlag = new Column("AUTO_PASS_FLAG"),
-		ExpressCertificateCode = new Column("EXPRESS_CERTIFICATE_CODE"),
-		ApprDep = new Column("APPR_DEP"),
-		AccoBank = new Column("ACCO_BANK"),
-		TelCo = new Column("TEL_CO"),
-		AccountAgentCopGbCode = new Column("ACCOUNT_AGENT_COP_GB_CODE"),
-		InvFundUs = new Column("INV_FUND_US"),
-		EnAddrCo = new Column("EN_ADDR_CO"),
-		EconomicAreaCode = new Column("ECONOMIC_AREA_CODE"),
-		CopEmail = new Column("COP_EMAIL"),
-		LocalOrg = new Column("LOCAL_ORG"),
-		ApprovalStd = new Column("APPROVAL_STD"),
-		InvTCurrRateUs = new Column("INV_T_CURR_RATE_US"),
-		TerritoryBusiMark = new Column("TERRITORY_BUSI_MARK"),
-		SpecialTradeZone = new Column("SPECIAL_TRADE_ZONE"),
-		CopRange = new Column("COP_RANGE"),
-		IsPublicCop = new Column("IS_PUBLIC_COP"),
-		IcRegDate = new Column("IC_REG_DATE"),
-		LatestTradeCo = new Column("LATEST_TRADE_CO"),
-		LawManMobile = new Column("LAW_MAN_MOBILE"),
-		OverallFloorage = new Column("OVERALL_FLOORAGE"),
-		IsAccountCompute = new Column("IS_ACCOUNT_COMPUTE"),
-		CorpType = new Column("CORP_TYPE"),
-		NationalCreditMark = new Column("NATIONAL_CREDIT_MARK"),
-		MailCo = new Column("MAIL_CO"),
-		InvFundT = new Column("INV_FUND_T"),
-		CurrRateRmb = new Column("CURR_RATE_RMB"),
-		RgFundRmb = new Column("RG_FUND_RMB"),
-		CopGbCode = new Column("COP_GB_CODE"),
-		EntType = new Column("ENT_TYPE"),
-		ValidDate = new Column("VALID_DATE"),
-		AccountType = new Column("ACCOUNT_TYPE"),
-		LawMan = new Column("LAW_MAN"),
-		CopIoCode = new Column("COP_IO_CODE"),
-		RgFund = new Column("RG_FUND"),
-		EconomicCategoryCode = new Column("ECONOMIC_CATEGORY_CODE"),
-		BusiType = new Column("BUSI_TYPE"),
-		CoClassProLastModifyTime = new Column("CO_CLASS_PRO_LAST_MODIFY_TIME"),
-		AdminDivisionCode = new Column("ADMIN_DIVISION_CODE"),
-		FullName = new Column("FULL_NAME"),
-		EntTypeCode = new Column("ENT_TYPE_CODE"),
-		OrgClassification = new Column("ORG_CLASSIFICATION"),
-		CorpDevelopIndex = new Column("CORP_DEVELOP_INDEX"),
-		PreTradeCo = new Column("PRE_TRADE_CO"),
-		LicenseId = new Column("LICENSE_ID"),
-		ContacMobile = new Column("CONTAC_MOBILE"),
-		HomePage = new Column("HOME_PAGE"),
-		LastCertifyTime = new Column("LAST_CERTIFY_TIME"),
-		CoClassPro = new Column("CO_CLASS_PRO"),
-		Varchar_ = new Column("VARCHAR_")
+		copFax = new Column("COP_FAX"),
+		accoNo = new Column("ACCO_NO"),
+		enFullCo = new Column("EN_FULL_CO"),
+		accountAgentTel = new Column("ACCOUNT_AGENT_TEL"),
+		brokerType = new Column("BROKER_TYPE"),
+		decimal_ = new Column("DECIMAL_"),
+		taxyRgNo = new Column("TAXY_RG_NO"),
+		addrCo = new Column("ADDR_CO"),
+		id = new Column("ID"),
+		firstRgDate = new Column("FIRST_RG_DATE"),
+		businessPlaceType = new Column("BUSINESS_PLACE_TYPE"),
+		datetime_ = new Column("DATETIME_"),
+		contacCo = new Column("CONTAC_CO"),
+		superiorFullName = new Column("SUPERIOR_FULL_NAME"),
+		accountAgentContac = new Column("ACCOUNT_AGENT_CONTAC"),
+		globalCreditMark = new Column("GLOBAL_CREDIT_MARK"),
+		coClass = new Column("CO_CLASS"),
+		apprId = new Column("APPR_ID"),
+		contacEmail = new Column("CONTAC_EMAIL"),
+		socialCreditCode = new Column("SOCIAL_CREDIT_CODE"),
+		signoutFlag = new Column("SIGNOUT_FLAG"),
+		copNote = new Column("COP_NOTE"),
+		staffQuantity = new Column("STAFF_QUANTITY"),
+		rgDate = new Column("RG_DATE"),
+		superiorSocialCreditCode = new Column("SUPERIOR_SOCIAL_CREDIT_CODE"),
+		superiorCopGbCode = new Column("SUPERIOR_COP_GB_CODE"),
+		accountAgentAddr = new Column("ACCOUNT_AGENT_ADDR"),
+		invFundTCurr = new Column("INV_FUND_T_CURR"),
+		idNumber = new Column("ID_NUMBER"),
+		directFlag = new Column("DIRECT_FLAG"),
+		lawManTel = new Column("LAW_MAN_TEL"),
+		isExpress = new Column("IS_EXPRESS"),
+		financeSoftware = new Column("FINANCE_SOFTWARE"),
+		lawManCredential = new Column("LAW_MAN_CREDENTIAL"),
+		int_ = new Column("INT_"),
+		actFund = new Column("ACT_FUND"),
+		lawManEmail = new Column("LAW_MAN_EMAIL"),
+		contacFax = new Column("CONTAC_FAX"),
+		superiorRelation = new Column("SUPERIOR_RELATION"),
+		accountAgentName = new Column("ACCOUNT_AGENT_NAME"),
+		accountSocialCreditCode = new Column("ACCOUNT_SOCIAL_CREDIT_CODE"),
+		customsCode = new Column("CUSTOMS_CODE"),
+		float_ = new Column("FLOAT_"),
+		secondAddrCo = new Column("SECOND_ADDR_CO"),
+		agentType = new Column("AGENT_TYPE"),
+		regCode = new Column("REG_CODE"),
+		currCode = new Column("CURR_CODE"),
+		autoPassFlag = new Column("AUTO_PASS_FLAG"),
+		expressCertificateCode = new Column("EXPRESS_CERTIFICATE_CODE"),
+		apprDep = new Column("APPR_DEP"),
+		accoBank = new Column("ACCO_BANK"),
+		telCo = new Column("TEL_CO"),
+		accountAgentCopGbCode = new Column("ACCOUNT_AGENT_COP_GB_CODE"),
+		invFundUs = new Column("INV_FUND_US"),
+		enAddrCo = new Column("EN_ADDR_CO"),
+		economicAreaCode = new Column("ECONOMIC_AREA_CODE"),
+		copEmail = new Column("COP_EMAIL"),
+		localOrg = new Column("LOCAL_ORG"),
+		approvalStd = new Column("APPROVAL_STD"),
+		invTCurrRateUs = new Column("INV_T_CURR_RATE_US"),
+		territoryBusiMark = new Column("TERRITORY_BUSI_MARK"),
+		specialTradeZone = new Column("SPECIAL_TRADE_ZONE"),
+		copRange = new Column("COP_RANGE"),
+		isPublicCop = new Column("IS_PUBLIC_COP"),
+		icRegDate = new Column("IC_REG_DATE"),
+		latestTradeCo = new Column("LATEST_TRADE_CO"),
+		lawManMobile = new Column("LAW_MAN_MOBILE"),
+		overallFloorage = new Column("OVERALL_FLOORAGE"),
+		isAccountCompute = new Column("IS_ACCOUNT_COMPUTE"),
+		corpType = new Column("CORP_TYPE"),
+		nationalCreditMark = new Column("NATIONAL_CREDIT_MARK"),
+		mailCo = new Column("MAIL_CO"),
+		invFundT = new Column("INV_FUND_T"),
+		currRateRmb = new Column("CURR_RATE_RMB"),
+		rgFundRmb = new Column("RG_FUND_RMB"),
+		copGbCode = new Column("COP_GB_CODE"),
+		entType = new Column("ENT_TYPE"),
+		validDate = new Column("VALID_DATE"),
+		accountType = new Column("ACCOUNT_TYPE"),
+		lawMan = new Column("LAW_MAN"),
+		copIoCode = new Column("COP_IO_CODE"),
+		rgFund = new Column("RG_FUND"),
+		economicCategoryCode = new Column("ECONOMIC_CATEGORY_CODE"),
+		busiType = new Column("BUSI_TYPE"),
+		coClassProLastModifyTime = new Column("CO_CLASS_PRO_LAST_MODIFY_TIME"),
+		adminDivisionCode = new Column("ADMIN_DIVISION_CODE"),
+		fullName = new Column("FULL_NAME"),
+		entTypeCode = new Column("ENT_TYPE_CODE"),
+		orgClassification = new Column("ORG_CLASSIFICATION"),
+		corpDevelopIndex = new Column("CORP_DEVELOP_INDEX"),
+		preTradeCo = new Column("PRE_TRADE_CO"),
+		licenseId = new Column("LICENSE_ID"),
+		contacMobile = new Column("CONTAC_MOBILE"),
+		homePage = new Column("HOME_PAGE"),
+		lastCertifyTime = new Column("LAST_CERTIFY_TIME"),
+		coClassPro = new Column("CO_CLASS_PRO"),
+		varchar_ = new Column("VARCHAR_")
 		;
 
 	} 

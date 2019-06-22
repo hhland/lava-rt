@@ -64,9 +64,9 @@ public abstract class DataContextSrcGener   {
 
 
 
-	public void saveLocalSrcTo(File srcFile,Class cls,String databaseName,String...justTables) throws SQLException, IOException {
+	public void saveLocalSrcTo(File srcFile,Class cls,String databaseName) throws SQLException, IOException {
 		
-		String src=toLocalSrc(cls, databaseName, justTables);
+		String src=toLocalSrc(cls, databaseName);
 		srcFile.delete();
 		srcFile.createNewFile();
 		srcFile.setWritable(true);
@@ -75,9 +75,9 @@ public abstract class DataContextSrcGener   {
 		}
 	}
 	
-    public  void saveRpcIntfSrcTo(File srcIntf,Class clsIntf,String databaseName,String...justTables) throws SQLException, IOException {
+    public  void saveIntfSrcTo(File srcIntf,Class clsIntf,String databaseName) throws SQLException, IOException {
 		
-    	String src=toRpcIntfSrc(clsIntf, databaseName, justTables);
+    	String src=toIntfSrc(clsIntf, databaseName);
     	srcIntf.delete();
     	srcIntf.createNewFile();
     	srcIntf.setWritable(true);
@@ -88,9 +88,9 @@ public abstract class DataContextSrcGener   {
 		
 	}
     
-     public  void saveRpcImplSrcTo(File srcImpl,Class clsIntf,Class clsImpl,String databaseName,String...justTables) throws SQLException, IOException {
+     public  void saveImplSrcTo(Class clsIntf,File srcImpl,Class clsImpl,String databaseName) throws SQLException, IOException {
 		
-    	 String src=toRpcImplSrc(clsIntf,clsImpl, databaseName, justTables);
+    	 String src=toImplSrc(clsImpl,clsIntf, databaseName);
 		srcImpl.delete();
 		srcImpl.createNewFile();
 		srcImpl.setWritable(true);
@@ -99,7 +99,9 @@ public abstract class DataContextSrcGener   {
 		}
 	}
 	
-	public String toLocalSrc(Class cls,String databaseName,String...justTables) throws SQLException {
+     
+    @Deprecated
+	public String toLocalSrc(Class cls,String databaseName) throws SQLException {
 		StringBuffer src=new StringBuffer(getFileInfo(databaseName));
 		if(cls.getPackage()!=null) {
 		 src.append("package "+cls.getPackage().getName()+"; \n\n");
@@ -152,13 +154,9 @@ public abstract class DataContextSrcGener   {
 		
 		Map<String, String> tablesPks=loadTablesPks(databaseName);
 		
-		if(justTables.length>0) {
-			for(String justTable:justTables) {
-				tables.add(justTable);
-			}
-		}else {
-			tables=tablesPks.keySet();
-		}
+		
+	  tables=tablesPks.keySet();
+		
 		
 		
 		
@@ -253,7 +251,7 @@ public abstract class DataContextSrcGener   {
 
 
 
-	public String toRpcIntfSrc(Class cls,String databaseName,String...justTables) throws SQLException {
+	public String toIntfSrc(Class cls,String databaseName) throws SQLException {
 		StringBuffer src=new StringBuffer(getFileInfo(databaseName));
 		if(cls.getPackage()!=null) {
 		 src.append("package "+cls.getPackage().getName()+"; \n\n");
@@ -287,13 +285,9 @@ public abstract class DataContextSrcGener   {
 		
 		Map<String, String> tablesPks=loadTablesPks(databaseName);
 		
-		if(justTables.length>0) {
-			for(String justTable:justTables) {
-				tables.add(justTable);
-			}
-		}else {
+		
 			tables=tablesPks.keySet();
-		}
+		
 		
 		
 		
@@ -346,7 +340,7 @@ public abstract class DataContextSrcGener   {
 	
 	
 	
-	public String toRpcImplSrc(Class intfCls,Class cls,String databaseName,String...justTables) throws SQLException {
+	public String toImplSrc(Class cls,Class intfCls,String databaseName) throws SQLException {
 		StringBuffer src=new StringBuffer(getFileInfo(databaseName));
 		if(cls.getPackage()!=null) {
 		 src.append("package "+cls.getPackage().getName()+"; \n\n");
@@ -370,17 +364,17 @@ public abstract class DataContextSrcGener   {
 		onClassSrcOutter(src,cls);
 		
 		
-		src.append("public class "+cls.getSimpleName()+" extends "+DataSourceContext.class.getName()+" implements "+intfCls.getName()+"{ \n\n");
+		src.append("public abstract class "+cls.getSimpleName()+" extends "+DataSourceContext.class.getName()+" implements "+intfCls.getName()+"{ \n\n");
 		
 		
 		onClassSrcInner(src,cls);
 		
-		src
+		//src
 		//.append("\tprivate static final long serialVersionUID=1L;\n\n")
-		.append("\t@Override\r\n" + 
-				"\tprotected Class thisClass() {return this.getClass(); }\n\n")
+		//.append("\t@Override\r\n" + 
+		//		"\tprotected Class thisClass() {return this.getClass(); }\n\n")
 		//.append("\t public "+cls.getSimpleName()+"("+DataSource.class.getSimpleName()+"... dataSources)throws "+Exception.class.getSimpleName()+"{ super(dataSources);  } \n\n")
-		;
+		//;
 		
 		Set<String> tables=new HashSet<>(),views=loadViews(databaseName);
 		
@@ -388,13 +382,9 @@ public abstract class DataContextSrcGener   {
 		
 		Map<String, String> tablesPks=loadTablesPks(databaseName);
 		
-		if(justTables.length>0) {
-			for(String justTable:justTables) {
-				tables.add(justTable);
-			}
-		}else {
-			tables=tablesPks.keySet();
-		}
+		
+	    tables=tablesPks.keySet();
+		
 		
 		
 		

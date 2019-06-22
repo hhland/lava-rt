@@ -64,16 +64,7 @@ public abstract class DataContextSrcGener   {
 
 
 
-	public void saveLocalSrcTo(File srcFile,Class cls,String databaseName) throws SQLException, IOException {
-		
-		String src=toLocalSrc(cls, databaseName);
-		srcFile.delete();
-		srcFile.createNewFile();
-		srcFile.setWritable(true);
-		try(FileWriter fw=new FileWriter(srcFile)){
-			fw.write(src);
-		}
-	}
+	
 	
     public  void saveIntfSrcTo(File srcIntf,Class clsIntf,String databaseName) throws SQLException, IOException {
 		
@@ -100,137 +91,7 @@ public abstract class DataContextSrcGener   {
 	}
 	
      
-    @Deprecated
-	public String toLocalSrc(Class cls,String databaseName) throws SQLException {
-		StringBuffer src=new StringBuffer(getFileInfo(databaseName));
-		if(cls.getPackage()!=null) {
-		 src.append("package "+cls.getPackage().getName()+"; \n\n");
-		}
-		
-		src.append("import "+DataContext.class.getPackage().getName()+".*; \n")
-		
-		
-		.append("import "+ List.class.getPackage().getName()+".*; \n")
-		.append("import "+ BigDecimal.class.getPackage().getName()+".*; \n")
-		
-		.append("import "+ SQLException.class.getPackage().getName()+".*; \n")
-		.append("import "+DataSource.class.getPackage().getName()+".*; \n\n\n")
-		.append("import "+Serializable.class.getPackage().getName()+".*; \n\n\n")
-		;
-		
-		
-		
-		
-		onClassSrcOutter(src,cls);
-		
-		
-		src.append("public class "+cls.getSimpleName()+" extends "+DataSourceContext.class.getName()+"{ \n\n");
-		
-		
-		onClassSrcInner(src,cls);
-		
-		
-		src
-		.append("\tDataSource[] dataSources;\r\n" + 
-				"		\r\n" + 
-				//"	 public "+cls.getSimpleName()+"(DataSource dataSource){ dataSources=new DataSource[] {dataSource}; } \r\n" + 
-				"	 \r\n" + 
-				"	 @Override\r\n" + 
-				"		protected DataSource[] getDataSources() {\r\n" + 
-				"			// TODO Auto-generated method stub\r\n" + 
-				"			return dataSources;\r\n" + 
-				"		}\n\n")
-		
-		.append("\tprivate static final long serialVersionUID="+serialVersionUID+";\n\n")
-		.append("\t@Override\r\n" + 
-				"\tprotected Class thisClass() {return this.getClass(); }\n\n")
-		//.append("\t public "+cls.getSimpleName()+"("+DataSource.class.getSimpleName()+" dataSource)throws "+Exception.class.getSimpleName()+"{ this.dataSources=new DataSource[]{dataSource};  } \n\n")
-		.append("\t public "+cls.getSimpleName()+"("+DataSource.class.getSimpleName()+"... dataSources)throws "+Exception.class.getSimpleName()+"{ this.dataSources=dataSources;  } \n\n")
-		;
-		
-		Set<String> tables=new HashSet<>(),views=loadViews(databaseName);
-		
-		Map<String, List<ProcedureParamSrc>>procs=loadProcedures(databaseName);
-		
-		Map<String, String> tablesPks=loadTablesPks(databaseName);
-		
-		
-	  tables=tablesPks.keySet();
-		
-		
-		
-		
-		for(String table:tables) {
-			
-			String pkName="ID";
-			
-			String tn=table.toUpperCase()
-					,cn=toClassName(tn)
-					;
-			if(views.contains(tn))continue;
-			
-			if(tablesPks.containsKey(tn)) {
-				pkName=tablesPks.get(tn);
-			}
-			src.append("\t public final Table<"+cn+"> "+tn+"=createTable("+cn+".class,\""+table+"\",\""+pkName+"\");\n");
-		}
-		
-		src.append("\n\n");
-		
-		for(String table:views) {
-			
-			
-			String tn=table.toUpperCase()
-					,cn=toClassName(tn)
-					;
-			
-			src.append("\t public final View<"+cn+"> "+tn+"=createView("+cn+".class,\""+table+"\");\n");
-		}
-		
-		src.append("\n\n");
-		
-		//tables.addAll(views);
-		for(String table:tables) {
-			String pkName=null;
-			String tn=table;
-			if(tablesPks.containsKey(tn)) {
-				pkName=tablesPks.get(tn);
-			}
-			TableSrc tableSrc=new TableSrc(tn,pkName);
-			src.append(tableSrc.toSrc(cls));
-		}
-		
-		for(String table:views) {
-			
-			String tn=table;
-			TableSrc tableSrc=new TableSrc(tn,null);
-			src.append(tableSrc.toSrc(cls));
-		}
-		
-        for(java.util.Map.Entry<String, List<ProcedureParamSrc>> ent : procs.entrySet() ) {
-			
-			String tn=ent.getKey();
-			ProcedureSrc tableSrc=new ProcedureSrc(tn,ent.getValue());
-			src.append(tableSrc.toSrc());
-		}
-		
-		src
-		.append("\tpublic final static Criteria CRITERIA=new Criteria();\n\n")
-		.append("\tpublic  static class Criteria{ \n\n")
-		.append("\t\tprivate Criteria() {} \n\n")
-		.append("\t\tpublic static final Column \n");
-		
-		for(String colName:columnNames) {
-			src.append("\t\t"+ toPropName(colName)+" = new Column(\""+colName+"\"),\n" );
-		}
-		src.deleteCharAt(src.length()-2);
-		src.append( "\t\t;\n\n")
-		.append("\t} \n\n")
-		;
-		src.append("\n\n\n} //end");
-		
-		return src.toString();
-	}
+   
 	
 	
 	private void onClassSrcInner(StringBuffer src,Class contextCls) {

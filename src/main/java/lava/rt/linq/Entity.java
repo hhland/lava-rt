@@ -16,38 +16,46 @@ import lava.rt.common.ReflectCommon;
 public abstract class Entity extends LangObject  {
 
 	
-	
-     
-	protected Date _createTime,_updateTime,_timeoutTime;
-     
+	protected Date newAt,updateAt,timeoutAt;
 
      
     public Entity() {
-		
+		newAt=now();
 	} 
 
 
+	
+    public void incrTimeout(int millSec) {
+    	
+    	this.timeoutAt=new Date(now().getTime()+millSec);
+    } 
+	
+	
+	
 	@Override
-	public String toString() {
-		String ret= "Entity [_createTime=" + _createTime + ", _updateTime=" + _updateTime + "]";
-		ret += super.toString();
-		return ret;
-		
+	public void val(Long offset, Object value) {
+		// TODO Auto-generated method stub
+		super.val(offset, value);
+		updateAt=now();
 	}
 
 
-	public Date get_createTime() {
-		return _createTime;
+
+
+
+
+
+	private Date now() {
+		// TODO Auto-generated method stub
+		return Calendar.getInstance().getTime();
 	}
 
 
-	public Date get_updateTime() {
-		return _updateTime;
-	}
-     
-	
-	
-	
+
+
+
+
+
 	public static <E extends Entity> E[] newEntitys(int size,Class<E> entryClass,Object ...objects) throws Exception {
 		E[] ret=(E[])Array.newInstance(entryClass,size);
 		for(int i=0;i<ret.length;i++){
@@ -68,8 +76,11 @@ public abstract class Entity extends LangObject  {
 	}
 
 
-	private static Date now() {
-		// TODO Auto-generated method stub
-		return Calendar.getInstance().getTime();
+	public  interface  CachePool{
+		
+		Entity get(String key);
+		
+		void put(String key,Entity entity);
+		
 	}
 }

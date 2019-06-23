@@ -4,6 +4,7 @@ import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,7 +19,7 @@ public abstract class LangObject {
 	protected abstract Class<? extends LangObject> thisClass();
 
 	
-	protected final static Map<Class<? extends LangObject>,Map<String,Field>> CLS_FIELD_MAP=new HashMap<>();
+	//protected final static Map<Class<? extends LangObject>,Map<String,Field>> CLS_FIELD_MAP=new HashMap<>();
 	
 	protected final static Map<Class<? extends LangObject>,Map<String,Long>> CLS_FIELDOFFSET_MAP=new HashMap<>();
 
@@ -27,14 +28,14 @@ public abstract class LangObject {
 	protected static UnsafeAdapter unsafeAdapter=UnsafeAdapter.getInstance();
 	
 	
-	protected Map<String,Field> getFieldMap(){
-		Map<String,Field> ret=CLS_FIELD_MAP.get(thisClass());
-		if(ret==null) {
-			ret=ReflectCommon.allDeclaredFieldMap(thisClass());
-			CLS_FIELD_MAP.put(thisClass(), ret);
-		}
-		return ret;
-	}
+//	protected Map<String,Field> getFieldMap(){
+//		Map<String,Field> ret=CLS_FIELD_MAP.get(thisClass());
+//		if(ret==null) {
+//			ret=ReflectCommon.allDeclaredFieldMap(thisClass());
+//			CLS_FIELD_MAP.put(thisClass(), ret);
+//		}
+//		return ret;
+//	}
 	
 	protected Map<String,Long> getFieldOffsetMap(){
 		Map<String,Long> ret=CLS_FIELDOFFSET_MAP.get(thisClass());
@@ -46,28 +47,18 @@ public abstract class LangObject {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public <T> T val(String fieldName) throws NoSuchFieldException{
-		Object ret=null;
-		Map<String, Field> fieldMap=getFieldMap();
-		if(!fieldMap.containsKey(fieldName)) throw new NoSuchFieldException();
-		Field field=fieldMap.get(fieldName);
-		field.setAccessible(true);
-		try {
-			ret=field.get(this);
-		} catch (IllegalArgumentException | IllegalAccessException e) {}
-		return (T)ret;
+	public <T> T val(String fieldName) {
+		T ret=null;
+		Map<String,Long> om=getFieldOffsetMap();
+		ret=val(om.get(fieldName));
+		return ret;
 	}
 	
-	public  void val(String fieldName,Object value) throws NoSuchFieldException{
+	public  void val(String fieldName,Object value) {
 		
-		Map<String, Field> fieldMap=getFieldMap();
-		if(!fieldMap.containsKey(fieldName)) throw new NoSuchFieldException();
-		Field field=fieldMap.get(fieldName);
-		field.setAccessible(true);
-		try {
-			field.set(this,value);
-		} catch (IllegalArgumentException | IllegalAccessException e) {}
-		
+		Map<String,Long> om=getFieldOffsetMap();
+		val(om.get(fieldName),value);
+
 	}
 	
 	@SuppressWarnings("restriction")
@@ -94,12 +85,12 @@ public abstract class LangObject {
 		StringBuffer sbr=new StringBuffer(this.thisClass().getSimpleName());
 		sbr.append(" [");
 		
-		for(java.util.Map.Entry<String, Field> ent: getFieldMap().entrySet()) {
+		for(Entry<String, Long> ent: getFieldOffsetMap().entrySet()) {
 			Object val="null";
 			try {
-				Field field=ent.getValue();
-				field.setAccessible(true);
-				val = field.get(this).toString().replaceAll(",", "");
+				//Field field=ent.getValue();
+				//field.setAccessible(true);
+				val = this.val(ent.getValue()).toString().replaceAll(",", "");
 				
 			} catch (Exception e) {}
 			sbr

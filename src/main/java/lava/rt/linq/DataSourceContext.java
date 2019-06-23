@@ -537,7 +537,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 		} else {
 			re += table.insertWithoutPk(entry);
 		}
-		entry._updateTime = now();
+		//entry._updateTime = now();
 		return re;
 	}
 
@@ -547,7 +547,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 		Class cls = entry.getClass();
 		Table table = this.getTable(cls);
 		re += table.update(entry);
-		entry._updateTime = now();
+		//entry._updateTime = now();
 
 		return re;
 	}

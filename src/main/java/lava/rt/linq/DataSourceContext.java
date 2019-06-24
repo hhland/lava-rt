@@ -18,8 +18,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.sql.DataSource;
 
-
-
+import lava.rt.base.CacheBox;
 import lava.rt.base.PoolList;
 import lava.rt.common.SqlCommon;
 
@@ -73,7 +72,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 		return ret;
 	};
 	
-	protected <E extends Entity> Cacheable<E> cacheGet(Class<E> cls, Object pk){
+	protected <E extends Entity> CacheBox<E> cacheGet(Class<E> cls, Object pk){
 		return null;
 	}
 	
@@ -82,14 +81,14 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 	@Override
 	public <E extends Entity> E load(Class<E> cls, Object pk) throws SQLException {
 		// TODO Auto-generated method stub
-		Cacheable<E> cacheable=cacheGet(cls, pk);
+		CacheBox<E> CacheBox=cacheGet(cls, pk);
 		E ret=null;
-		if(cacheable==null||cacheable.isTimeout()||!cacheable.isEnable()) {
+		if(CacheBox==null||CacheBox.isTimeout()||!CacheBox.isEnable()) {
 			Table<E> table=getTable(cls);
 			ret=table.load(pk);
 			cachePut(ret,pk);
 		}else {
-			ret=cacheable.getEntity();
+			ret=CacheBox.getEntity();
 		}
 		
 		return ret;

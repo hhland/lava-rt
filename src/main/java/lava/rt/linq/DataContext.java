@@ -57,39 +57,6 @@ public interface  DataContext  {
 	}
 	
 	
-public  class  Cacheable<E extends Entity>{
-		
-		final E entity;
-		
-		final Date timeoutAt;
-		
-	    boolean enable=true;
 
-		public Cacheable(E entity,long timeoutMillsec) {
-			super();
-			this.entity = entity;
-			timeoutAt=new Date(System.currentTimeMillis()+timeoutMillsec);
-		}
-		
-		public final E getEntity() {
-			return entity;
-		}
-		
-		public final boolean isTimeout() {
-			boolean ret=System.currentTimeMillis()>timeoutAt.getTime();
-			return ret;
-		}
-
-		public boolean isEnable() {
-			return enable;
-		}
-
-		public void setEnable(boolean enable) {
-			this.enable = enable;
-		}
-		
-		
-		
-	}
 
 }

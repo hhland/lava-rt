@@ -16,7 +16,7 @@ import lava.rt.common.ReflectCommon;
 public abstract class Entity extends LangObject  {
 
 	
-	protected Date newAt,updateAt,timeoutAt;
+	protected Date newAt,updateAt;
 
      
     public Entity() {
@@ -25,27 +25,10 @@ public abstract class Entity extends LangObject  {
 
 
 	
-    public void incrTimeout(int millSec) {
-    	
-    	this.timeoutAt=new Date(now().getTime()+millSec);
-    } 
-	
-	
-	
-	@Override
-	public void val(Long offset, Object value) {
-		// TODO Auto-generated method stub
-		super.val(offset, value);
-		updateAt=now();
-	}
 
 
 
-
-
-
-
-	private Date now() {
+	protected static Date now() {
 		// TODO Auto-generated method stub
 		return Calendar.getInstance().getTime();
 	}
@@ -75,12 +58,7 @@ public abstract class Entity extends LangObject  {
 		return ret;
 	}
 
+	
 
-	public  interface  CachePool{
-		
-		Entity get(String key);
-		
-		void put(String key,Entity entity);
-		
-	}
+	
 }

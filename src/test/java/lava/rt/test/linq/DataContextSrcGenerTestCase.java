@@ -12,6 +12,7 @@ import org.junit.Test;
 import junit.framework.TestCase;
 import lava.rt.linq.src.DataContextSrcGener;
 import lava.rt.linq.src.MSSQLServerDataContextSrcGener;
+import lava.rt.test.pojo.BaseJC2010_ENTERPRISE_DBImpl;
 import lava.rt.test.pojo.JC2010_ENTERPRISE_DB;
 import lava.rt.test.pojo.JC2010_ENTERPRISE_DBImpl;
 
@@ -58,8 +59,8 @@ public class DataContextSrcGenerTestCase extends TestCase {
 	
 	@Test
 	public void testSaveImplSrcTo() throws SQLException, IOException {
-		File srcFile=new File(dir+gener.refSrcPath(JC2010_ENTERPRISE_DBImpl.class));
-		gener.saveImplSrcTo(JC2010_ENTERPRISE_DB.class, srcFile,JC2010_ENTERPRISE_DBImpl.class, db);
+		File srcFile=new File(dir+gener.refSrcPath(BaseJC2010_ENTERPRISE_DBImpl.class));
+		gener.saveImplSrcTo(JC2010_ENTERPRISE_DB.class, srcFile,BaseJC2010_ENTERPRISE_DBImpl.class, db);
 	}
 
 	@Test

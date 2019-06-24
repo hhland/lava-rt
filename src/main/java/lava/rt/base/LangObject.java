@@ -90,7 +90,7 @@ public abstract class LangObject {
 			try {
 				//Field field=ent.getValue();
 				//field.setAccessible(true);
-				val = this.val(ent.getValue()).toString().replaceAll(",", "");
+				val = this.val(ent.getValue()).toString().replace(",", " ");
 				
 			} catch (Exception e) {}
 			sbr

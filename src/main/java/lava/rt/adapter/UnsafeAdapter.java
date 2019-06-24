@@ -12,8 +12,11 @@ import sun.misc.Unsafe;
 
 public class UnsafeAdapter extends BaseAdapter<Unsafe>{
 
-  protected  static UnsafeAdapter instance;
+    protected  static UnsafeAdapter instance;
     
+    
+    protected static final Map<String,Long> fieldOffsetMap=new HashMap<>();
+  
 	
 	protected UnsafeAdapter(Unsafe unsafe) {
 		super(unsafe);
@@ -57,18 +60,14 @@ public class UnsafeAdapter extends BaseAdapter<Unsafe>{
     	for(Entry<String, Field> ent:ReflectCommon.allDeclaredFieldMap(cls).entrySet()) {
     		ret.put(ent.getKey(), _this.objectFieldOffset(ent.getValue()));
     	}
-    	try {
-			Table t= (Table) _this.allocateInstance(Table.class);
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+    	
     	return ret;
     }
 
 
 	public Long objectFieldOffset(Field field) {
 		// TODO Auto-generated method stub
+		
 		return _this.objectFieldOffset(field);
 	}
 

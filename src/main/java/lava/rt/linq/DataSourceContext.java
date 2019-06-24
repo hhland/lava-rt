@@ -5,36 +5,22 @@ package lava.rt.linq;
 import java.io.Closeable;
 import java.io.IOException;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Savepoint;
-import java.sql.Statement;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
+
+import java.sql.*;
+
+import java.util.*;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.sql.DataSource;
 
-import org.omg.CORBA.Environment;
 
-import lava.rt.base.LangObject;
 
 import lava.rt.base.PoolList;
 import lava.rt.common.SqlCommon;
+
 import lava.rt.logging.Log;
 import lava.rt.logging.LogFactory;
 
@@ -42,7 +28,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 
 	
 
-	//private final Map<Class, Table> tableMap = new HashMap<>();
+	private final Map<Class, Table> tableMap = new HashMap<>();
 
 	private final Map<Class,View> viewMap = new HashMap<>();
 
@@ -64,8 +50,8 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 
 	public <M extends Entity> Table<M> createTable(Class<M> cls, String tableName, String pkName) {
 		Table<M> table = new Table<M>(this, cls, tableName, pkName);
-		//tableMap.put(cls, table);
-		viewMap.put(cls, table);
+		tableMap.put(cls, table);
+		//viewMap.put(cls, table);
 		return table;
 	}
 
@@ -76,24 +62,43 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 	};
 
 	public <M extends Entity> Table<M> getTable(Class<M> mcls) {
-		Table<M> ret = (Table<M>) viewMap.get(mcls);
+		Table<M> ret = tableMap.get(mcls);
 		return ret;
 	}
 
 	public <M extends Entity> View<M> getView(Class<M> mcls) {
-		View<M> ret = (View<M>) viewMap.get(mcls);
+		View<M> ret = viewMap.get(mcls);
 		return ret;
 	};
 	
+	protected <E extends Entity> Cacheable<E> cacheGet(Class<E> cls, Object pk){
+		return null;
+	}
 	
+	protected <E extends Entity> void cachePut(E ret, Object pk) {}
 
 	@Override
 	public <E extends Entity> E load(Class<E> cls, Object pk) throws SQLException {
 		// TODO Auto-generated method stub
-		Table<E> table=getTable(cls);
-		E ret=table.load(pk);
+		Cacheable<E> cacheable=cacheGet(cls, pk);
+		E ret=null;
+		if(cacheable==null||cacheable.isTimeout()||!cacheable.isEnable()) {
+			Table<E> table=getTable(cls);
+			ret=table.load(pk);
+			cachePut(ret,pk);
+		}else {
+			ret=cacheable.getEntity();
+		}
+		
 		return ret;
 	}
+
+
+
+
+
+	
+
 
 
 
@@ -120,43 +125,37 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 				View<M> view = getView(cls);
 				
 				
-
+			
 				while (resultSet.next()) {
-					M m=null;
-					try {
-						m = newEntity(cls);
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						getLog().error(e1);
-						throw new SQLException(cls.getName() + " can't be instance");
-					}
-
+					M m= newEntity(cls);
 					
-					int c = 0;
-					for (Iterator<String> it = view.entryFieldMap.keySet().iterator(); c < metaData.getColumnCount()
-							&& it.hasNext();) {
+					//int c = 0;
+					for (Iterator<String> it = view.entryFieldOffsetMap.keySet().iterator(); it.hasNext();) {
 						String columnName = it.next().toUpperCase();
-						if (!meteDataMap.containsKey(columnName))
+						Integer columnIndex = meteDataMap.get(columnName);
+						if (columnIndex==null)
 							continue;
-						int columnIndex = meteDataMap.get(columnName);
-						Field field = view.entryFieldMap.get(columnName);
-						try {
-							field.set(m, resultSet.getObject(columnIndex));
-						} catch (Exception e) {
-							continue;
-						}
-						c++;
+						
+						//Field field = view.entryFieldMap.get(columnName);
+						//try {
+							m.val(columnName,resultSet.getObject(columnIndex));
+							//field.set(m, resultSet.getObject(columnIndex));
+						//} catch (Exception e) {
+						//	continue;
+						//}
+						//c++;
 					}
 
 					list.add(m);
 				}
+			}catch(Exception ex) {
+				SQLException seq=new SQLException(ex);
+				Log log=getLog();
+				log.error(seq);
+				log.error("sql:"+sql+"\nparams:");
+				log.error(params);
+				throw seq;
 			}
-		}catch(SQLException seq) {
-			Log log=getLog();
-			log.error(seq);
-			log.error("sql:"+sql+"\nparams:");
-			log.error(params);
-			throw seq;
 		}
 
 		return list;
@@ -178,85 +177,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 		return re;
 	}
 	
-	public String executeQueryJsonArray(String sql, Object... params) throws SQLException {
-
-		StringBuffer ret = new StringBuffer("[");
-		String[] columns=null;
-		int size=0;
-		try (PreparedStatement preparedStatement = getConnection().prepareStatement(sql);) {
-			for (int i = 0; i < params.length; i++) {
-				preparedStatement.setObject(i + 1, params[i]);
-			}
-			try (ResultSet resultSet = preparedStatement.executeQuery();) {
-				ResultSetMetaData metaData = resultSet.getMetaData();
-				int cc = metaData.getColumnCount();
-				// String[] row=new String[cc];
-				// Map<String, Object> rowMap = null;
-				columns=new String[cc];
-				for (int i = 0; i < cc; i++) {
-					
-					columns[i]= metaData.getColumnName(i + 1);
-				}
-				
-				while (resultSet.next()) {
-					
-					
-					
-					ret.append("[");
-
-					for (int i = 0; i < cc; i++) {
-						Object colObject = resultSet.getObject(i + 1);
-						
-						//ret.append("\"").append(colName).append("\"").append(":");
-						if(colObject ==null) {
-							ret.append("null"); 
-						}else if (colObject instanceof String 
-								
-								) {
-							
-							ret.append("\"").append(colObject).append("\"");
-
-						}else if(colObject instanceof java.sql.Date
-							|| colObject instanceof Date){
-							ret.append("\"")
-							.append(format((Date)(colObject)))
-							.append("\"");
-							}
-						else {
-							String colValue = colObject.toString();
-							ret.append(colValue);
-						}
-						if(i<cc-1) {
-							ret.append(",");
-						}
-
-					}
-
-					ret.append("],");
-					size++;
-					// list.add(rowMap);
-				}
-			}
-		}catch(SQLException seq) {
-			Log log=getLog();
-			log.error(seq);
-			log.error("sql:"+sql+"\nparams:");
-			log.error(params);
-			throw seq;
-		} 
-		if(size>0) {
-			ret.deleteCharAt(ret.length()-1);
-		}
-		ret
-		.append("],columns:[\"")
-		.append(String.join("\",\"", columns))
-		//.append("\"],total:").append(total)
-		.append("],size:").append(size)
-		
-		;
-		
-		return ret.toString();
-	}
+	
 
 	protected Log getLog() {
 		// TODO Auto-generated method stub
@@ -342,27 +263,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 	
 	
 
-	@Override
-	public String executeQueryJsonArray(PagingParam pagingParam)
-			throws SQLException {
-		// TODO Auto-generated method stub
-		
-		StringBuffer ret=new StringBuffer(executeQueryJsonArray(pagingParam.psql, pagingParam.param));
-		
-		int size=Integer.parseInt(
-				  ret.substring(ret.lastIndexOf("size:")+5)
-				  ),total=pagingParam.start+size;
-		if(size==pagingParam.limit) {
-			String csql=Criterias.toCount(pagingParam.sql);
-			total=(int)executeQueryArray(csql, pagingParam.param)[0][0];
-		}
-		ret
-		.append(",total:")
-		.append(total)
-		;
-		return ret.toString();
-	}
-
+	
 
 
 

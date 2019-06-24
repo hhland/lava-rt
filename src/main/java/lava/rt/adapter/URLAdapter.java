@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -13,6 +14,7 @@ public class URLAdapter extends BaseAdapter<URL>{
 	public URLAdapter(URL url) {
 		super(url);
 		// TODO Auto-generated constructor stub
+		
 	}
 
 	
@@ -90,6 +92,14 @@ public class URLAdapter extends BaseAdapter<URL>{
 	    return result;
 	  }  
 	  
-	
+	  
+	  public Map<String,String> getParamMap(){
+		  Map<String,String> ret=new HashMap<>();
+		  for(String query :_this.getQuery().split("&")) {
+			  String[] kv=query.split("=");
+			  ret.put(kv[0], kv[1]);
+		  }
+		  return ret;
+	  }
 	
 }

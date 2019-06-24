@@ -2,6 +2,7 @@ package lava.rt.linq;
 
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 public interface  DataContext  {
@@ -16,12 +17,10 @@ public interface  DataContext  {
 
 	public Object[][] executeQueryArray(String sql, Object... params) throws SQLException ;
 
-	public String executeQueryJsonArray(String sql, Object... params) throws SQLException ;
+	
 	
 	public String executeQueryJsonList(String sql, Object... params) throws SQLException ;
 	
-	public String executeQueryJsonArray(PagingParam pagingParam) throws SQLException ;
-
 	public String executeQueryJsonList(PagingParam pagingParam) throws SQLException ;
 
 	public int executeUpdate(String sql, Object... param) throws SQLException ;
@@ -53,6 +52,39 @@ public interface  DataContext  {
 	
 	
 	
-	
+public  class  Cacheable<E extends Entity>{
+		
+		final E entity;
+		
+		final Date timeoutAt;
+		
+	    boolean enable=true;
+
+		public Cacheable(E entity,long timeoutMillsec) {
+			super();
+			this.entity = entity;
+			timeoutAt=new Date(System.currentTimeMillis()+timeoutMillsec);
+		}
+		
+		public final E getEntity() {
+			return entity;
+		}
+		
+		public final boolean isTimeout() {
+			boolean ret=System.currentTimeMillis()>timeoutAt.getTime();
+			return ret;
+		}
+
+		public boolean isEnable() {
+			return enable;
+		}
+
+		public void setEnable(boolean enable) {
+			this.enable = enable;
+		}
+		
+		
+		
+	}
 
 }

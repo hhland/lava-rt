@@ -44,17 +44,7 @@ public class DataContextTestCase extends TestCase {
 		   jds.setPassword("nfha_505");
 		   
 		   
-		   JC2010_ENTERPRISE_DBImpl db=new JC2010_ENTERPRISE_DBImpl(){
-
-			@Override
-			protected DataSource[] getDataSources() {
-				// TODO Auto-generated method stub
-				return new DataSource[]{jds};
-			}
-
-			
-			   
-		   };
+		   JC2010_ENTERPRISE_DBImpl db=new JC2010_ENTERPRISE_DBImpl(jds);
 		   cr=db.CRITERIA;
 		   dc=db;
 	}

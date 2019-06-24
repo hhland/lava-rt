@@ -8,7 +8,7 @@ import javax.sql.DataSource;
 import lava.rt.linq.Entity;
 
 
-public class JC2010_ENTERPRISE_DBImpl extends BaseJC2010_ENTERPRISE_DBImpl {
+public class JC2010_ENTERPRISE_DBImpl extends JC2010_ENTERPRISE_DBBase {
 
 	DataSource[] dataSources;
 	

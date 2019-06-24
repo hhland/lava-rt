@@ -1,7 +1,11 @@
 package lava.rt.base;
 
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.junit.Assert.assertNotSame;
+
 import java.io.PrintStream;
 import java.lang.reflect.Field;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -79,6 +83,26 @@ public abstract class LangObject {
 	}
 	
    
+	public String format(String pattern) {
+		String ret=pattern;
+		Field[] fields=thisClass().getDeclaredFields();
+		Object[] arguments=new Object[fields.length];
+		//Map<String,Object> argumentMap=new HashMap<>();
+		try {
+		for(int i=0;i<fields.length;i++) {
+			Field fieldi=fields[i];
+			String fieldName=fieldi.getName();
+			
+			String val=val(fieldName)==null?"null":val(fieldName).toString();
+			arguments[i]=val;
+			
+		    String el="${"+fieldName+"}";
+			ret=ret.replace(el, val);	
+		}
+		}catch(Exception ex) {};
+		ret=MessageFormat.format(pattern, arguments);
+		return ret;
+	}
 	
 	@Override
 	public String toString() {

@@ -50,7 +50,7 @@ public abstract class DataContextSrcGener   {
 	
 	protected Set<String> columnNames=new HashSet<>();
 	
-	private SrcEvent srcEvent=new SrcEvent();
+	
 	
 	public DataContextSrcGener(Connection connection) {
 		this.connection=connection;
@@ -58,9 +58,7 @@ public abstract class DataContextSrcGener   {
 	
 	
 	
-	public void setSrcEvent(SrcEvent srcEvent) {
-		this.srcEvent = srcEvent;
-	}
+
 
 
 
@@ -94,22 +92,7 @@ public abstract class DataContextSrcGener   {
    
 	
 	
-	private void onClassSrcInner(StringBuffer src,Class contextCls) {
-		// TODO Auto-generated method stub
-		src.append("//onClassSrcInner----start\n\n");
-		srcEvent.onClassSrcInner(src,contextCls);
-		src.append("\n\n//onClassSrcInner----end\n\n");
-	}
-
-
-
-	private void onClassSrcOutter(StringBuffer src,Class contextCls) {
-		// TODO Auto-generated method stub
-		src.append("//onClassSrcOutter----start\n\n");
-		srcEvent.onClassSrcOutter(src,contextCls);
-		src.append("\n");
-	}
-
+	
 
 
 	public String toIntfSrc(Class cls,String databaseName) throws SQLException {
@@ -222,13 +205,13 @@ public abstract class DataContextSrcGener   {
 		
 		
 		
-		onClassSrcOutter(src,cls);
+		
 		
 		
 		src.append("public abstract class "+cls.getSimpleName()+" extends "+DataSourceContext.class.getName()+" implements "+intfCls.getName()+"{ \n\n");
 		
 		
-		onClassSrcInner(src,cls);
+	
 		
 		//src
 		//.append("\tprivate static final long serialVersionUID=1L;\n\n")

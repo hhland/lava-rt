@@ -14,7 +14,7 @@ import javax.sql.*;
 //onClassSrcOutter----start
 
 
-public abstract class BaseJC2010_ENTERPRISE_DBImpl extends lava.rt.linq.DataSourceContext implements lava.rt.test.pojo.JC2010_ENTERPRISE_DB{ 
+public abstract class JC2010_ENTERPRISE_DBBase extends lava.rt.linq.DataSourceContext implements lava.rt.test.pojo.JC2010_ENTERPRISE_DB{ 
 
 //onClassSrcInner----start
 

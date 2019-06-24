@@ -1,6 +1,7 @@
 package lava.rt.logging;
 
-
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 public class Log {
 
@@ -8,7 +9,7 @@ public class Log {
 	final LogFactory factory;
 	
 	
-	
+	final static SimpleDateFormat SDF_YMDHMS=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
 	
 	protected Log(LogFactory factory, Class cls) {
@@ -18,35 +19,60 @@ public class Log {
 	}
 
 	
-    
+	public void warn(Object... vals) {
+		// TODO Auto-generated method stub
+		factory.infoStream.forEach(s->{
+			  
+		       s.print(prefix("WARN"));
+		       if(vals.length==1) {
+		    	   s.print(vals[0]);
+		       }else if(vals.length>1) {
+		    	   s.print(join(vals));
+		       }
+		       s.println(join(vals));
+		}
+	    );
+	}
 
 	
 
 	public void info(Object... vals) {
 		// TODO Auto-generated method stub
-		factory.infoStream.forEach(s->
-	       
-	       s.println(join(vals))
-	    
+		factory.infoStream.forEach(s->{
+			  
+		       s.print(prefix("INFO"));
+		       if(vals.length==1) {
+		    	   s.print(vals[0]);
+		       }else if(vals.length>1) {
+		    	   s.print(join(vals));
+		       }
+		       s.println(join(vals));
+		}
 	    );
 	}
 
 	public void error(Exception ex) {
 		// TODO Auto-generated method stub
-		factory.errStream.forEach(s->
-	       
-	       ex.printStackTrace(s)
-	    
+		factory.errStream.forEach(s->{
+	 	   
+	       ex.printStackTrace(s);
+		}
 	    );
 	}
 	
 
 	public void error(Object... vals) {
 		// TODO Auto-generated method stub
-		factory.errStream.forEach(s->
-	       
-	       s.println(join(vals))
-	    
+		factory.errStream.forEach(s->{
+		   
+	       s.print(prefix("ERROR"));
+	       if(vals.length==1) {
+	    	   s.print(vals[0]);
+	       }else if(vals.length>1) {
+	    	   s.print(join(vals));
+	       }
+	       s.println(join(vals));
+		}
 	    );
 	}
 
@@ -58,4 +84,23 @@ public class Log {
 		return String.join(",", ret);
 	}
 
+	
+	private String prefix(String type) {
+		//2019-06-24 10:59:44.832  INFO 15216 --- [askScheduler-21] c.n.j.s.schedule.impl.JcjkAfter06Task:
+		StringBuffer ret=new StringBuffer("\n");
+		Thread t=Thread.currentThread();
+		ret
+		.append(SDF_YMDHMS.format(Calendar.getInstance().getTime()))
+		.append(" ")
+		.append(type).append(" ")
+		.append(t.getId())
+		.append(" --- [")
+		.append(t.getName())
+		.append("] ")
+		.append(cls.getName())
+		.append(":")
+		;
+		return ret.toString();
+	}
+	
 }

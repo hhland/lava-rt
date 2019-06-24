@@ -2,6 +2,8 @@ package lava.rt.linq;
 
 
 
+import static org.hamcrest.CoreMatchers.theInstance;
+
 import java.io.Closeable;
 import java.io.IOException;
 
@@ -150,10 +152,10 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 				}
 			}catch(Exception ex) {
 				SQLException seq=new SQLException(ex);
-				Log log=getLog();
-				log.error(seq);
-				log.error("sql:"+sql+"\nparams:");
-				log.error(params);
+				
+				logExecptioin(seq);
+				logError("sql:"+sql+"\nparams:");
+				logError(params);
 				throw seq;
 			}
 		}
@@ -168,21 +170,25 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 		re=SqlCommon.executeQueryArray(connection, sql, params);
 		}
 		catch(SQLException seq) {
-			Log log=getLog();
-			log.error(seq);
-			log.error("sql:"+sql+"\nparams:");
-			log.error(params);
+			
+			logExecptioin(seq);
+			logError("sql:"+sql+"\nparams:");
+			logError(params);
 			throw seq;
 		}
 		return re;
 	}
 	
-	
-
-	protected Log getLog() {
-		// TODO Auto-generated method stub
-		return LogFactory.SYSTEM.getLog(this.getClass());
+	protected void logError(Object... vals) {
+		LogFactory.SYSTEM.getLog(this.getClass()).error(vals);
 	}
+
+
+	protected void logExecptioin(Exception exception) {
+		LogFactory.SYSTEM.getLog(this.getClass()).error(exception);
+	}
+
+	
 
 	public String executeQueryJsonList(String sql, Object... params) throws SQLException {
 
@@ -242,10 +248,10 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 				}
 			}
 		}catch(SQLException seq) {
-			Log log=getLog();
-			log.error(seq);
-			log.error("sql:"+sql+"\nparams:");
-			log.error(params);
+			
+			logExecptioin(seq);
+			logError("sql:"+sql+"\nparams:");
+			logError(params);
 			throw seq;
 		}
 		if(size>0) {
@@ -304,10 +310,10 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 			try {
 			re += SqlCommon.executeUpdate(connections.get(0), sql, param);
 			}catch(SQLException seq) {
-				Log log=getLog();
-				log.error(seq);
-				log.error("sql:"+sql+"\nparams:");
-				log.error(param);
+				
+				logExecptioin(seq);
+				logError("sql:"+sql+"\nparams:");
+				logError(param);
 				throw seq;
 			}
 		} else if (connections.size() > 1) {
@@ -318,10 +324,10 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 				try {
 					are.getAndAdd(SqlCommon.executeUpdate(conn, sql, param));
 				} catch (SQLException seq) {
-					Log log=getLog();
-					log.error(seq);
-					log.error("sql:"+sql+"\nparams:");
-					log.error(param);
+					
+					logExecptioin(seq);
+					logError("sql:"+sql+"\nparams:");
+					logError(param);
 					
 					sex.set(seq);
 				}
@@ -351,10 +357,10 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 					}
 				}
 			}catch(SQLException seq) {
-				Log log=getLog();
-				log.error(seq);
-				log.error("sql:"+sql+"\nparams:");
-				log.error(param);
+				
+				logExecptioin(seq);
+				logError("sql:"+sql+"\nparams:");
+				logError(param);
 				throw seq;
 			}
 		
@@ -370,10 +376,10 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 			try {
 			re += SqlCommon.executeBatch(connections.get(0), sql, params);
 			} catch(SQLException seq) {
-				Log log=getLog();
-				log.error(seq);
-				log.error("sql:"+sql+"\nparams:");
-				log.error(params);
+				
+				logExecptioin(seq);
+				logError("sql:"+sql+"\nparams:");
+				logError(params);
 				throw seq;
 			}
 		} else if (connections.size() > 1) {
@@ -384,10 +390,10 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 				try {
 					are.getAndAdd(SqlCommon.executeBatch(conn, sql, params));
 				} catch(SQLException seq) {
-					Log log=getLog();
-					log.error(seq);
-					log.error("sql:"+sql+"\nparams:");
-					log.error(params);
+					
+					logExecptioin(seq);
+					logError("sql:"+sql+"\nparams:");
+					logError(params);
 					sex.set(seq);
 				}
 			});
@@ -510,7 +516,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 		return re.get();
 	}
 
-	public void setAutoCommit(boolean b) throws SQLException {
+	public void connectionSetAutoCommit(boolean b) throws SQLException {
 
 		for (Connection conn : localConnection.get()) {
 			conn.setAutoCommit(b);
@@ -519,14 +525,14 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 
 	}
 
-	public void commit() throws SQLException {
+	public void connectionCommit() throws SQLException {
 		for (Connection conn : localConnection.get()) {
 			conn.commit();
 
 		}
 	}
 	
-	public void rollback(Savepoint...savepoints) throws SQLException {
+	public void connectionRollback(Savepoint...savepoints) throws SQLException {
 		for (Connection conn : localConnection.get()) {
 			if(savepoints.length==0) {
 			  conn.rollback();
@@ -537,7 +543,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 		}
 	}
 	
-	public Savepoint[] setSavepoint(String...savepoints) throws SQLException {
+	public Savepoint[] connectionSetSavepoint(String...savepoints) throws SQLException {
 		PoolList<Connection> connections=localConnection.get();
 		Savepoint[] ret=new Savepoint[connections.size()];
 		try {
@@ -563,7 +569,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 		return ret;
 	}
 
-	protected final PoolList<Connection> getConnections() throws SQLException{
+	private  PoolList<Connection> getConnections() throws SQLException{
        PoolList<Connection> connections = localConnection.get();
 		
 		if(connections==null) {
@@ -676,16 +682,14 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 
 
 	@Override
-	public void close() throws IOException {
+	public void close()  {
 		// TODO Auto-generated method stub
-		for(Connection conn:localConnection.get()) {
-			try {
-				conn.close();
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				throw new IOException(e);
-			}
-		}
+		localConnection.get().parallelStream().forEach(conn-> {try {
+			conn.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}});
 	}
 
 

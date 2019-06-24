@@ -1,6 +1,7 @@
 package lava.rt.linq;
 
 import java.sql.SQLException;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -50,6 +51,10 @@ public interface  DataContext  {
 	public int delete(Collection<? extends Entity> entrys) throws SQLException;
 
 	
+	static Date now() {
+		// TODO Auto-generated method stub
+		return Calendar.getInstance().getTime();
+	}
 	
 	
 public  class  Cacheable<E extends Entity>{

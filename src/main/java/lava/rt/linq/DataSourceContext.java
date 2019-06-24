@@ -179,6 +179,10 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 		return re;
 	}
 	
+	protected void logSql(String method,String sql,Object param) {
+		
+	}
+	
 	protected void logError(Object... vals) {
 		LogFactory.SYSTEM.getLog(this.getClass()).error(vals);
 	}
@@ -608,12 +612,9 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 	
 	
 
-	protected static Date now() {
-		// TODO Auto-generated method stub
-		return Calendar.getInstance().getTime();
-	}
+	
 
-	protected Object[][] callProcedure(String procName, Object... params) throws SQLException {
+	protected  Object[][] callProcedure(String procName, Object... params) throws SQLException {
 
 		List<Object[]> ret = new ArrayList<Object[]>();
 		StringBuffer sql = new StringBuffer();

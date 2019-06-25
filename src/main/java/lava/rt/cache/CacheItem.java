@@ -1,23 +1,32 @@
-package lava.rt.base;
+package lava.rt.cache;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class CacheBox<E extends Cloneable> {
+public class CacheItem<E> implements Serializable{
 
-	final E entity;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	final E item;
 	
 	 long timeoutAt;
+	 
+	public final String key;
 	
     boolean enable=true;
 
-	public CacheBox(E entity,long timeoutMillsec) {
+	public CacheItem(E entity,String key,long timeoutMillsec) {
 		super();
-		this.entity = entity;
+		this.item = entity;
 		timeoutAt=System.currentTimeMillis()+timeoutMillsec;
+		this.key=key;
 	}
 	
-	public final E getEntity() {
-		return entity;
+	public final E get() {
+		return item;
 	}
 	
 	public final boolean isTimeout() {

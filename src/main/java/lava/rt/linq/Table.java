@@ -30,7 +30,7 @@ public class Table<M extends Entity> extends View<M> {
 
 	protected final String sqlInsert,sqlInsertWithoutPk, sqlUpdate, sqlDelete,sqlLoad,sqlColumns;
 
-	public Table(DataContext dataContext, Class<M> entryClass, String tableName, String pkName) {
+	public Table(DataSourceContext dataContext, Class<M> entryClass, String tableName, String pkName) {
 		super(dataContext, entryClass, tableName);
 		this.pkName = pkName;
 

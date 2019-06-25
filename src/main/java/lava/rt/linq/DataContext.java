@@ -24,37 +24,27 @@ public interface  DataContext  {
 	
 	public String executeQueryJsonList(PagingParam pagingParam) throws SQLException ;
 
-	public int executeUpdate(String sql, Object... param) throws SQLException ;
-
-	public int executeInsertReturnPk(String sql, Object... param) throws SQLException ;
-
-	
-	
-	public int executeBatch(String sql, Object[]... params) throws SQLException ;
-
-	public int insert(Collection<? extends Entity> entrys) throws SQLException ;
-
 	
 
-	
+	public <E extends Entity> int insert(Collection<E> entrys) throws SQLException ;
+
+	public int insert(Entity entry) throws SQLException ;
+
+	public  int insertWithoutPk(Entity entry) throws SQLException;
 
 	public int update(Entity entry) throws SQLException;
 
 	
 
-	public int update(Collection<? extends Entity> entrys) throws SQLException ;
+	public <E extends Entity> int update(Collection<E> entrys) throws SQLException ;
 
 	
 
 	public int delete(Entity entry) throws SQLException ;
 	
-	public int delete(Collection<? extends Entity> entrys) throws SQLException;
+	public <E extends Entity> int delete(Collection<E> entrys) throws SQLException;
 
 	
-	static Date now() {
-		// TODO Auto-generated method stub
-		return Calendar.getInstance().getTime();
-	}
 	
 	
 

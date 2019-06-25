@@ -21,7 +21,7 @@ import sun.misc.Unsafe;
 
 public   class  View<M extends Entity> {
 
-	protected final DataContext dataContext;
+	protected final DataSourceContext dataContext;
 	
 	public final String tableName;
 	protected final Class<M> entryClass;
@@ -35,7 +35,7 @@ public   class  View<M extends Entity> {
 	
 	protected static UnsafeAdapter unsafeAdapter= UnsafeAdapter.getInstance();
 	
-	protected View (DataContext dataContext,Class<M> entryClass,String tableName) {
+	protected View (DataSourceContext dataContext,Class<M> entryClass,String tableName) {
 		this.dataContext=dataContext;
 		this.tableName=tableName;
 		this.entryClass=entryClass;

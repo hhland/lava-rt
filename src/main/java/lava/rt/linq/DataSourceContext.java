@@ -18,8 +18,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.sql.DataSource;
 
-import lava.rt.base.CacheBox;
 import lava.rt.base.PoolList;
+import lava.rt.cache.CacheItem;
 import lava.rt.common.SqlCommon;
 
 import lava.rt.logging.Log;
@@ -72,7 +72,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 		return ret;
 	};
 	
-	protected <E extends Entity> CacheBox<E> cacheGet(Class<E> cls, Object pk){
+	protected <E extends Entity> CacheItem<E> cacheGet(Class<E> cls, Object pk){
 		return null;
 	}
 	
@@ -81,14 +81,14 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 	@Override
 	public <E extends Entity> E load(Class<E> cls, Object pk) throws SQLException {
 		// TODO Auto-generated method stub
-		CacheBox<E> CacheBox=cacheGet(cls, pk);
+		CacheItem<E> cache=cacheGet(cls, pk);
 		E ret=null;
-		if(CacheBox==null||CacheBox.isTimeout()||!CacheBox.isEnable()) {
+		if(cache.isTimeout()||!cache.isEnable()) {
 			Table<E> table=getTable(cls);
 			ret=table.load(pk);
 			cachePut(ret,pk);
 		}else {
-			ret=CacheBox.getEntity();
+			ret=cache.get();
 		}
 		
 		return ret;
@@ -233,9 +233,11 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 
 						}else if(colObject instanceof java.sql.Date
 								|| colObject instanceof Date) {
-							ret.append("\"")
-							.append(format((Date)colObject))
-							.append("\"");
+							ret
+							//.append("\"")
+							.append(((Date)colObject).getTime())
+							//.append("\"")
+							;
 						} else {
 							ret.append(colValue);
 						}
@@ -407,49 +409,45 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 
 		return re;
 	}
-
-	public int insert(Collection<? extends Entity> entrys) throws SQLException {
-		AtomicInteger re = new AtomicInteger(0);
-		AtomicReference<SQLException> sex = new AtomicReference<>();
-		final PoolList<Connection> connections = localConnection.get();
-		entrys.parallelStream().forEach(entry -> {
-			try {
-				re.getAndAdd(insert(entry, connections));
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				sex.set(e);
-				
-			}
-		});
-		if (sex.get() != null) {
-			throw sex.get();
-		}
-
-		return re.get();
+	
+	public  int insertWithoutPk(Entity entry) throws SQLException {
+		int re = 0;
+		Class cls = entry.getClass();
+		Table table = this.getTable(cls);
+		table.insertWithoutPk(entry);
+		re=(int)table.getPk(entry);
+		
+		return re;
 	}
 
 	
 
-	protected int insert(Entity entry, PoolList<Connection> connections) throws SQLException {
-		localConnection.set(connections);
-		return insert(entry);
-	}
-
+	
 	@SuppressWarnings("unchecked")
 	public int insert(Entity entry) throws SQLException {
 		int re = 0;
 		Class<? extends Entity> cls = entry.getClass();
 		Table table = this.getTable(cls);
-		boolean hasPk = table.getPk(entry) != null;
-		if (hasPk) {
-			re += table.insert(entry);
+		re += table.insert(entry);
+		return re;
+	}
 
-		} else {
-			re += table.insertWithoutPk(entry);
-		}
+	public <E extends Entity> int insert(Collection<E> entrys) throws SQLException {
+		int re = 0;
+		Class cls = entrys.stream().findFirst().getClass();
+		Table table = this.getTable(cls);
+		
+		re += table.insert(entrys);
+
+		
 		//entry._updateTime = now();
 		return re;
 	}
+
+	
+
+	
+	
 
 	public int update(Entity entry) throws SQLException {
 		int re = 0;
@@ -467,29 +465,17 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 		return update(entry);
 	}
 
-	public int update(Collection<? extends Entity> entrys) throws SQLException {
-		AtomicInteger re = new AtomicInteger(0);
-		AtomicReference<SQLException> sex = new AtomicReference<>();
-		final PoolList<Connection> connections = localConnection.get();
-		entrys.parallelStream().forEach(entry -> {
-			try {
-				re.getAndAdd(update(entry, connections));
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				sex.set(e);
-			}
-		});
-		if (sex.get() != null) {
-			throw sex.get();
-		}
+	public <E extends Entity> int update(Collection<E> entrys) throws SQLException {
+		int re = 0;
+		Class cls = entrys.stream().findFirst().getClass();
+		Table table = this.getTable(cls);
+		re += table.update(entrys);
+		//entry._updateTime = now();
 
-		return re.get();
+		return re;
 	}
 
-	protected int delete(Entity entry, PoolList<Connection> connections) throws SQLException {
-		localConnection.set(connections);
-		return delete(entry);
-	}
+	
 
 	public int delete(Entity entry) throws SQLException {
 		int re = 0;
@@ -501,22 +487,14 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 		return re;
 	}
 
-	public int delete(Collection<? extends Entity> entrys) throws SQLException {
-		AtomicInteger re = new AtomicInteger(0);
-		AtomicReference<SQLException> sex = new AtomicReference<>();
-		final PoolList<Connection> connections = localConnection.get();
-		entrys.parallelStream().forEach(entry -> {
-			try {
-				re.getAndAdd(delete(entry, connections));
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				sex.set(e);
-			}
-		});
-		if (sex.get() != null) {
-			throw sex.get();
-		}
-		return re.get();
+	public <E extends Entity> int delete(Collection<E> entrys) throws SQLException {
+		int re = 0;
+
+		Class cls = entrys.stream().findFirst().getClass();
+		Table table = this.getTable(cls);
+		re += table.delete(entrys);
+
+		return re;
 	}
 
 	public void connectionSetAutoCommit(boolean b) throws SQLException {
@@ -695,9 +673,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 
 
 
-     protected String format(Date date) {
-    	 return date.toString();
-     }
+    
 	
 	
 	

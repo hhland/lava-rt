@@ -50,14 +50,17 @@ public abstract class DataContextSrcGener   {
 	
 	protected Set<String> columnNames=new HashSet<>();
 	
-	
+	protected SrcEvent srcEvent=new SrcEvent();
 	
 	public DataContextSrcGener(Connection connection) {
 		this.connection=connection;
 	}
 	
 	
-	
+	public DataContextSrcGener(Connection connection,SrcEvent srcEvent) {
+		this.connection=connection;
+		this.srcEvent=srcEvent;
+	}
 
 
 
@@ -129,6 +132,9 @@ public abstract class DataContextSrcGener   {
 		
 		Map<String, String> tablesPks=loadTablesPks(databaseName);
 		
+		srcEvent.onViewsLoaded(src,views);
+		srcEvent.onTablesLoaded(src,tablesPks);
+		srcEvent.onProceduresLoaded(src,procs);
 		
 			tables=tablesPks.keySet();
 		
@@ -147,6 +153,7 @@ public abstract class DataContextSrcGener   {
 				pkName=tablesPks.get(tn);
 			}
 			TableSrc tableSrc=new TableSrc(tn,pkName);
+			srcEvent.onTableSrcAppend(src,tableSrc);
 			src.append(tableSrc.toSrc(cls));
 		}
 		
@@ -154,6 +161,7 @@ public abstract class DataContextSrcGener   {
 			
 			String tn=table;
 			TableSrc tableSrc=new TableSrc(tn,null);
+			srcEvent.onViewSrcAppend(src,tableSrc);
 			src.append(tableSrc.toSrc(cls));
 		}
 		
@@ -161,6 +169,7 @@ public abstract class DataContextSrcGener   {
 			
 			String tn=ent.getKey();
 			ProcedureSrc tableSrc=new ProcedureSrc(tn,ent.getValue());
+			srcEvent.onProcedureIntfSrcAppend(src,tableSrc);
 			src.append(tableSrc.toIntfSrc());
 		}
 		
@@ -171,7 +180,9 @@ public abstract class DataContextSrcGener   {
 		.append("\t\tpublic static final Column \n");
 		
 		for(String colName:columnNames) {
-			src.append("\t\t"+ toPropName(colName)+" = new Column(\""+colName+"\"),\n" );
+			ColumnSrc columnSrc=new ColumnSrc(colName, toPropName(colName));
+			srcEvent.onColumnSrcAppend(src, columnSrc);
+			src.append("\t\t"+ columnSrc.className+" = new Column(\""+columnSrc.columnName+"\"),\n" );
 		}
 		src.deleteCharAt(src.length()-2);
 		src.append( "\t\t;\n\n")
@@ -229,7 +240,9 @@ public abstract class DataContextSrcGener   {
 		
 	    tables=tablesPks.keySet();
 		
-		
+	    srcEvent.onViewsLoaded(src,views);
+		srcEvent.onTablesLoaded(src,tablesPks);
+		srcEvent.onProceduresLoaded(src,procs);
 		
 		
 		for(String table:tables) {
@@ -267,6 +280,7 @@ public abstract class DataContextSrcGener   {
 			
 			String tn=ent.getKey();
 			ProcedureSrc tableSrc=new ProcedureSrc(tn,ent.getValue());
+			srcEvent.onProcedureImplSrcAppend(src,tableSrc);
 			src.append(tableSrc.toSrc());
 		}
 	
@@ -422,6 +436,19 @@ public abstract class DataContextSrcGener   {
 		
 	}
 	
+	public class ColumnSrc{
+		
+		public String columnName,className;
+
+		public ColumnSrc(String columnName, String className) {
+			super();
+			this.columnName = columnName;
+			this.className = className;
+		}
+		
+		
+	}
+	
 	public class TableSrc{
 		
 		public String tableName,pkName,className;
@@ -434,6 +461,8 @@ public abstract class DataContextSrcGener   {
 			this.className=DataContextSrcGener.toClassName(tableName);
 			
 		}
+		
+		
 		
 		protected StringBuffer toSrc(Class dcClass) throws SQLException{
 	        StringBuffer context=new StringBuffer("");

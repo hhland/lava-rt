@@ -8,12 +8,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import lava.rt.common.ReflectCommon;
 import lava.rt.common.TextCommon;
+import lava.rt.linq.execption.CommandExecuteExecption;
 
 
 public class Table<M extends Entity> extends View<M> {
@@ -114,7 +116,7 @@ public class Table<M extends Entity> extends View<M> {
 			sqlLoad = MessageFormat.format("select * from {0} where {1}= ? ", this.tableName, this.pkName);
 	}
 
-	public M load(Object pk) throws SQLException {
+	public M load(Object pk) throws CommandExecuteExecption {
 
 		String sql = sqlLoad;
 		
@@ -122,14 +124,11 @@ public class Table<M extends Entity> extends View<M> {
 		M ret = null;
 		if (entrys.size() == 1) {
 			ret = entrys.get(0);
-		} else {
-			throw new SQLException(
-					"there has not only 1 but " + entrys.size() + " entrys in [" + tableName + "] has [" + pk + "]");
-		}
+		} 
 		return ret;
 	}
 
-	public <E extends M> int insert(Collection<E> entrys) throws SQLException {
+	public <E extends M> int insert(Collection<E> entrys) throws CommandExecuteExecption {
 		if (entrys.size() == 0)
 			return 0;
 		String  sql = sqlInsert;
@@ -151,7 +150,7 @@ public class Table<M extends Entity> extends View<M> {
 				i++;
 			}
 		//} catch (Exception e) {
-		//	throw new SQLException(e);
+		//	throw new ExecuteExecption(e);
 		//}
 
 		re = dataContext.executeBatch(sql, params);
@@ -163,7 +162,7 @@ public class Table<M extends Entity> extends View<M> {
 	
 	
 	
-	public <E extends M> int insert(E entry) throws SQLException {
+	public <E extends M> int insert(E entry) throws CommandExecuteExecption {
 		
 		
 		
@@ -180,7 +179,7 @@ public class Table<M extends Entity> extends View<M> {
 					param[j+1]=unsafeAdapter.getObject(entry, insertFieldOffsets[j]);
 				}
 		//} catch (Exception e) {
-		//	throw new SQLException(e);
+		//	throw new ExecuteExecption(e);
 		//}
 		re = dataContext.executeUpdate(sqlInsert, param);
 		
@@ -189,9 +188,9 @@ public class Table<M extends Entity> extends View<M> {
 
 	}
 
-	public <E extends M> int insertWithoutPk(E... entrys) throws SQLException {
+	public <E extends M> int insertWithoutPk(E... entrys) throws CommandExecuteExecption {
         AtomicInteger re=new AtomicInteger(0);
-        AtomicReference<SQLException> sex=new AtomicReference<>();
+        AtomicReference<CommandExecuteExecption> sex=new AtomicReference<>();
 		String sql=sqlInsertWithoutPk;
 		
 		int insertsize = insertFields.length;
@@ -208,9 +207,9 @@ public class Table<M extends Entity> extends View<M> {
 				pkField.set(entry, pk);
 			    re.getAndIncrement();
 			} catch (Exception se) {
-				SQLException nse = new SQLException(se);
 				
-				sex.set(nse);
+				
+				sex.set(CommandExecuteExecption.forSql(se, sql, param));
 			} 
 		});
 		
@@ -224,7 +223,7 @@ public class Table<M extends Entity> extends View<M> {
 	}
 
 	
-	public <E extends M> int update(E entry) throws SQLException {
+	public <E extends M> int update(E entry) throws CommandExecuteExecption {
 		
 		int updatesize = updateFields.length;
 		Object[] param = new Object[updatesize + 1];
@@ -236,7 +235,7 @@ public class Table<M extends Entity> extends View<M> {
 			param[j]=unsafeAdapter.getObject(entry, updateFieldOffsets[j]);
 	    }
       //  }catch(Exception ex) {
-       // 	throw new SQLException(ex);
+       // 	throw new ExecuteExecption(ex);
        // }
 		param[updatesize] = getPk(entry);
 
@@ -248,7 +247,7 @@ public class Table<M extends Entity> extends View<M> {
 	}
 	
 	
-	public <E extends M> int update(Collection<E> entrys) throws SQLException {
+	public <E extends M> int update(Collection<E> entrys) throws CommandExecuteExecption {
 		if (entrys.size() == 0)
 			return 0;
 		
@@ -271,7 +270,7 @@ public class Table<M extends Entity> extends View<M> {
 			}
 		//} catch (Exception e) {
 			// TODO Auto-generated catch block
-		//	throw new SQLException(e);
+		//	throw new ExecuteExecption(e);
 		//}
 		int re =  dataContext.executeBatch(sqlUpdate, params);
 		
@@ -280,7 +279,7 @@ public class Table<M extends Entity> extends View<M> {
 	}
 	
 	
-	public <E extends M> int delete(Collection<E> entrys) throws SQLException {
+	public <E extends M> int delete(Collection<E> entrys) throws CommandExecuteExecption {
 		int re = 0;
 		if (entrys.size() == 0)
 			return re;
@@ -300,7 +299,7 @@ public class Table<M extends Entity> extends View<M> {
 		return re;
 	}
 
-	public <E extends M> int delete(E entry) throws SQLException {
+	public <E extends M> int delete(E entry) throws CommandExecuteExecption {
 		
 		
 		
@@ -313,7 +312,7 @@ public class Table<M extends Entity> extends View<M> {
 		return re;
 	}
 
-	public int truncate() throws SQLException {
+	public int truncate() throws CommandExecuteExecption {
 		String sql = "truncate table " + tableName;
 		int re = dataContext.executeUpdate(sql);
 		return re;
@@ -334,7 +333,7 @@ public class Table<M extends Entity> extends View<M> {
 		return ret;
 	}
 
-	public Table<M> selectInto(String newTableName,String where,Object...param) throws SQLException{
+	public Table<M> selectInto(String newTableName,String where,Object...param) throws CommandExecuteExecption{
 		Table<M> ret=null;
 		String sql="select * into "+newTableName+" from "+tableName+" "+where;
 		dataContext.executeUpdate(sql, param);
@@ -342,7 +341,7 @@ public class Table<M extends Entity> extends View<M> {
 		return ret;
 	}
 	
-	public int insertInto(String newTableName,String where,Object...param) throws SQLException{
+	public int insertInto(String newTableName,String where,Object...param) throws CommandExecuteExecption{
 		//Table<M> ret=null;
 		String sql=" insert into "+newTableName+"("+sqlColumns+") select ("+sqlColumns+") from "+tableName+" "+where;
 		int ret= dataContext.executeUpdate(sql, param);

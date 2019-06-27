@@ -5,7 +5,9 @@
 */ 
 package lava.rt.test.pojo; 
 
-import lava.rt.linq.*; 
+import lava.rt.linq.*;
+import lava.rt.linq.execption.CommandExecuteExecption;
+
 import java.util.*; 
 import java.sql.*; 
 import javax.sql.*; 
@@ -30,7 +32,7 @@ public abstract class JC2010_ENTERPRISE_DBBase extends lava.rt.linq.DataSourceCo
 
 
 
-		public Object[][] getColumns(Integer id,OutputParam<Float> name,OutputParam<String> age) throws SQLException {
+		public Object[][] getColumns(Integer id,OutputParam<Float> name,OutputParam<String> age) throws  CommandExecuteExecption {
 
 
 			 return callProcedure("getColumns",id,name,age);

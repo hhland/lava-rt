@@ -30,14 +30,14 @@ public abstract class CacheContainer  {
 	
 	
 	
-	protected class ClearItemThread extends Thread{
+	public class ClearItemThread extends Thread{
 		
 		CacheContainer cacheContainer;
 
 		boolean pause=true,stop=false;
 		
 		
-		public ClearItemThread(CacheContainer cacheContainer) {
+		protected ClearItemThread(CacheContainer cacheContainer) {
 			super();
 			this.cacheContainer = cacheContainer;
 		}

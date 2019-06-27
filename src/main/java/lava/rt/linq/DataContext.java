@@ -1,51 +1,64 @@
 package lava.rt.linq;
 
-import java.sql.SQLException;
+import java.sql.Connection;
+
+import java.sql.Savepoint;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import lava.rt.base.PoolList;
+
+import lava.rt.linq.execption.CommandExecuteExecption;
+
 public interface  DataContext  {
 
 	
 
-	public <E extends Entity> E load(Class<E> cls,Object pk) throws SQLException;
 	
 	
 	
-	public <M extends Entity> List<M> executeQueryList(Class<M> cls, String sql, Object... params) throws SQLException ;
+	
+	public <M extends Entity> List<M> executeQueryList(Class<M> cls, String cmd, Object... params) throws CommandExecuteExecption ;
 
-	public Object[][] executeQueryArray(String sql, Object... params) throws SQLException ;
+	public Object[][] executeQueryArray(String cmd, Object... params) throws CommandExecuteExecption ;
 
 	
 	
-	public String executeQueryJsonList(String sql, Object... params) throws SQLException ;
+	public String executeQueryJsonList(String cmd, Object... params) throws CommandExecuteExecption ;
 	
-	public String executeQueryJsonList(PagingParam pagingParam) throws SQLException ;
-
-	
-
-	public <E extends Entity> int insert(Collection<E> entrys) throws SQLException ;
-
-	public int insert(Entity entry) throws SQLException ;
-
-	public  int insertWithoutPk(Entity entry) throws SQLException;
-
-	public int update(Entity entry) throws SQLException;
+	public String executeQueryJsonList(PagingParam pagingParam) throws CommandExecuteExecption ;
 
 	
+	public <E extends Entity> E get(Class<E> cls,Object pk) throws CommandExecuteExecption;
 
-	public <E extends Entity> int update(Collection<E> entrys) throws SQLException ;
+	public <E extends Entity> int addAll(Collection<E> entrys) throws CommandExecuteExecption ;
+
+	public int add(Entity entry) throws CommandExecuteExecption ;
+
+	public  int put(Object pk,Entity entry) throws Exception;
+
+	public int update(Entity entry) throws CommandExecuteExecption;
 
 	
 
-	public int delete(Entity entry) throws SQLException ;
-	
-	public <E extends Entity> int delete(Collection<E> entrys) throws SQLException;
+	public <E extends Entity> int updateAll(Collection<E> entrys) throws CommandExecuteExecption ;
 
 	
+
+	public int remove(Entity entry) throws CommandExecuteExecption ;
 	
+	public <E extends Entity> int removeAll(Collection<E> entrys) throws CommandExecuteExecption;
+
+	
+	public void setAutoCommit(boolean b) throws CommandExecuteExecption ;
+	
+	public void commit() throws CommandExecuteExecption;
+	
+	public void rollback(Savepoint...savepoints) throws CommandExecuteExecption;
+	
+	public Savepoint[] setSavepoint(String...savepoints) throws CommandExecuteExecption;
 	
 
 

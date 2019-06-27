@@ -13,6 +13,7 @@ import java.sql.*;
 
 import java.util.*;
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -21,7 +22,8 @@ import javax.sql.DataSource;
 import lava.rt.base.PoolList;
 import lava.rt.cache.CacheItem;
 import lava.rt.common.SqlCommon;
-
+import lava.rt.linq.execption.CommandExecuteExecption;
+import lava.rt.linq.execption.CommandExecuteExecption.CmdType;
 import lava.rt.logging.Log;
 import lava.rt.logging.LogFactory;
 
@@ -78,14 +80,19 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 	
 	protected <E extends Entity> void cachePut(E ret, Object pk) {}
 
-	@Override
-	public <E extends Entity> E load(Class<E> cls, Object pk) throws SQLException {
+	
+	public <E extends Entity> E get(Class<E> cls, Object pk) throws CommandExecuteExecption {
 		// TODO Auto-generated method stub
 		CacheItem<E> cache=cacheGet(cls, pk);
 		E ret=null;
 		if(cache.isTimeout()||!cache.isEnable()) {
 			Table<E> table=getTable(cls);
-			ret=table.load(pk);
+			try {
+				ret=table.load(pk);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				throw CommandExecuteExecption.forSql(e, "load", pk);
+			}
 			cachePut(ret,pk);
 		}else {
 			ret=cache.get();
@@ -105,9 +112,10 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 
 
 
-	public <M extends Entity> List<M> executeQueryList(Class<M> cls, String sql, Object... params) throws SQLException {
+	public <M extends Entity> List<M> executeQueryList(Class<M> cls, String sql, Object... params) throws CommandExecuteExecption {
+		
 		Connection connection = getConnection();
-
+		
 		List<M> list = new ArrayList<M>();
 		try (PreparedStatement preparedStatement = connection.prepareStatement(sql);) {
 			for (int i = 0; i < params.length; i++) {
@@ -149,21 +157,22 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 
 					list.add(m);
 				}
-			}catch(Exception ex) {
-				SQLException seq=new SQLException(ex);
-				
-				logExecptioin(seq);
-				logError("sql:"+sql+"\nparams:");
-				logError(params);
-				throw seq;
 			}
+		}catch(Exception ex) {
+			SQLException seq=new SQLException(ex);
+			
+			logExecptioin(seq);
+			logError("sql:"+sql+"\nparams:");
+			logError(params);
+			throw CommandExecuteExecption.forSql(seq, sql, params);
 		}
 
 		return list;
 	}
 
-	public Object[][] executeQueryArray(String sql, Object... params) throws SQLException {
-		Connection connection = getConnection();
+	public Object[][] executeQueryArray(String sql, Object... params) throws CommandExecuteExecption {
+		Connection connection= getConnection();
+		
 		Object[][] re =null;
 		try {
 		re=SqlCommon.executeQueryArray(connection, sql, params);
@@ -173,7 +182,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 			logExecptioin(seq);
 			logError("sql:"+sql+"\nparams:");
 			logError(params);
-			throw seq;
+			throw CommandExecuteExecption.forSql(seq, sql, params);
 		}
 		return re;
 	}
@@ -193,7 +202,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 
 	
 
-	public String executeQueryJsonList(String sql, Object... params) throws SQLException {
+	public String executeQueryJsonList(String sql, Object... params) throws CommandExecuteExecption {
 
 		StringBuffer ret = new StringBuffer("[");
 		int size=0;
@@ -257,7 +266,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 			logExecptioin(seq);
 			logError("sql:"+sql+"\nparams:");
 			logError(params);
-			throw seq;
+			throw CommandExecuteExecption.forSql(seq, sql, params);
 		}
 		if(size>0) {
 			ret.deleteCharAt(ret.length()-1);
@@ -281,7 +290,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 
 	@Override
 	public String executeQueryJsonList(PagingParam pagingParam)
-			throws SQLException {
+			throws CommandExecuteExecption {
        StringBuffer ret=new StringBuffer(executeQueryJsonList(pagingParam.psql, pagingParam.param));
 		
 		int size=Integer.parseInt(
@@ -306,7 +315,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 
 
 
-	public int executeUpdate(String sql, Object... param) throws SQLException {
+	public int executeUpdate(String sql, Object... param) throws CommandExecuteExecption {
 		int re = 0;
 		PoolList<Connection> connections = getConnections();
 		if (connections == null) {
@@ -319,11 +328,12 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 				logExecptioin(seq);
 				logError("sql:"+sql+"\nparams:");
 				logError(param);
-				throw seq;
+				throw CommandExecuteExecption.forSql(seq, sql, param);
+				//throw seq;
 			}
 		} else if (connections.size() > 1) {
 			AtomicInteger are = new AtomicInteger(0);
-			AtomicReference<SQLException> sex = new AtomicReference<>();
+			AtomicReference<CommandExecuteExecption> sex = new AtomicReference<>();
 			connections.parallelStream().forEach(conn -> {
 
 				try {
@@ -334,7 +344,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 					logError("sql:"+sql+"\nparams:");
 					logError(param);
 					
-					sex.set(seq);
+					sex.set(CommandExecuteExecption.forSql(seq, sql, param));
 				}
 			});
 			if (sex.get() != null)
@@ -345,7 +355,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 		return re;
 	}
 
-	public int executeInsertReturnPk(String sql, Object... param) throws SQLException {
+	public int executeInsertReturnPk(String sql, Object... param) throws CommandExecuteExecption {
 		int pk = 0;
 		Connection connection = getConnection();
 
@@ -366,7 +376,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 				logExecptioin(seq);
 				logError("sql:"+sql+"\nparams:");
 				logError(param);
-				throw seq;
+				throw CommandExecuteExecption.forSql(seq, sql, param);
 			}
 		
 		return pk;
@@ -374,7 +384,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 
 	
 	
-	public int executeBatch(String sql, Object[]... params) throws SQLException {
+	public int executeBatch(String sql, Object[]... params) throws CommandExecuteExecption {
 		int re = 0;
 		PoolList<Connection> connections = getConnections();
 		if (connections.size() == 1) {
@@ -385,11 +395,11 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 				logExecptioin(seq);
 				logError("sql:"+sql+"\nparams:");
 				logError(params);
-				throw seq;
+				throw CommandExecuteExecption.forSql(seq, sql, params);
 			}
 		} else if (connections.size() > 1) {
 			AtomicInteger are = new AtomicInteger(0);
-			AtomicReference<SQLException> sex = new AtomicReference<>();
+			AtomicReference<CommandExecuteExecption> sex = new AtomicReference<>();
 			connections.parallelStream().forEach(conn -> {
 
 				try {
@@ -399,7 +409,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 					logExecptioin(seq);
 					logError("sql:"+sql+"\nparams:");
 					logError(params);
-					sex.set(seq);
+					sex.set(CommandExecuteExecption.forSql(seq, sql, params));
 				}
 			});
 			if (sex.get() != null)
@@ -410,11 +420,12 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 		return re;
 	}
 	
-	public  int insertWithoutPk(Entity entry) throws SQLException {
+	public  int put(Object pk,Entity entry) throws Exception {
 		int re = 0;
-		Class cls = entry.getClass();
+		Class<? extends Entity> cls = entry.getClass();
 		Table table = this.getTable(cls);
-		table.insertWithoutPk(entry);
+		table.pkField.set(entry, pk);
+		table.insert(entry);
 		re=(int)table.getPk(entry);
 		
 		return re;
@@ -424,21 +435,26 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 
 	
 	@SuppressWarnings("unchecked")
-	public int insert(Entity entry) throws SQLException {
+	public int add(Entity entry) throws CommandExecuteExecption {
 		int re = 0;
 		Class<? extends Entity> cls = entry.getClass();
 		Table table = this.getTable(cls);
-		re += table.insert(entry);
+		
+			re += table.insertWithoutPk(entry);
+		
 		return re;
 	}
 
-	public <E extends Entity> int insert(Collection<E> entrys) throws SQLException {
+	public <E extends Entity> int addAll(Collection<E> entrys) throws CommandExecuteExecption {
 		int re = 0;
 		Class cls = entrys.stream().findFirst().getClass();
 		Table table = this.getTable(cls);
+		
 		
 		re += table.insert(entrys);
+		
 
+		
 		
 		//entry._updateTime = now();
 		return re;
@@ -449,71 +465,79 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 	
 	
 
-	public int update(Entity entry) throws SQLException {
+	public int update(Entity entry) throws CommandExecuteExecption {
 		int re = 0;
 
 		Class cls = entry.getClass();
 		Table table = this.getTable(cls);
+		
 		re += table.update(entry);
+		
 		//entry._updateTime = now();
 
 		return re;
 	}
 
-	protected int update(Entity entry, PoolList<Connection> connections) throws SQLException {
-		localConnection.set(connections);
-		return update(entry);
-	}
 
-	public <E extends Entity> int update(Collection<E> entrys) throws SQLException {
+	public <E extends Entity> int updateAll(Collection<E> entrys) throws CommandExecuteExecption {
 		int re = 0;
 		Class cls = entrys.stream().findFirst().getClass();
 		Table table = this.getTable(cls);
+		
 		re += table.update(entrys);
-		//entry._updateTime = now();
+		
 
 		return re;
 	}
 
 	
 
-	public int delete(Entity entry) throws SQLException {
+	public int remove(Entity entry) throws CommandExecuteExecption {
 		int re = 0;
 
 		Class cls = entry.getClass();
 		Table table = this.getTable(cls);
-		re += table.delete(entry);
+		
+	    re += table.delete(entry);
+		
 
 		return re;
 	}
 
-	public <E extends Entity> int delete(Collection<E> entrys) throws SQLException {
+	public <E extends Entity> int removeAll(Collection<E> entrys) throws CommandExecuteExecption {
 		int re = 0;
-
+        
 		Class cls = entrys.stream().findFirst().getClass();
 		Table table = this.getTable(cls);
-		re += table.delete(entrys);
+		
+		
+	    re += table.delete(entrys);
+		
 
 		return re;
 	}
 
-	public void connectionSetAutoCommit(boolean b) throws SQLException {
-
+	public void setAutoCommit(boolean b) throws CommandExecuteExecption {
+        try {
 		for (Connection conn : localConnection.get()) {
 			conn.setAutoCommit(b);
 
 		}
+        }catch(SQLException sex) {throw CommandExecuteExecption.forSql(sex,"setAutoCommit",b);}
 
 	}
 
-	public void connectionCommit() throws SQLException {
+	public void commit() throws CommandExecuteExecption {
+		try {
 		for (Connection conn : localConnection.get()) {
 			conn.commit();
 
 		}
+		}catch(SQLException sex) {throw CommandExecuteExecption.forSql(sex,"commit");}
 	}
 	
-	public void connectionRollback(Savepoint...savepoints) throws SQLException {
+	public void rollback(Savepoint...savepoints) throws CommandExecuteExecption {
+		try {
 		for (Connection conn : localConnection.get()) {
 			if(savepoints.length==0) {
 			  conn.rollback();
@@ -522,35 +546,37 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 			}
 
 		}
+		}catch(SQLException sex) {throw CommandExecuteExecption.forSql(sex,"rollback",savepoints);}
 	}
 	
-	public Savepoint[] connectionSetSavepoint(String...savepoints) throws SQLException {
+	public Savepoint[] setSavepoint(String...savepoints) throws CommandExecuteExecption {
 		PoolList<Connection> connections=localConnection.get();
 		Savepoint[] ret=new Savepoint[connections.size()];
-		try {
-			connections.each((i,conn)->{
+		
+			
 				try {
-				if(savepoints.length==0) {
+			      
+				  for(int i=0;i<connections.size();i++) {
+					  Connection conn=connections.get(i);
+				   if(savepoints.length==0) {
 					
 						ret[i]= conn.setSavepoint();
 					
 					}else {
 						ret[i]=conn.setSavepoint(savepoints[0]);
 					}
+				  }
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
-					throw e;
+					throw CommandExecuteExecption.forSql(e, "setSavepoint", savepoints);
 				}
-			});
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			throw new SQLException(e);
-		}
+		
+		
 		
 		return ret;
 	}
 
-	private  PoolList<Connection> getConnections() throws SQLException{
+	private  PoolList<Connection> getConnections() throws CommandExecuteExecption{
        PoolList<Connection> connections = localConnection.get();
 		
 		if(connections==null) {
@@ -567,7 +593,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 				};
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
-				throw new SQLException(e);
+				throw CommandExecuteExecption.forSql(e, "getConnection");
 			}
 
 			localConnection.set(connections);
@@ -577,7 +603,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 	}
 	
 	@SuppressWarnings("resource")
-	protected final Connection getConnection() throws SQLException {
+	protected final Connection getConnection() throws CommandExecuteExecption {
 		PoolList<Connection> connections = getConnections();
 		
 		Connection ret = connections.getNext();
@@ -591,7 +617,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 
 	
 
-	protected  Object[][] callProcedure(String procName, Object... params) throws SQLException {
+	protected  Object[][] callProcedure(String procName, Object... params) throws CommandExecuteExecption {
 
 		List<Object[]> ret = new ArrayList<Object[]>();
 		StringBuffer sql = new StringBuffer();
@@ -650,6 +676,8 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 				ret.add(outRe);
 			}
 
+		}catch(SQLException sex) {
+			throw CommandExecuteExecption.forSql(sex, procName, params);
 		}
 		return ret.toArray(new Object[ret.size()][cc]);
 

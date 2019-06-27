@@ -30,8 +30,11 @@ public class JC2010_ENTERPRISE_DBImpl extends JC2010_ENTERPRISE_DBBase {
 	}
 
 	
-	MemoryCacheContainer cacheContainer=new MemoryCacheContainer();
+	static MemoryCacheContainer cacheContainer=new MemoryCacheContainer();
 
+	static {
+		cacheContainer.getCleanItemThread().start();
+	}
 
 	@Override
 	protected <E extends Entity> CacheItem<E> cacheGet(Class<E> cls, Object pk) {
@@ -47,6 +50,10 @@ public class JC2010_ENTERPRISE_DBImpl extends JC2010_ENTERPRISE_DBBase {
 		// TODO Auto-generated method stub
 		cacheContainer.put(entity, pk, 1000*60);
 	}
+
+
+
+	
 	
 	
 	

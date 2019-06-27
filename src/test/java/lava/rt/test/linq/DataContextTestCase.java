@@ -14,6 +14,7 @@ import junit.framework.TestCase;
 import lava.rt.linq.Criterias;
 import lava.rt.linq.DataContext;
 import lava.rt.linq.Entity;
+import lava.rt.linq.execption.CommandExecuteExecption;
 import lava.rt.linq.src.DataContextSrcGener;
 import lava.rt.linq.src.MSSQLServerDataContextSrcGener;
 import lava.rt.test.pojo.JC2010_ENTERPRISE_DB.Criteria;
@@ -56,14 +57,14 @@ public class DataContextTestCase extends TestCase {
 	}
 
 	@Test
-	public void testLoad() throws SQLException {
+	public void testLoad() throws SQLException, CommandExecuteExecption {
 		
-		 Test_ record=dc.load(Test_.class, 1);
+		 Test_ record=dc.get(Test_.class, 1);
 		 assertNotNull(record);
 	}
 
 	@Test
-	public void testExecuteQueryList() throws SQLException {
+	public void testExecuteQueryList() throws SQLException, CommandExecuteExecption {
 		
 		 List<Test_> records=dc.executeQueryList(Test_.class, "select * from "+Criterias.tableName(Test_.class) );
 		 assertTrue(records.size()>0);

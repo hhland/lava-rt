@@ -5,7 +5,9 @@
 */ 
 package lava.rt.test.pojo; 
 
-import lava.rt.linq.*; 
+import lava.rt.linq.*;
+import lava.rt.linq.execption.CommandExecuteExecption;
+
 import java.util.*; 
 import java.sql.*; 
 import java.math.*; 
@@ -343,7 +345,7 @@ public interface JC2010_ENTERPRISE_DB extends lava.rt.linq.DataContext{
 
 	 } //end COMPANY_REL
 
-		public Object[][] getColumns(Integer id,OutputParam<Float> name,OutputParam<String> age) throws SQLException; 
+		public Object[][] getColumns(Integer id,OutputParam<Float> name,OutputParam<String> age) throws CommandExecuteExecption; 
 	public final static Criteria CRITERIA=new Criteria();
 
 	public  static class Criteria{ 

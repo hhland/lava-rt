@@ -37,10 +37,12 @@ public class OracleDataContextSrcGener extends DataContextSrcGener{
 		Map<String,String> tablePks=new HashMap<String,String>();
 		String sql="select cu.table_name,cu.column_name from user_cons_columns cu, user_constraints au where cu.constraint_name = au.constraint_name and au.constraint_type = 'P' ";
 		PreparedStatement preparedStatement= connection.prepareStatement(sql);
+		
 		ResultSet resultSet=preparedStatement.executeQuery();
 		while(resultSet.next()) {
 		   String table=resultSet.getString(1).toUpperCase();
 		   String pkName=resultSet.getString(2).toUpperCase();
+		   if(table.startsWith("BIN$"))continue;
 		   tablePks.put(table, pkName);
 		}
 		return tablePks;

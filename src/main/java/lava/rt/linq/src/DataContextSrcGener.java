@@ -113,6 +113,7 @@ public abstract class DataContextSrcGener   {
 		.append("import "+ SQLException.class.getPackage().getName()+".*; \n")
 		.append("import "+BigDecimal.class.getPackage().getName()+".*; \n\n\n")
 		.append("import "+Serializable.class.getPackage().getName()+".*; \n\n\n")
+		.append("import "+Date.class.getName()+"; \n\n\n")
 		;
 		
 		
@@ -211,7 +212,7 @@ public abstract class DataContextSrcGener   {
 		
 		.append("import "+ SQLException.class.getPackage().getName()+".*; \n")
 		.append("import "+DataSource.class.getPackage().getName()+".*; \n\n\n")
-		//.append("import "+Serializable.class.getName()+"; \n\n\n")
+		.append("import "+Date.class.getName()+"; \n\n\n")
 		;
 		
 		
@@ -609,11 +610,17 @@ public abstract class DataContextSrcGener   {
 	public static String toClassName(String name) {
 		StringBuffer ret=new StringBuffer("");
 		for(String _colName:name.split("_")) {
-			ret
-			.append(_colName.substring(0, 1).toUpperCase())
-			.append(_colName.substring(1).toLowerCase());
+			if(_colName.length()==0)continue;
+			try {
+				int i=Integer.parseInt(_colName);
+				ret.append("_").append(i);
+			}catch(Exception ex) {
+				ret
+				.append(_colName.substring(0, 1).toUpperCase())
+				.append(_colName.substring(1).toLowerCase());
+				}
+			}
 			
-		}
 		if(name.endsWith("_")) {
 			ret.append("_");
 		}

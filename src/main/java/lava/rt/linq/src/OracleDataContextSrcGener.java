@@ -1,6 +1,7 @@
 package lava.rt.linq.src;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -12,6 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Stream;
+
+import lava.rt.logging.LogFactory;
 
 public class OracleDataContextSrcGener extends DataContextSrcGener{
 
@@ -59,7 +63,9 @@ public class OracleDataContextSrcGener extends DataContextSrcGener{
 		// TODO Auto-generated method stub
 		 Map<String, List<ProcedureParamSrc>> ret=new HashMap<>();
 		 Map<String, StringBuffer> textMap=new HashMap<>();
-		String sql="SELECT NAME,TEXT FROM ALL_SOURCE  WHERE TYPE='PROCEDURE' and OWNER='"+databaseName.toUpperCase()+"'";
+		String sql="SELECT NAME,TEXT FROM ALL_SOURCE  WHERE TYPE='PROCEDURE' "
+				+ "and OWNER='"+databaseName.toUpperCase()+"'"
+				;
 		sql+=" order by NAME,LINE asc";
         try(PreparedStatement preparedStatement= connection.prepareStatement(sql);
         		ResultSet resultSet=preparedStatement.executeQuery();){
@@ -91,10 +97,11 @@ public class OracleDataContextSrcGener extends DataContextSrcGener{
         		ret.put(procName, paramSrcs);
         	}
         	
-        	String text=procName.toString(),t=text.toLowerCase(),p="";
+        	String text=ent.getValue().toString(),t=text.toLowerCase(),p="";
         	int s=0,e=0;
         	s=t.indexOf(procName.toLowerCase())+procName.length();
         	t=t.substring(s);
+        	
         	
         	s=t.indexOf("(");
         	
@@ -102,10 +109,11 @@ public class OracleDataContextSrcGener extends DataContextSrcGener{
         	     s++;
         	     
         	   
+        	     e=t.indexOf(")");
+        	
         	     
         	     
-        	     
-        	     p=text.substring(s,e);
+        	     p=t.substring(s,e-1);
         	}
         	
         	
@@ -113,15 +121,36 @@ public class OracleDataContextSrcGener extends DataContextSrcGener{
         	String[] params=p.split(",");
         	for(String param: params) {
         		//     (is_used OUT number, data_ratio OUT number, clob_rest OUT clob)
-
+                if(param.trim().length()==0)continue;
         		String[] subParams=param.trim().split(" ");
         		
-        		String name=subParams[0].trim(),io=subParams[1].trim(),type=subParams[2];
+        		Object[] _params= Stream.of(subParams)
+        				.filter(str->!str.isEmpty()).toArray();
+        		
+        		//System.out.println(param);
+        		String name=_params[0].toString().trim()
+        				,io="in"
+        				,type="varchar2"
+        				;
+        		if(_params.length==3) {
+        			io=_params[1].toString().trim();
+            		type=_params[2].toString().trim();
+        		}
         		ProcedureParamSrc src=new ProcedureParamSrc();
-        		src.isOutput=io.toUpperCase().equals("OUT");
+        		src.isOutput=io.toUpperCase().equals("out");
         		src.paramName=name;
-        		src.sqlType=Types.VARCHAR;
-        		src.cls=String.class;
+        		if("number".equals(type)) {
+        			src.sqlType=Types.DOUBLE;
+            		src.cls=Double.class;
+        		}
+        		else if("date".equals(type)) {
+        			src.sqlType=Types.DATE;
+            		src.cls=Date.class;
+        		}else {
+        			src.sqlType=Types.VARCHAR;
+            		src.cls=String.class;
+        		}
+        		
         		paramSrcs.add(src);
         	}
         	

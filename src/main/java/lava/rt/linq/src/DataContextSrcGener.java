@@ -31,6 +31,7 @@ import javax.sql.DataSource;
 
 import lava.rt.common.TextCommon;
 import lava.rt.linq.Column;
+import lava.rt.linq.CommandExecuteExecption;
 import lava.rt.linq.DataContext;
 import lava.rt.linq.DataSourceContext;
 import lava.rt.linq.Entity;
@@ -171,7 +172,7 @@ public abstract class DataContextSrcGener   {
 			String tn=ent.getKey();
 			ProcedureSrc tableSrc=new ProcedureSrc(tn,ent.getValue());
 			srcEvent.onProcedureIntfSrcAppend(src,tableSrc);
-			src.append(tableSrc.toIntfSrc());
+			src.append(tableSrc.toIntfSrc()).append("\n\n");
 		}
 		
 		src
@@ -359,7 +360,7 @@ public abstract class DataContextSrcGener   {
 				//.append("\t\t@"+Override.class.getSimpleName()+"\n")
 				.append("\t\tpublic Object[][] "+procName+"(")
 				.append(String.join(",", funParams))
-				.append(") throws SQLException; ")
+				.append(") throws "+CommandExecuteExecption.class.getSimpleName()+"; ")
 				.append("\n");
 		        
 		        return src.toString();
@@ -419,7 +420,7 @@ public abstract class DataContextSrcGener   {
 			//.append("\t\t@"+Override.class.getSimpleName()+"\n")
 			.append("\t\tpublic Object[][] "+procName+"(")
 			.append(String.join(",", funParams))
-			.append(") throws SQLException {")
+			.append(") throws "+CommandExecuteExecption.class.getSimpleName()+" {")
 			.append("\n")
 			//.append("\t\t\tList<"+Param.class.getSimpleName()+"> params=new ArrayList<>();")
 			.append("\n")

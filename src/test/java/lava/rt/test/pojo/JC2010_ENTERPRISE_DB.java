@@ -6,7 +6,6 @@
 package lava.rt.test.pojo; 
 
 import lava.rt.linq.*;
-import lava.rt.linq.execption.CommandExecuteExecption;
 
 import java.util.*; 
 import java.sql.*; 

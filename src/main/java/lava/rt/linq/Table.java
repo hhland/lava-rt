@@ -15,7 +15,6 @@ import java.util.stream.Stream;
 
 import lava.rt.common.ReflectCommon;
 import lava.rt.common.TextCommon;
-import lava.rt.linq.execption.CommandExecuteExecption;
 
 
 public class Table<M extends Entity> extends View<M> {

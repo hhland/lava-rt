@@ -10,8 +10,6 @@ import java.util.List;
 
 import lava.rt.base.PoolList;
 
-import lava.rt.linq.execption.CommandExecuteExecption;
-
 public interface  DataContext  {
 
 	

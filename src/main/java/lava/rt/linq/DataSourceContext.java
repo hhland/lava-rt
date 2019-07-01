@@ -22,8 +22,7 @@ import javax.sql.DataSource;
 import lava.rt.base.PoolList;
 import lava.rt.cache.CacheItem;
 import lava.rt.common.SqlCommon;
-import lava.rt.linq.execption.CommandExecuteExecption;
-import lava.rt.linq.execption.CommandExecuteExecption.CmdType;
+import lava.rt.linq.CommandExecuteExecption.CmdType;
 import lava.rt.logging.Log;
 import lava.rt.logging.LogFactory;
 

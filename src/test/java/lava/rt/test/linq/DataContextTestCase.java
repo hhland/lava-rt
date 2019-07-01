@@ -11,10 +11,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import junit.framework.TestCase;
+import lava.rt.linq.CommandExecuteExecption;
 import lava.rt.linq.Criterias;
 import lava.rt.linq.DataContext;
 import lava.rt.linq.Entity;
-import lava.rt.linq.execption.CommandExecuteExecption;
 import lava.rt.linq.src.DataContextSrcGener;
 import lava.rt.linq.src.MSSQLServerDataContextSrcGener;
 import lava.rt.test.pojo.JC2010_ENTERPRISE_DB.Criteria;

@@ -17,7 +17,6 @@ import javax.sql.PooledConnection;
 
 import lava.rt.adapter.UnsafeAdapter;
 import lava.rt.common.ReflectCommon;
-import lava.rt.linq.execption.CommandExecuteExecption;
 import sun.misc.Unsafe;
 
 public   class  View<M extends Entity> {

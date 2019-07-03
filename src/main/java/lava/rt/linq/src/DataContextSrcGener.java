@@ -51,17 +51,13 @@ public abstract class DataContextSrcGener   {
 	
 	protected Set<String> columnNames=new HashSet<>();
 	
-	protected SrcEvent srcEvent=new SrcEvent();
+	public SrcEvent srcEvent=new SrcEvent();
 	
 	public DataContextSrcGener(Connection connection) {
 		this.connection=connection;
 	}
 	
 	
-	public DataContextSrcGener(Connection connection,SrcEvent srcEvent) {
-		this.connection=connection;
-		this.srcEvent=srcEvent;
-	}
 
 
 
@@ -252,14 +248,16 @@ public abstract class DataContextSrcGener   {
 			String pkName="ID";
 			
 			String tn=table.toUpperCase()
-					,cn=toClassName(tn)
+					
 					;
 			if(views.contains(tn))continue;
 			
 			if(tablesPks.containsKey(tn)) {
 				pkName=tablesPks.get(tn);
 			}
-			src.append("\t public final Table<"+cn+"> "+tn+"=createTable("+cn+".class,\""+table+"\",\""+pkName+"\");\n");
+			TableSrc tableSrc=new TableSrc(tn, pkName);
+			srcEvent.onTableSrcAppend(src, tableSrc);
+			src.append("\t public final Table<"+tableSrc.className+"> "+tableSrc.tableName+"=createTable("+tableSrc.className+".class,\""+tableSrc.tableName+"\",\""+tableSrc.pkName+"\");\n");
 		}
 		
 		src.append("\n\n");
@@ -268,10 +266,11 @@ public abstract class DataContextSrcGener   {
 			
 			
 			String tn=table.toUpperCase()
-					,cn=toClassName(tn)
+					
 					;
-			
-			src.append("\t public final View<"+cn+"> "+tn+"=createView("+cn+".class,\""+table+"\");\n");
+			TableSrc tableSrc=new TableSrc(tn,null);
+			srcEvent.onViewSrcAppend(src, tableSrc);
+			src.append("\t public final View<"+tableSrc.className+"> "+tableSrc.tableName+"=createView("+tableSrc.className+".class,\""+tableSrc.tableName+"\");\n");
 		}
 		
 		src.append("\n\n");

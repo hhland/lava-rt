@@ -1,6 +1,13 @@
 package lava.rt.common;
 
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,9 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
-import lava.rt.sqlparser.SingleSqlParserFactory;
-import lava.rt.sqlparser.SqlSegment;
 
 
 
@@ -129,11 +133,29 @@ public final class SqlCommon {
   	}
       
       
-     
+     @SuppressWarnings("unchecked")
+	public static <T> T getObject(Blob blob) throws IOException, SQLException, ClassNotFoundException {
+    	 T ret=null;
+    	try(
+    			InputStream is=blob.getBinaryStream();                //获取二进制流对象
+    			BufferedInputStream bis=new BufferedInputStream(is);    //带缓冲区的流对象
+    			){
+    		
+			byte[] buff=new byte[(int) blob.length()];
+			if(-1!=(bis.read(buff, 0, buff.length))){            //一次性全部读到buff中
+				ObjectInputStream in=new ObjectInputStream(new ByteArrayInputStream(buff));
+				ret=(T)in.readObject();                   //读出对象
+				
+				
+			}
+
+    	}
+    	 return ret;
+     }
 	
       
      
-      
+     
       
       
       

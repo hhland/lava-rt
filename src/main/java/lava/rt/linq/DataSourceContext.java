@@ -6,9 +6,7 @@ import static org.hamcrest.CoreMatchers.theInstance;
 
 import java.io.Closeable;
 import java.io.IOException;
-
-
-
+import java.lang.reflect.Field;
 import java.sql.*;
 
 import java.util.*;
@@ -53,7 +51,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 	public <M extends Entity> Table<M> createTable(Class<M> cls, String tableName, String pkName) {
 		Table<M> table = new Table<M>(this, cls, tableName, pkName);
 		tableMap.put(cls, table);
-		//viewMap.put(cls, table);
+		viewMap.put(cls, table);
 		return table;
 	}
 
@@ -112,7 +110,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 
 
 	public <M extends Entity> List<M> executeQueryList(Class<M> cls, String sql, Object... params) throws CommandExecuteExecption {
-		
+		sql=View.formatEl(sql, viewMap);
 		Connection connection = getConnection();
 		
 		List<M> list = new ArrayList<M>();
@@ -137,21 +135,21 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 				while (resultSet.next()) {
 					M m= newEntity(cls);
 					
-					//int c = 0;
-					for (Iterator<String> it = view.entryFieldOffsetMap.keySet().iterator(); it.hasNext();) {
+					int c = 0;
+					for (Iterator<String> it = view.entryFieldMap.keySet().iterator(); it.hasNext();) {
 						String columnName = it.next().toUpperCase();
 						Integer columnIndex = meteDataMap.get(columnName);
 						if (columnIndex==null)
 							continue;
 						
-						//Field field = view.entryFieldMap.get(columnName);
-						//try {
-							m.val(columnName,resultSet.getObject(columnIndex));
-							//field.set(m, resultSet.getObject(columnIndex));
-						//} catch (Exception e) {
-						//	continue;
-						//}
-						//c++;
+						Field field = view.entryFieldMap.get(columnName);
+						try {
+							//m.val(columnName,resultSet.getObject(columnIndex));
+							field.set(m, resultSet.getObject(columnIndex));
+						} catch (Exception e) {
+							continue;
+						}
+						c++;
 					}
 
 					list.add(m);
@@ -170,6 +168,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 	}
 
 	public Object[][] executeQueryArray(String sql, Object... params) throws CommandExecuteExecption {
+		sql=View.formatEl(sql, viewMap);
 		Connection connection= getConnection();
 		
 		Object[][] re =null;
@@ -202,7 +201,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 	
 
 	public String executeQueryJsonList(String sql, Object... params) throws CommandExecuteExecption {
-
+		sql=View.formatEl(sql, viewMap);
 		StringBuffer ret = new StringBuffer("[");
 		int size=0;
 		String[] columns=null;
@@ -290,6 +289,8 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 	@Override
 	public String executeQueryJsonList(PagingParam pagingParam)
 			throws CommandExecuteExecption {
+		pagingParam.sql=View.formatEl(pagingParam.sql, viewMap);
+		pagingParam.psql=View.formatEl(pagingParam.psql, viewMap);		
        StringBuffer ret=new StringBuffer(executeQueryJsonList(pagingParam.psql, pagingParam.param));
 		
 		int size=Integer.parseInt(
@@ -314,8 +315,9 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 
 
 
-	public int executeUpdate(String sql, Object... param) throws CommandExecuteExecption {
+	public int executeUpdate(String sql0, Object... param) throws CommandExecuteExecption {
 		int re = 0;
+		final String sql=View.formatEl(sql0, viewMap);
 		PoolList<Connection> connections = getConnections();
 		if (connections == null) {
 			//printErr("error:" + sql);
@@ -356,6 +358,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 
 	public int executeInsertReturnPk(String sql, Object... param) throws CommandExecuteExecption {
 		int pk = 0;
+		sql=View.formatEl(sql, viewMap);
 		Connection connection = getConnection();
 
 			try (PreparedStatement preparedStatement = connection.prepareStatement(sql,
@@ -383,8 +386,9 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 
 	
 	
-	public int executeBatch(String sql, Object[]... params) throws CommandExecuteExecption {
+	public int executeBatch(String sql0, Object[]... params) throws CommandExecuteExecption {
 		int re = 0;
+		final String  sql=View.formatEl(sql0, viewMap);
 		PoolList<Connection> connections = getConnections();
 		if (connections.size() == 1) {
 			try {
@@ -699,7 +703,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 
 
 
-
+   
     
 	
 	

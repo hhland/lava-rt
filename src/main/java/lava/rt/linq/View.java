@@ -11,6 +11,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.Set;
 
 import javax.sql.PooledConnection;
@@ -27,13 +29,13 @@ public   class  View<M extends Entity> {
 	protected final Class<M> entryClass;
 	protected final Map<String,Field> entryFieldMap=new HashMap<>();
 	
-	protected final Map<String,Long> entryFieldOffsetMap=new HashMap<>();
+	//protected final Map<String,Long> entryFieldOffsetMap=new HashMap<>();
 	
 	protected final String sqlSelect;
 	
 	
 	
-	protected static UnsafeAdapter unsafeAdapter= UnsafeAdapter.getInstance();
+	//protected static UnsafeAdapter unsafeAdapter= UnsafeAdapter.getInstance();
 	
 	protected View (DataSourceContext dataContext,Class<M> entryClass,String tableName) {
 		this.dataContext=dataContext;
@@ -46,7 +48,7 @@ public   class  View<M extends Entity> {
 			boolean isStatic = ReflectCommon.isStatic(field);
 			if(isStatic)continue;
 			this.entryFieldMap.put(ent.getKey(), ent.getValue());
-			entryFieldOffsetMap.put(ent.getKey(), unsafeAdapter.objectFieldOffset(ent.getValue()));
+			//entryFieldOffsetMap.put(ent.getKey(), unsafeAdapter.objectFieldOffset(ent.getValue()));
 		}
 		
 		
@@ -121,8 +123,37 @@ public   class  View<M extends Entity> {
 	}
 
 	
+	final static String elPrefix="{view:",elSubFix="}";
+	final static Pattern elPattern = Pattern.compile("\\"+elPrefix+"(.*?)\\"+elSubFix);
 	
+	public static String toEl(Class<? extends Entity> cls) {
+		String ret=elPrefix+cls.getName()+elSubFix;
+		return ret;
+	}
 	
-	
-	
+	protected static String formatEl(String sql,Map<Class,View> viewMap) {
+		String ret=sql;
+		
+	      
+	     Matcher matcher= elPattern.matcher(ret);
+		 
+	      
+	      if(!matcher.find())return ret;
+	      for(int i=0;i<matcher.groupCount();i++) {
+	    	  
+	    	  String groupi= matcher.group(i);
+	    	  String cn=groupi.substring(elPrefix.length(),groupi.length()-elSubFix.length());
+	    	  Class cls=null;
+			try {
+				cls = Class.forName(cn);
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(cls==null)continue;
+	    	  View view=viewMap.get(cls);
+	    	  ret=ret.replace(groupi, view.tableName);
+	      }
+		return ret;
+	}
 }

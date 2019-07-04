@@ -186,24 +186,7 @@ public abstract class Criterias implements Serializable {
 		return String.join(",", ret);
 	}
 	
-	public static String tableName(Class cls){
-		String ret=clsTableMap.get(cls);
-		if (ret == null) {
-			String para = cls.getSimpleName();
-			StringBuilder sb = new StringBuilder(para);
-			int temp = 0;// 定位
-
-			for (int i = 0; i < para.length(); i++) {
-				if (Character.isUpperCase(para.charAt(i)) && i > 0) {
-					sb.insert(i + temp, "_");
-					temp += 1;
-				}
-			}
-			ret = sb.toString().toUpperCase();
-		}
-        
-        return ret;
-    }
+	
 
 	
 	public static String joinColumnAsProp(Class<? extends Entity> entityCls) {

@@ -3,6 +3,8 @@ package lava.rt.test.linq;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.sql.DataSource;
 
@@ -15,6 +17,7 @@ import lava.rt.linq.CommandExecuteExecption;
 import lava.rt.linq.Criterias;
 import lava.rt.linq.DataContext;
 import lava.rt.linq.Entity;
+import lava.rt.linq.Table;
 import lava.rt.linq.src.DataContextSrcGener;
 import lava.rt.linq.src.MSSQLServerDataContextSrcGener;
 import lava.rt.test.pojo.JC2010_ENTERPRISE_DB.Criteria;
@@ -64,9 +67,11 @@ public class DataContextTestCase extends TestCase {
 	}
 
 	@Test
-	public void testExecuteQueryList() throws SQLException, CommandExecuteExecption {
-		
-		 List<Test_> records=dc.executeQueryList(Test_.class, "select * from "+Criterias.tableName(Test_.class) );
+	public void testExecuteQueryList() throws SQLException, CommandExecuteExecption, ClassNotFoundException {
+		 String sql0="select * from "+Table.toEl(Test_.class);
+		 
+		 
+		 List<Test_> records=dc.executeQueryList(Test_.class, sql0 );
 		 assertTrue(records.size()>0);
 	}
 

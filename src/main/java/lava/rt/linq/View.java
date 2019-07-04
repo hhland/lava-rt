@@ -143,16 +143,13 @@ public   class  View<M extends Entity> {
 	    	  
 	    	  String groupi= matcher.group(i);
 	    	  String cn=groupi.substring(elPrefix.length(),groupi.length()-elSubFix.length());
-	    	  Class cls=null;
-			try {
-				cls = Class.forName(cn);
-			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			if(cls==null)continue;
-	    	  View view=viewMap.get(cls);
-	    	  ret=ret.replace(groupi, view.tableName);
+	    	  
+	    	  for(Entry<Class, View> ent :viewMap.entrySet()) {
+	    		  if(ent.getKey().getName().equals(cn)) {
+	    			  ret=ret.replace(groupi, ent.getValue().tableName);
+	    		  }
+	    	  }
+	    	  
 	      }
 		return ret;
 	}

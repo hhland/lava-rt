@@ -147,6 +147,7 @@ public   class  View<M extends Entity> {
 	    	  for(Entry<Class, View> ent :viewMap.entrySet()) {
 	    		  if(ent.getKey().getName().equals(cn)) {
 	    			  ret=ret.replace(groupi, ent.getValue().tableName);
+	    			  break;
 	    		  }
 	    	  }
 	    	  

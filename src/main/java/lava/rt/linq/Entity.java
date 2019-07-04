@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import lava.rt.adapter.UnsafeAdapter;
 import lava.rt.base.LangObject;
 import lava.rt.common.ReflectCommon;
 
@@ -17,6 +18,8 @@ public abstract class Entity extends LangObject implements Cloneable  {
 
 	
 	protected Date newAt,updateAt;
+	
+	protected static UnsafeAdapter unsafeAdapter=UnsafeAdapter.getInstance();
 
      
     public Entity() {

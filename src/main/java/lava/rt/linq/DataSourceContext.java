@@ -82,7 +82,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 		// TODO Auto-generated method stub
 		CacheItem<E> cache=cacheGet(cls, pk);
 		E ret=null;
-		if(cache.isTimeout()||!cache.isEnable()) {
+		if(cache==null||cache.isTimeout()||!cache.isEnable()) {
 			Table<E> table=getTable(cls);
 			try {
 				ret=table.load(pk);
@@ -142,10 +142,10 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 						if (columnIndex==null)
 							continue;
 						
-						Field field = view.entryFieldMap.get(columnName);
+						//Field field = view.entryFieldMap.get(columnName);
 						try {
-							//m.val(columnName,resultSet.getObject(columnIndex));
-							field.set(m, resultSet.getObject(columnIndex));
+							m.val(columnName,resultSet.getObject(columnIndex));
+							//field.set(m, resultSet.getObject(columnIndex));
 						} catch (Exception e) {
 							continue;
 						}

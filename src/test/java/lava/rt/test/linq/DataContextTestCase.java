@@ -62,7 +62,7 @@ public class DataContextTestCase extends TestCase {
 	@Test
 	public void testLoad() throws SQLException, CommandExecuteExecption {
 		
-		 Test_ record=dc.get(Test_.class, 1);
+		 Test_ record=dc.entityGet(Test_.class, 1);
 		 assertNotNull(record);
 	}
 

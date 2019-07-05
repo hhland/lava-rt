@@ -15,6 +15,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.security.sasl.SaslException;
 import javax.sql.DataSource;
 
 import lava.rt.base.PoolList;
@@ -34,8 +35,8 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 
 	private final ThreadLocal<PoolList<Connection>> localConnection = new ThreadLocal<>();
 
-	public  <E extends Entity> E newEntity(Class<E> entryClass) throws Exception{
-          E ret=Entity.newEntitys(1,entryClass)[0];
+	protected  <E extends Entity> E entityNew(Class<E> entryClass) throws Exception{
+          E ret=Entity.newEntity(entryClass);
           return ret;
 	}
 	
@@ -48,25 +49,25 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 
 	
 
-	public <M extends Entity> Table<M> createTable(Class<M> cls, String tableName, String pkName) {
+	protected <M extends Entity> Table<M> tableCreate(Class<M> cls, String tableName, String pkName) {
 		Table<M> table = new Table<M>(this, cls, tableName, pkName);
 		tableMap.put(cls, table);
 		viewMap.put(cls, table);
 		return table;
 	}
 
-	public <M extends Entity> View<M> createView(Class<M> cls, String tableName) {
+	protected <M extends Entity> View<M> viewCreate(Class<M> cls, String tableName) {
 		View<M> view = new View<M>(this, cls, tableName);
 		viewMap.put(cls, view);
 		return view;
 	};
 
-	public <M extends Entity> Table<M> getTable(Class<M> mcls) {
+	public <M extends Entity> Table<M> tableGet(Class<M> mcls) {
 		Table<M> ret = tableMap.get(mcls);
 		return ret;
 	}
 
-	public <M extends Entity> View<M> getView(Class<M> mcls) {
+	public <M extends Entity> View<M> viewGet(Class<M> mcls) {
 		View<M> ret = viewMap.get(mcls);
 		return ret;
 	};
@@ -78,18 +79,15 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 	protected <E extends Entity> void cachePut(E ret, Object pk) {}
 
 	
-	public <E extends Entity> E get(Class<E> cls, Object pk) throws CommandExecuteExecption {
+	public <E extends Entity> E entityGet(Class<E> cls, Object pk) throws CommandExecuteExecption {
 		// TODO Auto-generated method stub
 		CacheItem<E> cache=cacheGet(cls, pk);
 		E ret=null;
 		if(cache==null||cache.isTimeout()||!cache.isEnable()) {
-			Table<E> table=getTable(cls);
-			try {
-				ret=table.load(pk);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				throw CommandExecuteExecption.forSql(e, "load", pk);
-			}
+			Table<E> table=tableGet(cls);
+			
+			ret=table.load(pk);
+			
 			cachePut(ret,pk);
 		}else {
 			ret=cache.get();
@@ -128,12 +126,12 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 					meteDataMap.put(key, i);
 				}
 
-				View<M> view = getView(cls);
+				View<M> view = viewGet(cls);
 				
 				
 			
 				while (resultSet.next()) {
-					M m= newEntity(cls);
+					M m= entityNew(cls);
 					
 					int c = 0;
 					for (Iterator<String> it = view.entryFieldMap.keySet().iterator(); it.hasNext();) {
@@ -290,14 +288,14 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 	public String executeQueryJsonList(PagingParam pagingParam)
 			throws CommandExecuteExecption {
 		pagingParam.sql=View.formatEl(pagingParam.sql, viewMap);
-		pagingParam.psql=View.formatEl(pagingParam.psql, viewMap);		
-       StringBuffer ret=new StringBuffer(executeQueryJsonList(pagingParam.psql, pagingParam.param));
+		pagingParam.pagingSql=View.formatEl(pagingParam.pagingSql, viewMap);		
+       StringBuffer ret=new StringBuffer(executeQueryJsonList(pagingParam.pagingSql, pagingParam.param));
 		
 		int size=Integer.parseInt(
 				  ret.substring(ret.lastIndexOf("size:")+5)
 				  ),total=pagingParam.start+size;
 		if(size==pagingParam.limit) {
-			String csql=Criterias.toCount(pagingParam.sql);
+			String csql=pagingParam.countSql();
 			total=(int)executeQueryArray(csql, pagingParam.param)[0][0];
 		}
 		ret
@@ -423,10 +421,10 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 		return re;
 	}
 	
-	public  int put(Object pk,Entity entry) throws Exception {
+	public  int entityPut(Object pk,Entity entry) throws Exception {
 		int re = 0;
 		Class<? extends Entity> cls = entry.getClass();
-		Table table = this.getTable(cls);
+		Table table = this.tableGet(cls);
 		table.pkField.set(entry, pk);
 		table.insert(entry);
 		re=(int)table.getPk(entry);
@@ -438,20 +436,20 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 
 	
 	@SuppressWarnings("unchecked")
-	public int add(Entity entry) throws CommandExecuteExecption {
+	public int entityAdd(Entity entry) throws CommandExecuteExecption {
 		int re = 0;
 		Class<? extends Entity> cls = entry.getClass();
-		Table table = this.getTable(cls);
+		Table table = this.tableGet(cls);
 		
 			re += table.insertWithoutPk(entry);
 		
 		return re;
 	}
 
-	public <E extends Entity> int addAll(Collection<E> entrys) throws CommandExecuteExecption {
+	public <E extends Entity> int entityAddAll(Collection<E> entrys) throws CommandExecuteExecption {
 		int re = 0;
 		Class cls = entrys.stream().findFirst().getClass();
-		Table table = this.getTable(cls);
+		Table table = this.tableGet(cls);
 		
 		
 		re += table.insert(entrys);
@@ -468,11 +466,11 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 	
 	
 
-	public int update(Entity entry) throws CommandExecuteExecption {
+	public int entityUpdate(Entity entry) throws CommandExecuteExecption {
 		int re = 0;
 
 		Class cls = entry.getClass();
-		Table table = this.getTable(cls);
+		Table table = this.tableGet(cls);
 		
 		re += table.update(entry);
 		
@@ -482,10 +480,10 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 	}
 
 
-	public <E extends Entity> int updateAll(Collection<E> entrys) throws CommandExecuteExecption {
+	public <E extends Entity> int entityUpdateAll(Collection<E> entrys) throws CommandExecuteExecption {
 		int re = 0;
 		Class cls = entrys.stream().findFirst().getClass();
-		Table table = this.getTable(cls);
+		Table table = this.tableGet(cls);
 		
 		re += table.update(entrys);
 		
@@ -495,11 +493,11 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 
 	
 
-	public int remove(Entity entry) throws CommandExecuteExecption {
+	public int entityRemove(Entity entry) throws CommandExecuteExecption {
 		int re = 0;
 
 		Class cls = entry.getClass();
-		Table table = this.getTable(cls);
+		Table table = this.tableGet(cls);
 		
 	    re += table.delete(entry);
 		
@@ -507,11 +505,11 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 		return re;
 	}
 
-	public <E extends Entity> int removeAll(Collection<E> entrys) throws CommandExecuteExecption {
+	public <E extends Entity> int entityRemoveAll(Collection<E> entrys) throws CommandExecuteExecption {
 		int re = 0;
         
 		Class cls = entrys.stream().findFirst().getClass();
-		Table table = this.getTable(cls);
+		Table table = this.tableGet(cls);
 		
 		
 	    re += table.delete(entrys);
@@ -520,7 +518,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 		return re;
 	}
 
-	public void setAutoCommit(boolean b) throws CommandExecuteExecption {
+	public void executeSetAutoCommit(boolean b) throws CommandExecuteExecption {
         try {
 		for (Connection conn : localConnection.get()) {
 			conn.setAutoCommit(b);
@@ -530,48 +528,78 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 
 	}
 
-	public void commit() throws CommandExecuteExecption {
+	public void executeCommit() throws CommandExecuteExecption {
 		try {
 		for (Connection conn : localConnection.get()) {
 			conn.commit();
 
 		}
-		}catch(SQLException sex) {throw CommandExecuteExecption.forSql(sex,"commit");}
+		}catch(SQLException sex) {throw CommandExecuteExecption.forSql(sex,"executeCommit");}
 	}
 	
-	public void rollback(Savepoint...savepoints) throws CommandExecuteExecption {
+	public void executeRollback(Checkpoint...points) throws CommandExecuteExecption {
 		try {
 		for (Connection conn : localConnection.get()) {
-			if(savepoints.length==0) {
+			if(points.length==0) {
 			  conn.rollback();
 			}else {
-				conn.rollback(savepoints[0]);
+				conn.rollback(new Savepoint() {
+					
+					@Override
+					public String getSavepointName() throws SQLException {
+						// TODO Auto-generated method stub
+						String ret=null;
+						try {
+							ret=points[0].getPointName();
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							throw new SQLException(e);
+						}
+						return ret;
+					}
+					
+					@Override
+					public int getSavepointId() throws SQLException {
+						// TODO Auto-generated method stub
+						int ret=0;
+						try {
+							ret=points[0].getPointId();
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							throw new SQLException(e);
+						}
+						return ret;
+					}
+				});
 			}
 
 		}
-		}catch(SQLException sex) {throw CommandExecuteExecption.forSql(sex,"rollback",savepoints);}
+		}catch(SQLException sex) {throw CommandExecuteExecption.forSql(sex,"executeRollback",points);}
 	}
 	
-	public Savepoint[] setSavepoint(String...savepoints) throws CommandExecuteExecption {
+	public Checkpoint[] executeSetCheckpoint(String... points) throws CommandExecuteExecption {
 		PoolList<Connection> connections=localConnection.get();
-		Savepoint[] ret=new Savepoint[connections.size()];
-		
+		Savepoint[] ret0=new Savepoint[connections.size()];
+		Checkpoint[] ret=new Checkpoint[ret0.length];
 			
 				try {
 			      
 				  for(int i=0;i<connections.size();i++) {
 					  Connection conn=connections.get(i);
-				   if(savepoints.length==0) {
+				   if(points.length==0) {
 					
-						ret[i]= conn.setSavepoint();
-					
+						ret0[i]= conn.setSavepoint();
+					    
 					}else {
-						ret[i]=conn.setSavepoint(savepoints[0]);
+						ret0[i]=conn.setSavepoint(points[0]);
 					}
+				   ret[i]= Checkpoint.forSql(ret0[i]);
 				  }
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
-					throw CommandExecuteExecption.forSql(e, "setSavepoint", savepoints);
+					throw CommandExecuteExecption.forSql(e, "executeSetCheckpoint", points);
 				}
 		
 		
@@ -596,7 +624,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 				};
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
-				throw CommandExecuteExecption.forSql(e, "getConnection");
+				throw CommandExecuteExecption.forSql(e, "getConnections");
 			}
 
 			localConnection.set(connections);

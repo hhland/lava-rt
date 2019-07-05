@@ -39,13 +39,7 @@ public abstract class Criterias implements Serializable {
 	
 	public abstract String format(Date date);
 	
-	protected static final Map<String,StringBuffer>  countSqlMap=new HashMap<>();
-	
-    protected static final Map<Class,String> clsJoinAsPropMap=new HashMap<>()
-   , clsTableMap=new HashMap<>()
    
-   ;
-	
 	public final static Criterias mssql=new Criterias() {
 		
 		@Override
@@ -180,7 +174,7 @@ public abstract class Criterias implements Serializable {
 		for(Column column:columns) {
 		//for(int i=0;i<ret.length;i++) {
 		//	Column column=columns[i];
-			ret[i]= column+" as "+column.propName;
+			ret[i]= column.as(column.propName);
 			i++;
 		}
 		return String.join(",", ret);
@@ -189,41 +183,8 @@ public abstract class Criterias implements Serializable {
 	
 
 	
-	public static String joinColumnAsProp(Class<? extends Entity> entityCls) {
-		String sql=clsJoinAsPropMap.get(entityCls);
-		if(sql==null) {
-			Map<String,Field> fieldMap= ReflectCommon.theDeclaredFieldMap(entityCls);
-			List<String> joins=new ArrayList<>();
-			for(Entry<String, Field> ent:fieldMap.entrySet()) {
-				boolean isStatic = ReflectCommon.isStatic(ent.getValue());
-				if(isStatic)continue;
-				String cn=ent.getValue().getName(),asn=Column.toClassName(cn);
-				asn=asn.substring(0, 1).toLowerCase()+asn.substring(1);
-				joins.add(cn+" as "+asn);
-				
-			}
-			sql=String.join(",", joins);
-			clsJoinAsPropMap.put(entityCls, sql);
-		}
-		return sql;
-	}
 	
 	
-	public static String toCount(String sql) {
-		
-		StringBuffer ret=countSqlMap.get(sql);
-		if(ret==null) {
-			 ret=new StringBuffer();
-			String csql="select count(*) "+sql.substring(sql.toLowerCase().indexOf("from"));
-			SelectSqlParser parser=new SelectSqlParser(csql);
-		    List<SqlSegment> segments=	parser.getSegments();
-		    for(SqlSegment segment:segments) {
-		    	if(segment.getStart().toLowerCase().equals("order by")) continue;
-		    	ret.append(" ").append(segment.toSql());
-		    }
-		    countSqlMap.put(sql, ret);
-		}
-		
-		return ret.toString();
-	}
+	
+	
 }

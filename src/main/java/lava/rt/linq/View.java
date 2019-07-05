@@ -76,34 +76,7 @@ public   class  View<M extends Entity> {
 		return dataContext.executeQueryList(entryClass,sql,params);
 	}
 	
-	public int count(String column,String where,Object...params) throws CommandExecuteExecption{
-		String pattern="select count({0}) from {1} ";
-    	String sql=MessageFormat.format(pattern,column, this.tableName)+where;
-    	
-    	return (int)dataContext.executeQueryArray(sql,params)[0][0];
-	}
 	
-	public float sum(String column,String where,Object...params) throws CommandExecuteExecption{
-		String pattern="select sum({0}) from {1} ";
-    	String sql=MessageFormat.format(pattern,column, this.tableName)+where;
-    	
-    	return (float)dataContext.executeQueryArray(sql,params)[0][0];
-	}
-	
-	public <T> T min(String column,String where,Object...params) throws CommandExecuteExecption{
-		String pattern="select min({0}) from {1} ";
-    	String sql=MessageFormat.format(pattern,column, this.tableName)+where;
-    	
-    	return (T)dataContext.executeQueryArray(sql,params)[0][0];
-	}
-	
-	public <T> T max(String column,String where,Object...params) throws CommandExecuteExecption{
-		String pattern="select max({0}) from {1} ";
-    	String sql=MessageFormat.format(pattern,column, this.tableName)+where;
-    	
-    	return (T)dataContext.executeQueryArray(sql,params)[0][0];
-	}
-
 
 
 

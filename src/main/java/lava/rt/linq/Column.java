@@ -26,6 +26,20 @@ public class Column {
 		propName=toPropName(column);
 	}
 	
+	public Column(String column,String propName) {
+		this.column=column;
+		asc = column + " asc";
+		desc =column + " desc";
+		groupBy= "group by "+column;
+		orderBy= "order by "+column;
+		distinct="distinct "+column;
+		count="count("+column+")";
+		max="max("+column+")";
+		min="min("+column+")";
+		sum="sum("+column+")";
+		this.propName=propName;
+	}
+	
 	public String eq(Object val) {return sql_eq(true,column,val);}
 	public String notEq(Object val) {return sql_eq(false,column,val);}
 	public String lt(Object val) {return sql_lt(true,column,val);}

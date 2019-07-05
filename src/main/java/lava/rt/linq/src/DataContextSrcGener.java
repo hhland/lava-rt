@@ -180,7 +180,7 @@ public abstract class DataContextSrcGener   {
 		for(String colName:columnNames) {
 			ColumnSrc columnSrc=new ColumnSrc(colName, toPropName(colName));
 			srcEvent.onColumnSrcAppend(src, columnSrc);
-			src.append("\t\t"+ columnSrc.className+" = new Column(\""+columnSrc.columnName+"\"),\n" );
+			src.append("\t\t"+ columnSrc.className+" = new Column(\""+columnSrc.columnName+"\",\""+columnSrc.className+"\"),\n" );
 		}
 		src.deleteCharAt(src.length()-2);
 		src.append( "\t\t;\n\n")
@@ -257,7 +257,7 @@ public abstract class DataContextSrcGener   {
 			}
 			TableSrc tableSrc=new TableSrc(tn, pkName);
 			srcEvent.onTableSrcAppend(src, tableSrc);
-			src.append("\t public final Table<"+tableSrc.className+"> "+tableSrc.tableName+"=createTable("+tableSrc.className+".class,\""+tableSrc.tableName+"\",\""+tableSrc.pkName+"\");\n");
+			src.append("\t public final Table<"+tableSrc.className+"> "+tableSrc.tableName+"=tableCreate("+tableSrc.className+".class,\""+tableSrc.tableName+"\",\""+tableSrc.pkName+"\");\n");
 		}
 		
 		src.append("\n\n");
@@ -270,7 +270,7 @@ public abstract class DataContextSrcGener   {
 					;
 			TableSrc tableSrc=new TableSrc(tn,null);
 			srcEvent.onViewSrcAppend(src, tableSrc);
-			src.append("\t public final View<"+tableSrc.className+"> "+tableSrc.tableName+"=createView("+tableSrc.className+".class,\""+tableSrc.tableName+"\");\n");
+			src.append("\t public final View<"+tableSrc.className+"> "+tableSrc.tableName+"=viewCreate("+tableSrc.className+".class,\""+tableSrc.tableName+"\");\n");
 		}
 		
 		src.append("\n\n");

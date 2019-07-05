@@ -23,8 +23,8 @@ public abstract class JC2010_ENTERPRISE_DBBase extends lava.rt.linq.DataSourceCo
 
 //onClassSrcInner----end
 
-	 public final Table<Test_> TEST_=createTable(Test_.class,"TEST_","ID");
-	 public final Table<CompanyRel> COMPANY_REL=createTable(CompanyRel.class,"COMPANY_REL","COP_GB_CODE");
+	 public final Table<Test_> TEST_=tableCreate(Test_.class,"TEST_","ID");
+	 public final Table<CompanyRel> COMPANY_REL=tableCreate(CompanyRel.class,"COMPANY_REL","COP_GB_CODE");
 
 
 

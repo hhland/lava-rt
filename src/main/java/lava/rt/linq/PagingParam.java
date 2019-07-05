@@ -1,6 +1,10 @@
 package lava.rt.linq;
 
 import java.io.Serializable;
+import java.util.List;
+
+import lava.rt.sqlparser.SelectSqlParser;
+import lava.rt.sqlparser.SqlSegment;
 
 public class PagingParam implements Serializable{
 
@@ -15,7 +19,7 @@ public class PagingParam implements Serializable{
 	
 	public  int start,limit;
 	
-	public  String psql,sql;
+	public  String sql,pagingSql;
 	
 	public  Object[] param;
 
@@ -23,9 +27,10 @@ public class PagingParam implements Serializable{
 		super();
 		this.start = start;
 		this.limit = limit;
-		this.psql =criterias.toPaging(sql, start, limit);
+		this.pagingSql =criterias.toPaging(sql, start, limit);
 		this.sql = sql;
 		this.param = param;
+		
 	}
 
 	
@@ -33,13 +38,28 @@ public class PagingParam implements Serializable{
 		super();
 		this.start = start;
 		this.limit = limit;
-		this.psql =psql;
+		this.pagingSql =psql;
 		this.sql = sql;
 		this.param = param;
+	
 	}
 	
 	
-	
+    protected  String countSql() {
+		
+		StringBuffer ret=new StringBuffer();
+			String csql="select count(*) "+sql.substring(sql.toLowerCase().indexOf("from"));
+			SelectSqlParser parser=new SelectSqlParser(csql);
+		    List<SqlSegment> segments=	parser.getSegments();
+		    for(SqlSegment segment:segments) {
+		    	if(segment.getStart().toLowerCase().equals("order by")) continue;
+		    	ret.append(" ").append(segment.toSql());
+		    }
+		    
+		
+		
+		return ret.toString();
+	}
 	
 	
 	

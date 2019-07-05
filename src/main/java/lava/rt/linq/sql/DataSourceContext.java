@@ -30,7 +30,7 @@ import lava.rt.linq.CommandExecuteExecption.CmdType;
 import lava.rt.logging.Log;
 import lava.rt.logging.LogFactory;
 
-public abstract class DataSourceContext  implements DataContext,Closeable {
+public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 
 	
 

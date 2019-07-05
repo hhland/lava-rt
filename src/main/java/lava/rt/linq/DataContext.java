@@ -22,8 +22,7 @@ public interface  DataContext  {
 	
 	public String executeQueryJsonList(String cmd, Object... params) throws CommandExecuteExecption ;
 	
-	public String executeQueryJsonList(PagingParam pagingParam) throws CommandExecuteExecption ;
-
+	
 	
 	public <E extends Entity> E entityGet(Class<E> cls,Object pk) throws CommandExecuteExecption;
 

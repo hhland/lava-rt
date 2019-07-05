@@ -36,6 +36,7 @@ import lava.rt.linq.Entity;
 import lava.rt.linq.sql.Column;
 import lava.rt.linq.sql.DataSourceContext;
 import lava.rt.linq.sql.OutputParam;
+import lava.rt.linq.sql.SqlDataContext;
 import lava.rt.linq.sql.Table;
 import lava.rt.linq.sql.View;
 
@@ -115,7 +116,7 @@ public abstract class DataContextSrcGener   {
 		
 		
 		
-		src.append("public interface "+cls.getSimpleName()+" extends "+DataContext.class.getName()+"{ \n\n");
+		src.append("public interface "+cls.getSimpleName()+" extends "+SqlDataContext.class.getName()+"{ \n\n");
 		
 		src
 		.append("\tpublic static final long serialVersionUID="+serialVersionUID+";\n\n")

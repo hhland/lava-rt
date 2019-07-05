@@ -8,6 +8,7 @@ package lava.rt.test.pojo;
 import lava.rt.linq.*;
 import lava.rt.linq.sql.Column;
 import lava.rt.linq.sql.OutputParam;
+import lava.rt.linq.sql.SqlDataContext;
 
 import java.util.*; 
 import java.sql.*; 
@@ -17,7 +18,7 @@ import java.math.*;
 import java.io.*; 
 
 
-public interface JC2010_ENTERPRISE_DB extends lava.rt.linq.DataContext{ 
+public interface JC2010_ENTERPRISE_DB extends SqlDataContext{ 
 
 	public static final long serialVersionUID=1;
 

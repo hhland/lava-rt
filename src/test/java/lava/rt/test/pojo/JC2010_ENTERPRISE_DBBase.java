@@ -6,6 +6,8 @@
 package lava.rt.test.pojo; 
 
 import lava.rt.linq.*;
+import lava.rt.linq.sql.OutputParam;
+import lava.rt.linq.sql.Table;
 
 import java.util.*; 
 import java.sql.*; 
@@ -15,7 +17,7 @@ import javax.sql.*;
 //onClassSrcOutter----start
 
 
-public abstract class JC2010_ENTERPRISE_DBBase extends lava.rt.linq.DataSourceContext implements lava.rt.test.pojo.JC2010_ENTERPRISE_DB{ 
+public abstract class JC2010_ENTERPRISE_DBBase extends lava.rt.linq.sql.DataSourceContext implements lava.rt.test.pojo.JC2010_ENTERPRISE_DB{ 
 
 //onClassSrcInner----start
 

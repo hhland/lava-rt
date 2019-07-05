@@ -10,12 +10,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import junit.framework.TestCase;
-import lava.rt.linq.src.DataContextSrcGener;
-import lava.rt.linq.src.MSSQLServerDataContextSrcGener;
-import lava.rt.test.pojo.JC2010_ENTERPRISE_DBBase;
+import lava.rt.linq.sql.src.DataContextSrcGener;
+import lava.rt.linq.sql.src.MSSQLServerDataContextSrcGener;
 import lava.rt.test.pojo.JC2010_ENTERPRISE_DB;
-import lava.rt.test.pojo.JC2010_ENTERPRISE_DBImpl;
-
+import lava.rt.test.pojo.JC2010_ENTERPRISE_DBBase;
 import net.sourceforge.jtds.jdbcx.JtdsDataSource;
 
 public class DataContextSrcGenerTestCase extends TestCase {

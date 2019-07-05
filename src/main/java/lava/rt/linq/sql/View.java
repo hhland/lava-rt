@@ -1,4 +1,4 @@
-package lava.rt.linq;
+package lava.rt.linq.sql;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -19,6 +19,8 @@ import javax.sql.PooledConnection;
 
 import lava.rt.adapter.UnsafeAdapter;
 import lava.rt.common.ReflectCommon;
+import lava.rt.linq.CommandExecuteExecption;
+import lava.rt.linq.Entity;
 import sun.misc.Unsafe;
 
 public   class  View<M extends Entity> {
@@ -28,6 +30,8 @@ public   class  View<M extends Entity> {
 	public final String tableName;
 	protected final Class<M> entryClass;
 	protected final Map<String,Field> entryFieldMap=new HashMap<>();
+	
+	protected static Map<Class,List<Column>> clsColumns=new HashMap<>();
 	
 	//protected final Map<String,Long> entryFieldOffsetMap=new HashMap<>();
 	
@@ -127,4 +131,23 @@ public   class  View<M extends Entity> {
 	      }
 		return ret;
 	}
+	
+	
+	public static List<Column> getColumns(Class<? extends Entity> entityCls) {
+	    List<Column> ret=clsColumns.get(entityCls);
+	    if(ret==null) {
+	    ret=new ArrayList<>();
+		Map<String,Field> fieldMap= ReflectCommon.theDeclaredFieldMap(entityCls);
+		
+		for(Entry<String, Field> ent:fieldMap.entrySet()) {
+			boolean isStatic = ReflectCommon.isStatic(ent.getValue());
+			if(isStatic)continue;
+			String key=ent.getKey();
+			Column column=new Column(key);
+			ret.add( column);
+		 }
+	    }
+	
+	return ret;
+}
 }

@@ -1,4 +1,4 @@
-package lava.rt.linq;
+package lava.rt.linq.sql;
 
 import java.io.Serializable;
 import java.util.List;

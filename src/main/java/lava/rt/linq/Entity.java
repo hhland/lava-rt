@@ -15,6 +15,7 @@ import java.util.Map.Entry;
 import lava.rt.adapter.UnsafeAdapter;
 import lava.rt.base.LangObject;
 import lava.rt.common.ReflectCommon;
+import lava.rt.linq.sql.Column;
 
 public abstract class Entity extends LangObject implements Cloneable  {
 
@@ -24,7 +25,7 @@ public abstract class Entity extends LangObject implements Cloneable  {
 	protected static UnsafeAdapter unsafeAdapter=UnsafeAdapter.getInstance();
 	
 	
-	protected static Map<Class,List<Column>> clsColumns=new HashMap<>();
+
 
      
     public Entity() {
@@ -68,23 +69,7 @@ public abstract class Entity extends LangObject implements Cloneable  {
 
 	
 
-	public static List<Column> getColumns(Class<? extends Entity> entityCls) {
-		    List<Column> ret=clsColumns.get(entityCls);
-		    if(ret==null) {
-		    ret=new ArrayList<>();
-			Map<String,Field> fieldMap= ReflectCommon.theDeclaredFieldMap(entityCls);
-			
-			for(Entry<String, Field> ent:fieldMap.entrySet()) {
-				boolean isStatic = ReflectCommon.isStatic(ent.getValue());
-				if(isStatic)continue;
-				String key=ent.getKey();
-				Column column=new Column(key);
-				ret.add( column);
-			 }
-		    }
-		
-		return ret;
-	}
+	
 	
 	
 }

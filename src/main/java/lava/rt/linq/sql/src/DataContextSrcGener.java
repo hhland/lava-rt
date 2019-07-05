@@ -1,4 +1,4 @@
-package lava.rt.linq.src;
+package lava.rt.linq.sql.src;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -30,14 +30,14 @@ import javax.sql.DataSource;
 
 
 import lava.rt.common.TextCommon;
-import lava.rt.linq.Column;
 import lava.rt.linq.CommandExecuteExecption;
 import lava.rt.linq.DataContext;
-import lava.rt.linq.DataSourceContext;
 import lava.rt.linq.Entity;
-import lava.rt.linq.OutputParam;
-import lava.rt.linq.Table;
-import lava.rt.linq.View;
+import lava.rt.linq.sql.Column;
+import lava.rt.linq.sql.DataSourceContext;
+import lava.rt.linq.sql.OutputParam;
+import lava.rt.linq.sql.Table;
+import lava.rt.linq.sql.View;
 
 
 
@@ -204,7 +204,7 @@ public abstract class DataContextSrcGener   {
 		
 		src.append("import "+DataContext.class.getPackage().getName()+".*; \n")
 		
-		
+		.append("import "+DataSourceContext.class.getPackage().getName()+".*; \n")
 		.append("import "+ List.class.getPackage().getName()+".*; \n")
 		
 		.append("import "+ SQLException.class.getPackage().getName()+".*; \n")

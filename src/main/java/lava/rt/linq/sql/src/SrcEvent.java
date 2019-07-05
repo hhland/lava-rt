@@ -1,13 +1,15 @@
-package lava.rt.linq.src;
+package lava.rt.linq.sql.src;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import lava.rt.linq.src.DataContextSrcGener.ColumnSrc;
-import lava.rt.linq.src.DataContextSrcGener.ProcedureParamSrc;
-import lava.rt.linq.src.DataContextSrcGener.ProcedureSrc;
-import lava.rt.linq.src.DataContextSrcGener.TableSrc;
+import lava.rt.linq.sql.src.DataContextSrcGener.ColumnSrc;
+import lava.rt.linq.sql.src.DataContextSrcGener.ProcedureParamSrc;
+import lava.rt.linq.sql.src.DataContextSrcGener.ProcedureSrc;
+import lava.rt.linq.sql.src.DataContextSrcGener.TableSrc;
+
+
 
 public class SrcEvent {
 

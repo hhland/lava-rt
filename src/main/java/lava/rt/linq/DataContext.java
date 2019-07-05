@@ -4,6 +4,8 @@ package lava.rt.linq;
 import java.util.Collection;
 import java.util.List;
 
+import lava.rt.linq.sql.PagingParam;
+
 public interface  DataContext  {
 
 	
@@ -29,7 +31,7 @@ public interface  DataContext  {
 
 	public int entityAdd(Entity entry) throws CommandExecuteExecption ;
 
-	public  int entityPut(Object pk,Entity entry) throws Exception;
+	public  int entityPut(Object pk,Entity entry) throws CommandExecuteExecption;
 
 	public int entityUpdate(Entity entry) throws CommandExecuteExecption;
 

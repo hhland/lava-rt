@@ -1,4 +1,4 @@
-package lava.rt.linq;
+package lava.rt.linq.sql;
 
 
 
@@ -11,6 +11,7 @@ import java.sql.*;
 
 import java.util.*;
 import java.util.Date;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -21,6 +22,10 @@ import javax.sql.DataSource;
 import lava.rt.base.PoolList;
 import lava.rt.cache.CacheItem;
 import lava.rt.common.SqlCommon;
+import lava.rt.linq.Checkpoint;
+import lava.rt.linq.CommandExecuteExecption;
+import lava.rt.linq.DataContext;
+import lava.rt.linq.Entity;
 import lava.rt.linq.CommandExecuteExecption.CmdType;
 import lava.rt.logging.Log;
 import lava.rt.logging.LogFactory;
@@ -32,6 +37,8 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 	private final Map<Class, Table> tableMap = new HashMap<>();
 
 	private final Map<Class,View> viewMap = new HashMap<>();
+	
+	private final Map<String,Column> columnMap = new HashMap<>();
 
 	private final ThreadLocal<PoolList<Connection>> localConnection = new ThreadLocal<>();
 
@@ -48,6 +55,11 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 	protected abstract  DataSource[] getDataSources() ;
 
 	
+	protected Column columnCreate(String fieldName,String columnName) {
+		Column ret=new Column(fieldName);
+		columnMap.put(fieldName, ret);
+		return ret;
+	}
 
 	protected <M extends Entity> Table<M> tableCreate(Class<M> cls, String tableName, String pkName) {
 		Table<M> table = new Table<M>(this, cls, tableName, pkName);
@@ -421,14 +433,18 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 		return re;
 	}
 	
-	public  int entityPut(Object pk,Entity entry) throws Exception {
+	
+	public  int entityPut(Object pk,Entity entry) throws CommandExecuteExecption {
 		int re = 0;
 		Class<? extends Entity> cls = entry.getClass();
 		Table table = this.tableGet(cls);
-		table.pkField.set(entry, pk);
-		table.insert(entry);
-		re=(int)table.getPk(entry);
-		
+		try {
+			table.pkField.set(entry, pk);
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			throw new CommandExecuteExecption(e,CmdType.reflect,"set",table.pkField,entry,pk);
+		}
+		re=table.insert(entry);
 		return re;
 	}
 
@@ -440,8 +456,7 @@ public abstract class DataSourceContext  implements DataContext,Closeable {
 		int re = 0;
 		Class<? extends Entity> cls = entry.getClass();
 		Table table = this.tableGet(cls);
-		
-			re += table.insertWithoutPk(entry);
+		re += table.insertWithoutPk(entry);
 		
 		return re;
 	}

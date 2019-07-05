@@ -1,12 +1,7 @@
 package lava.rt.test.linq;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.sql.DataSource;
 
 import org.junit.After;
 import org.junit.Before;
@@ -14,16 +9,11 @@ import org.junit.Test;
 
 import junit.framework.TestCase;
 import lava.rt.linq.CommandExecuteExecption;
-import lava.rt.linq.Criterias;
 import lava.rt.linq.DataContext;
-import lava.rt.linq.Entity;
-import lava.rt.linq.Table;
-import lava.rt.linq.src.DataContextSrcGener;
-import lava.rt.linq.src.MSSQLServerDataContextSrcGener;
+import lava.rt.linq.sql.Table;
 import lava.rt.test.pojo.JC2010_ENTERPRISE_DB.Criteria;
 import lava.rt.test.pojo.JC2010_ENTERPRISE_DB.Test_;
 import lava.rt.test.pojo.JC2010_ENTERPRISE_DBImpl;
-
 import net.sourceforge.jtds.jdbcx.JtdsDataSource;
 
 public class DataContextTestCase extends TestCase {

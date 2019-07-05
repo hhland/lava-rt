@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import junit.framework.TestCase;
 import lava.rt.linq.DataContext;
-import lava.rt.linq.Table;
+import lava.rt.linq.sql.Table;
 import lava.rt.test.pojo.JC2010_ENTERPRISE_DBBase;
 import lava.rt.test.pojo.JC2010_ENTERPRISE_DBImpl;
 import lava.rt.test.pojo.JC2010_ENTERPRISE_DB.Criteria;

@@ -1,4 +1,4 @@
-package lava.rt.linq.src;
+package lava.rt.linq.sql.src;
 
 import java.sql.Connection;
 import java.sql.Date;

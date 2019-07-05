@@ -6,6 +6,8 @@
 package lava.rt.test.pojo; 
 
 import lava.rt.linq.*;
+import lava.rt.linq.sql.Column;
+import lava.rt.linq.sql.OutputParam;
 
 import java.util.*; 
 import java.sql.*; 

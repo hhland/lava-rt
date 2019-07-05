@@ -1,4 +1,4 @@
-package lava.rt.linq;
+package lava.rt.linq.sql;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
@@ -16,6 +16,8 @@ import java.util.stream.Stream;
 
 import lava.rt.common.ReflectCommon;
 import lava.rt.common.TextCommon;
+import lava.rt.linq.CommandExecuteExecption;
+import lava.rt.linq.Entity;
 
 
 public class Table<M extends Entity> extends View<M> {

@@ -1,17 +1,15 @@
 package lava.rt.linq.sql;
 
 import java.lang.reflect.Field;
-import java.sql.Connection;
-import java.sql.SQLException;
+
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
+
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Pattern;
+
 import java.util.stream.Stream;
 
 import lava.rt.common.ReflectCommon;

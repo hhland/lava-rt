@@ -1,8 +1,6 @@
 package lava.rt.linq.sql;
 
-import java.util.Date;
 
-import lava.rt.common.TextCommon;
 
 public class Column {
 

@@ -1,7 +1,6 @@
 package lava.rt.linq;
 
-import java.io.CharArrayWriter;
-import java.sql.SQLException;
+
 import java.sql.Savepoint;
 
 public abstract class Checkpoint {

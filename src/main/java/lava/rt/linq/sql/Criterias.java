@@ -1,25 +1,14 @@
 package lava.rt.linq.sql;
 
-import static org.junit.Assume.assumeNotNull;
 
-import java.io.File;
+
+
 import java.io.Serializable;
-import java.lang.reflect.Field;
+
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import lava.rt.common.ReflectCommon;
-import lava.rt.common.TextCommon;
-import lava.rt.sqlparser.SelectSqlParser;
-import lava.rt.sqlparser.SqlSegment;
 
 
 public abstract class Criterias implements Serializable {

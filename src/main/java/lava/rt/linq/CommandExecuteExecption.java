@@ -1,12 +1,19 @@
 package lava.rt.linq;
 
-import java.sql.SQLException;
 
-import lava.rt.common.SqlCommon;
 
 public class CommandExecuteExecption  extends Exception{
 
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+
+
+
+
 	public enum CmdType{
 		unknow,sql,procedure,bat,sh, reflect;
 	}

@@ -61,7 +61,7 @@ public class DataContextTestCase extends TestCase {
 		 String sql0="select * from "+Table.toEl(Test_.class);
 		 
 		 
-		 List<Test_> records=dc.executeQueryList(Test_.class, sql0 );
+		 List<Test_> records=dc.entityList(Test_.class, sql0 );
 		 assertTrue(records.size()>0);
 	}
 

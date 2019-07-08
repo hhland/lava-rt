@@ -28,7 +28,7 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler; 
 import org.xml.sax.helpers.XMLReaderFactory; 
 
-public abstract class XpathDataContext implements XmlDataContext{
+public abstract class DocumentContext implements XmlDataContext{
 
 	DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
 	XPathFactory factory = XPathFactory.newInstance();
@@ -38,7 +38,7 @@ public abstract class XpathDataContext implements XmlDataContext{
 	
 	
 	@Override
-	public <M extends Entity> List<M> executeQueryList(Class<M> cls, String cmd, Object... params)
+	public <M extends Entity> List<M> entityList(Class<M> cls, String cmd, Object... params)
 			throws CommandExecuteExecption {
 		// TODO Auto-generated method stub
 		List<M> ret=new ArrayList<>();
@@ -46,9 +46,11 @@ public abstract class XpathDataContext implements XmlDataContext{
 			XPathExpression expr = xpath.compile("//"+cls.getSimpleName()+cmd);
 			for(Document document:getDocuments()) {
 				NodeList nodes = (NodeList)expr.evaluate(document, XPathConstants.NODESET);
+				
 				for(int i=0;i<nodes.getLength();i++) {
 					nodes.item(i);
 				}
+				
 			}
 		} catch (XPathExpressionException e) {
 			// TODO Auto-generated catch block

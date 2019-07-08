@@ -63,14 +63,14 @@ public   class  View<M extends Entity> {
     public List<M> select(String where,Object...params) throws CommandExecuteExecption{
     	
     	String sql=sqlSelect+" "+where;
-		return dataContext.executeQueryList(entryClass,sql,params);
+		return dataContext.entityList(entryClass,sql,params);
 	}
     
     public List<M> selectByPaging(Criterias criterias,int start,int limit,String where,Object...params) throws CommandExecuteExecption{
     	
     	String sql=sqlSelect+" "+where;
     	sql=criterias.toPaging(sql,start,limit);
-		return dataContext.executeQueryList(entryClass,sql,params);
+		return dataContext.entityList(entryClass,sql,params);
 	}
 	
 	

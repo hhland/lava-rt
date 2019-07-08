@@ -117,7 +117,7 @@ public class Table<M extends Entity> extends View<M> {
 
 		String sql = sqlLoad;
 		
-		List<M> entrys = dataContext.<M>executeQueryList(entryClass,sql , pk);
+		List<M> entrys = dataContext.<M>entityList(entryClass,sql , pk);
 		M ret = null;
 		if (entrys.size() == 1) {
 			ret = entrys.get(0);

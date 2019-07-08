@@ -4,6 +4,8 @@ package lava.rt.linq.sql;
 
 
 
+
+
 import java.io.Closeable;
 
 import java.sql.*;
@@ -36,7 +38,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 
 	private final Map<Class,View> viewMap = new HashMap<>();
 	
-	private final Map<String,Column> columnMap = new HashMap<>();
+	protected  final Map<String,String> columnMap = new HashMap<>();
 
 	private final ThreadLocal<PoolList<Connection>> localConnection = new ThreadLocal<>();
 
@@ -53,11 +55,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	protected abstract  DataSource[] getDataSources() ;
 
 	
-	protected Column columnCreate(String fieldName,String columnName) {
-		Column ret=new Column(fieldName);
-		columnMap.put(fieldName, ret);
-		return ret;
-	}
+	
 
 	protected <M extends Entity> Table<M> tableCreate(Class<M> cls, String tableName, String pkName) {
 		Table<M> table = new Table<M>(this, cls, tableName, pkName);
@@ -117,7 +115,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 
 
 
-	public <M extends Entity> List<M> executeQueryList(Class<M> cls, String sql, Object... params) throws CommandExecuteExecption {
+	public <M extends Entity> List<M> entityList(Class<M> cls, String sql, Object... params) throws CommandExecuteExecption {
 		sql=View.formatEl(sql, viewMap);
 		Connection connection = getConnection();
 		
@@ -176,7 +174,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	}
 
 	public Object[][] executeQueryArray(String sql, Object... params) throws CommandExecuteExecption {
-		sql=View.formatEl(sql, viewMap);
+		sql=formatEl(sql);
 		Connection connection= getConnection();
 		
 		Object[][] re =null;
@@ -209,7 +207,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	
 
 	public String executeQueryJsonList(String sql, Object... params) throws CommandExecuteExecption {
-		sql=View.formatEl(sql, viewMap);
+		sql=formatEl(sql);
 		StringBuffer ret = new StringBuffer("[");
 		int size=0;
 		String[] columns=null;
@@ -297,8 +295,8 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	@Override
 	public String executeQueryJsonList(PagingParam pagingParam)
 			throws CommandExecuteExecption {
-		pagingParam.sql=View.formatEl(pagingParam.sql, viewMap);
-		pagingParam.pagingSql=View.formatEl(pagingParam.pagingSql, viewMap);		
+		pagingParam.sql=formatEl(pagingParam.sql);
+		pagingParam.pagingSql=formatEl(pagingParam.pagingSql);		
        StringBuffer ret=new StringBuffer(executeQueryJsonList(pagingParam.pagingSql, pagingParam.param));
 		
 		int size=Integer.parseInt(
@@ -366,7 +364,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 
 	public int executeInsertReturnPk(String sql, Object... param) throws CommandExecuteExecption {
 		int pk = 0;
-		sql=View.formatEl(sql, viewMap);
+		sql=formatEl(sql);
 		Connection connection = getConnection();
 
 			try (PreparedStatement preparedStatement = connection.prepareStatement(sql,
@@ -396,7 +394,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	
 	public int executeBatch(String sql0, Object[]... params) throws CommandExecuteExecption {
 		int re = 0;
-		final String  sql=View.formatEl(sql0, viewMap);
+		final String  sql=formatEl(sql0);
 		PoolList<Connection> connections = getConnections();
 		if (connections.size() == 1) {
 			try {
@@ -743,7 +741,21 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	}
 
 
+    protected String formatEl(String command) {
+    	
+    	String ret=View.formatEl(command, viewMap);
+    	
+    	ret=Criteria.formatEl(ret, columnMap);
+    	
+    	return ret;
+    }
 
+
+
+
+
+
+	
    
     
 	

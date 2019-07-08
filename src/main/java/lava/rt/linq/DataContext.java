@@ -14,7 +14,7 @@ public interface  DataContext  {
 	
 	
 	
-	public <M extends Entity> List<M> executeQueryList(Class<M> cls, String cmd, Object... params) throws CommandExecuteExecption ;
+	public <M extends Entity> List<M> entityList(Class<M> cls, String cmd, Object... params) throws CommandExecuteExecption ;
 
 	public Object[][] executeQueryArray(String cmd, Object... params) throws CommandExecuteExecption ;
 

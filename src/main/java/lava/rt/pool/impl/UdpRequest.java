@@ -2,7 +2,7 @@ package lava.rt.pool.impl;
 
 import java.lang.ref.WeakReference;
 
-import lava.rt.pool.Request;
+import lava.rt.aio.Request;
 
 
 

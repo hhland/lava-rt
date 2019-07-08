@@ -11,9 +11,9 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.regex.Pattern;
 
+import lava.rt.aio.ConnectionPool;
+import lava.rt.aio.RequestFactory;
 import lava.rt.logging.Log;
-import lava.rt.pool.ConnectionPool;
-import lava.rt.pool.RequestFactory;
 
 
 /**

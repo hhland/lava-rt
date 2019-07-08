@@ -2,7 +2,7 @@
  * Created on 2006-11-24
  *
  */
-package lava.rt.pool.impl;
+package lava.rt.aio.udp;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -36,7 +36,7 @@ public abstract class UdpGenericConnectionPool extends ConnectionPool {
 	///	socket����ʧ��ʱ�����Զ�ѡ��һ��������ӣ����Ʒ��inplaceConnectionLife��query���Զ��Ͽ�
 	protected int inplaceConnectionLife = 500;
 
-	Selector selector;
+	
 	
 	protected UdpReceiver recver;
 	protected UdpSender sender;

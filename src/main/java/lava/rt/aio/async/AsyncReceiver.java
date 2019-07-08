@@ -1,4 +1,4 @@
-package lava.rt.pool.impl;
+package lava.rt.aio.async;
 
 import java.io.IOException;
 import java.nio.channels.CancelledKeyException;
@@ -165,7 +165,8 @@ class AsyncReceiver implements Runnable{
 				try {
 					SocketChannel channel = sc.getChannel();
 					if( channel != null ){
-						channel.register(pool.selector, option, sc);
+						//channel.register(pool.selector, option, sc);
+						pool.registe(channel, option, sc);
 						needReturnClient = false;
 					}
 				} catch (ClosedChannelException e) {
@@ -261,7 +262,7 @@ class AsyncReceiver implements Runnable{
 				
 					logger.info(this.generation+"SelectAt:" + (System.currentTimeMillis()-cycleStart) + ",robin:" + pool.getServerConfig().robinTime);
 				
-				int num = pool.selector.select(pool.getServerConfig().robinTime);
+				int num = pool.select(pool.getServerConfig().robinTime);
 				
 					logger.info(this.generation+"SelectEnd,KeyNum( num = )" + num + ",At:" + (System.currentTimeMillis()-cycleStart) );
 				
@@ -270,7 +271,7 @@ class AsyncReceiver implements Runnable{
 					continue;
 				}
 	
-				Set set = pool.selector.selectedKeys();
+				Set set = pool.selectedKeys();
 				Iterator it = set.iterator();
 				while( it.hasNext() ){
 					SelectionKey key = (SelectionKey)it.next();

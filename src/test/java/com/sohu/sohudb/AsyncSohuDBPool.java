@@ -1,9 +1,9 @@
 package com.sohu.sohudb;
 
 import lava.rt.aio.Request;
+import lava.rt.aio.async.AsyncGenericConnectionPool;
 import lava.rt.logging.Log;
 import lava.rt.logging.LogFactory;
-import lava.rt.pool.impl.AsyncGenericConnectionPool;
 
 public class AsyncSohuDBPool extends AsyncGenericConnectionPool {
 

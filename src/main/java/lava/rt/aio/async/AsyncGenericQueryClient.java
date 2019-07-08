@@ -4,19 +4,18 @@
  *  Created on 2006-09-23
  *   
  */
-package lava.rt.pool.impl;
+package lava.rt.aio.async;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.channels.DatagramChannel;
+import java.nio.channels.SocketChannel;
 
 import lava.rt.logging.Log;
 
 
-/**
- * cache���첽���ӿͻ���
- */
-public abstract class UdpGenericQueryClient {
+
+
+public abstract class AsyncGenericQueryClient {
 
 	public static final int STS_OPEN = 0;
 	public static final int STS_CONN = 1;
@@ -27,7 +26,7 @@ public abstract class UdpGenericQueryClient {
 	volatile Long time_connect = 0l;
 	volatile Long time_request = 0l;
 //	boolean needRequest = false;
-	volatile boolean requestSent = true;
+	boolean requestSent = true;
 	
 	public long getTime_connect() {
 		return time_connect;
@@ -46,7 +45,7 @@ public abstract class UdpGenericQueryClient {
 	}
 
 	public int getStatus(){
-		DatagramChannel channel;
+		SocketChannel channel;
 		boolean using;
 		synchronized( channelLock) {
 			channel = this.channel;
@@ -56,25 +55,27 @@ public abstract class UdpGenericQueryClient {
 				return STS_CLOS;
 			} else if( ! channel.isConnected() ){
 				return STS_OPEN;
+			} else if( channel.isConnectionPending() ){
+				return STS_CONN;
 			} else if( !using ){
 				return STS_FREE;
 			} else {
 				return STS_BUSY;
 			}
 	}
-	// ��¼��
-	private Log logger = getLogger();
+	
+	//private Log logger = getLogger();
 
 	private Object channelLock = new Object();
-	private volatile DatagramChannel channel = null;
-	protected UdpServerStatus serverStatus;
+	private volatile SocketChannel channel = null;
+	protected AsyncServerStatus serverStatus;
 	
-	protected volatile boolean using = false;
+	protected boolean using = false;
 	
-	// ���ӵ�����ֵ.����0��ʾ���ɿ�.
+	
 	protected int life = 0;
 	
-	private volatile UdpRequest request ;
+	private volatile AsyncRequest request ;
 	
 	public void setLife(int lf) {
 		this.life = lf;
@@ -84,11 +85,9 @@ public abstract class UdpGenericQueryClient {
 		return this.life;
 	}
 
-	/**
-	 * �ر�����
-	 */
-	public void close() {
-		DatagramChannel channel;
+	
+	final public void close() {
+		SocketChannel channel;
 		synchronized( channelLock ){
 			channel = this.channel;
 			this.channel = null;
@@ -97,7 +96,7 @@ public abstract class UdpGenericQueryClient {
 			try {
 				channel.close();
 			} catch (IOException e) {
-				logger.info(this);
+				//logger.debug(this, e);
 			}
 		}
 	}
@@ -118,6 +117,13 @@ public abstract class UdpGenericQueryClient {
 					&& channel.isRegistered()	 );
 		}
 	}
+	
+	public boolean isConnected(){
+		synchronized( channelLock ){
+			return ( channel != null 
+					&& channel.isConnected() );
+		}
+	}
 
 	public boolean isActive(){
 		synchronized( channelLock ){
@@ -127,8 +133,20 @@ public abstract class UdpGenericQueryClient {
 		}
 	}
 	
+	public boolean isConnectionPending(){
+		synchronized( channelLock ){
+			return ( channel != null 
+					&& channel.isConnectionPending() );
+		}
+		
+	}
+
+
 	/**
-	 * callback function, by Receiver
+	 * callback function, �����ӳص�Receiver�̵߳��ã�ÿ��ʵ�����ӳص�ʵ���߱���ʵ�ִ˷�����
+	 * ��һ����Ӧ���ݵĽ��ܹ����У��÷����ᱻ��ε��á�ʵ�ֽ�����д��Buffer�Ĺ��̡�
+	 * �������ӳ����಻����client�˵�Buffer����ʵ�ַ�ʽ�����Ա���ÿ��������������ɡ�
+	 * ����ע�⣺��Ҫ�����е����������
 	 * @return true  - if a complete reponse body has been received
 	 * @throws Exception  - IOException is thrown if there is any IO problem.
 	 *                      or NullPointerException for hell code.
@@ -142,10 +160,11 @@ public abstract class UdpGenericQueryClient {
 	 *  =0 request needn't to be sent
 	 *  <0 some Exception happeds, need reset
 	 */
-	public abstract int sendRequest() throws IOException, IllegalArgumentException;
+	public abstract int sendRequest() throws IOException;
 	/**
-	 * callback function, by Receiver
-	 * if a full response has been received, extract information from data, and return ture
+	 * callback function, �����ӳص�Receiver�̵߳��ã�ÿ��ʵ�����ӳص�ʵ���߱���ʵ�ִ˷�����
+	 * ��һ����Ӧ���ݽ��չ����У��÷����ᱻ��ε��ã�ʵ���߱���ÿ�ζ�Ҫ�����������Ѿ�������
+	 * �ǵĻ����ͷ���true�����򷵻�false��ͬʱע�⣬Buffer��������״̬�ģ���Ҫ���Ѿ����յ������ݸ��ǵ���
 	 * @return
 	 * @throws Exception
 	 */
@@ -153,15 +172,17 @@ public abstract class UdpGenericQueryClient {
 
 	/**
 	 * callback function, by receiver or sender, if some Exceptions thrown.
+	 * client���ͷź󱻵��ã�����ִ������������Ա���һ�������á�һ�������������롢���buffer�����������
 	 *
 	 */
 	public abstract void reset() throws IOException;
 	
 
 	public void connect(InetSocketAddress addr) throws IOException {
-		DatagramChannel channel = DatagramChannel.open(); 
+		SocketChannel channel = SocketChannel.open(); 
 		channel.configureBlocking(false);
 		channel.connect(addr);
+		channel.finishConnect();
 		
 		synchronized( channelLock ){
 			this.channel = channel;
@@ -169,12 +190,12 @@ public abstract class UdpGenericQueryClient {
 	}
 	protected abstract Log getLogger();
 
-	public UdpRequest getRequest() {
+	public AsyncRequest getRequest() {
 		return request;
 	}
 
 	
-	public void setRequest(UdpRequest request) {
+	public void setRequest(AsyncRequest request) {
 		this.request = request;
 	}
 
@@ -195,7 +216,7 @@ public abstract class UdpGenericQueryClient {
 		this.requestSent = needRequest;
 	}
 
-	public DatagramChannel getChannel() {
+	public SocketChannel getChannel() {
 		return channel;
 	}
 

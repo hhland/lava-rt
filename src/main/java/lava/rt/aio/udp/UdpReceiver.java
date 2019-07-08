@@ -2,7 +2,7 @@
  * ���ڽ��շ���������Ӧ����. ��鳬ʱ��ѯ, ע����channel, �����������.
  * @author liumingzhu
  */
-package lava.rt.pool.impl;
+package lava.rt.aio.udp;
 
 import java.io.IOException;
 import java.nio.channels.CancelledKeyException;
@@ -88,7 +88,8 @@ class UdpReceiver implements Runnable{
 				try {
 					DatagramChannel channel = sc.getChannel();
 					if( channel != null ){
-						channel.register(pool.selector, option, sc);
+						//channel.register(pool.selector, option, sc);
+						pool.registe(channel, option, sc);
 						needReturnClient = false;
 					}
 				} catch (ClosedChannelException e) {
@@ -184,7 +185,7 @@ class UdpReceiver implements Runnable{
 				
 					logger.info(this.generation+"SelectAt:" + (System.currentTimeMillis()-cycleStart) + ",robin:" + pool.serverConfig.robinTime);
 				
-				int num = pool.selector.select(pool.serverConfig.robinTime);
+				int num = pool.select(pool.serverConfig.robinTime);
 				
 					logger.info(this.generation+"SelectEnd,KeyNum( num = )" + num + ",At:" + (System.currentTimeMillis()-cycleStart) );
 				
@@ -193,7 +194,7 @@ class UdpReceiver implements Runnable{
 					continue;
 				}
 	
-				Set set = pool.selector.selectedKeys();
+				Set set = pool.selectedKeys();
 				Iterator it = set.iterator();
 				while( it.hasNext() ){
 					SelectionKey key = (SelectionKey)it.next();

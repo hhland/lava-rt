@@ -3,7 +3,7 @@ package com.sohu.sohudb;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import lava.rt.pool.impl.AsyncRequest;
+import lava.rt.aio.async.AsyncRequest;
 
 
 public class SohuDBRequest extends AsyncRequest {

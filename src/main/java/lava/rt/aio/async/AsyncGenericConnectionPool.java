@@ -1,5 +1,5 @@
 
-package lava.rt.pool.impl;
+package lava.rt.aio.async;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -7,6 +7,7 @@ import java.nio.channels.Selector;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 import java.util.regex.Pattern;
 
@@ -26,7 +27,7 @@ public abstract class AsyncGenericConnectionPool extends ConnectionPool {
    
     protected int                 inplaceConnectionLife    = 500;
 
-    Selector                      selector;
+    
 
     protected AsyncReceiver            recver;
     protected AsyncSender              sender;
@@ -58,7 +59,7 @@ public abstract class AsyncGenericConnectionPool extends ConnectionPool {
 
     public void init() throws Exception {
 
-        ArrayList servers = new ArrayList();
+        List<AsyncServerStatus> servers = new ArrayList<>();
 
         if (this.serverConfig.servers == null)
             throw new IllegalArgumentException("config is NULL");

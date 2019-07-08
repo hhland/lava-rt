@@ -1,4 +1,4 @@
-package lava.rt.pool.impl;
+package lava.rt.aio.async;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -348,7 +348,7 @@ public class AsyncServerStatus {
 					sc.requestSent(false);
 					request.time_enqueue();
 					pool.recver.queueChannel(sc);
-					pool.selector.wakeup();
+					pool.wakeup();
 					request.time_enqueue_end();
 					return 0;
 				}
@@ -402,7 +402,7 @@ public class AsyncServerStatus {
 					
 					request.time_enqueue();
 					pool.recver.queueChannel(sc);
-					pool.selector.wakeup();
+					pool.wakeup();
 					request.time_enqueue_end();
 				}
 

@@ -1,4 +1,4 @@
-package lava.rt.pool.impl;
+package lava.rt.aio.udp;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -305,7 +305,7 @@ public class UdpServerStatus {
 					
 					request.time_enqueue();
 					pool.recver.queueChannel(sc);
-					pool.selector.wakeup();
+					pool.wakeup();
 					request.time_enqueue_end();
 				}
 				request.setConnectionErrorStatus(0);	

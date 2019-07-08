@@ -1,7 +1,7 @@
 package com.sohu.sohudb;
 
-import lava.rt.pool.impl.AsyncClientFactory;
-import lava.rt.pool.impl.AsyncGenericQueryClient;
+import lava.rt.aio.async.AsyncClientFactory;
+import lava.rt.aio.async.AsyncGenericQueryClient;
 
 public class AsyncSohuDBClientFactory implements AsyncClientFactory {
 
@@ -9,4 +9,22 @@ public class AsyncSohuDBClientFactory implements AsyncClientFactory {
 		return new AsyncSohuDBClient();
 	}
 
+	
+	
+	
+	
+	public static void main(String[] args) throws Exception {
+		
+		AsyncSohuDBClientFactory factory=new AsyncSohuDBClientFactory();
+		
+		AsyncGenericQueryClient client=factory.newInstance();
+		
+		AsyncSohuDBPool pool=new AsyncSohuDBPool();
+		
+		pool.init();
+		
+		
+		
+	}
+	
 }

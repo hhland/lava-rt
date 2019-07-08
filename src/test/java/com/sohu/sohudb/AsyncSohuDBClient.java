@@ -6,9 +6,9 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.SocketChannel;
 
+import lava.rt.aio.async.AsyncGenericQueryClient;
 import lava.rt.logging.Log;
 import lava.rt.logging.LogFactory;
-import lava.rt.pool.impl.AsyncGenericQueryClient;
 
 
 

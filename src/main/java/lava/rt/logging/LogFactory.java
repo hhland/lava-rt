@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Stream;
 
-import lava.rt.pool.impl.AsyncServerStatus;
+import lava.rt.aio.async.AsyncServerStatus;
 
 public class LogFactory {
 

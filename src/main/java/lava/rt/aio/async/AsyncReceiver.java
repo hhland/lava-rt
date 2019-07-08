@@ -166,7 +166,7 @@ class AsyncReceiver implements Runnable{
 					SocketChannel channel = sc.getChannel();
 					if( channel != null ){
 						//channel.register(pool.selector, option, sc);
-						pool.registe(channel, option, sc);
+						pool.register(channel, option, sc);
 						needReturnClient = false;
 					}
 				} catch (ClosedChannelException e) {

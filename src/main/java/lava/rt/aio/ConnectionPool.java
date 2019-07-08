@@ -22,8 +22,8 @@ public abstract class ConnectionPool  {
 	}
    
 	
-	public  void  registe(AbstractSelectableChannel channel,int option,Object client) throws ClosedChannelException {
-		channel.register(selector, option, client);
+	public  SelectionKey  register(AbstractSelectableChannel channel,int option,Object client) throws ClosedChannelException {
+		return channel.register(selector, option, client);
 	}
 	
 	

@@ -1,35 +1,25 @@
 package lava.rt.aio.udp;
 
+import lava.rt.aio.Sender;
 import lava.rt.logging.Log;
 import lava.rt.logging.LogFactory;
 
-public class UdpSender implements Runnable{
+public class UdpSender extends Sender<UdpRequest>{
 
 	private static final Log log = LogFactory.SYSTEM.getLog(UdpSender.class);
 	
-	private String generation = "(ThreadErr)"; 
+	
 	private volatile Thread _thread = null;
 	UdpGenericConnectionPool pool;
 	
-	private long yieldTime = 50;
-	private long minSleepTime = 500;
-	private long maxSleepTime = 1200000l;
-	private long sleepTime;
+	
 	
 	private long requestCount = 0;
 	private Object requestCountLock = new Object();
 	
 	private volatile boolean needRestart = false;
 	
-	private static int GENERATION = 0;
-	private static Object GENERATION_LOCK = new Object();
-	private static int newGeneration(){
-		int ret = 0;
-		synchronized( GENERATION_LOCK ){
-			ret = ++ GENERATION;
-		}
-		return ret;
-	}
+	
 	
 	
 	UdpSender( UdpGenericConnectionPool sc ){
@@ -75,16 +65,6 @@ public class UdpSender implements Runnable{
 		return requestCount;
 	}
 
-	/**
-	 * �߳�����
-	 *
-	 */
-	public void startThread(){
-		sleepTime = minSleepTime;
-		this.generation = pool.serverConfig.name+"(Sender" + newGeneration() + ")";
-		_thread = new Thread(this, this.generation);
-		_thread.start();
-	}
 	/**
 	 * �߳�ֹͣ
 	 * *ע��* ����stopThread������ζ���߳�����ֹͣ
@@ -217,7 +197,7 @@ public class UdpSender implements Runnable{
 	 * @param request
 	 * @return
 	 */
-	int senderSendRequest( UdpRequest request ){
+	public int sendRequest( UdpRequest request ){
 		
 		UdpServerStatus ss = request.getServer();
 		
@@ -266,6 +246,12 @@ public class UdpSender implements Runnable{
 
 	public void setYieldTime(long yieldTime) {
 		this.yieldTime = yieldTime;
+	}
+
+	@Override
+	protected String getServerConfigName() {
+		// TODO Auto-generated method stub
+		return this.pool.serverConfig.name;
 	}
 	
 }

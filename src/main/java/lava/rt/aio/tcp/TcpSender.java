@@ -1,38 +1,27 @@
-package lava.rt.aio.async;
+package lava.rt.aio.tcp;
 
+import lava.rt.aio.Sender;
 import lava.rt.logging.Log;
 import lava.rt.logging.LogFactory;
 
-class AsyncSender implements Runnable{
+class TcpSender extends Sender<TcpRequest>{
 
-	private static final Log log = LogFactory.SYSTEM.getLog(AsyncSender.class);
+	private static final Log log = LogFactory.SYSTEM.getLog(TcpSender.class);
 	
-	private String generation = "(ThreadErr)"; 
-	private volatile Thread _thread = null;
-	AsyncGenericConnectionPool pool;
+
+	TcpGenericConnectionPool pool;
 	
-	private long yieldTime = 50;
-	private long minSleepTime = 500;
-	private long maxSleepTime = 1200000l;
-	private long sleepTime;
+	
 	
 	private long requestCount = 0;
 	private Object requestCountLock = new Object();
 	
 	private boolean needRestart = false;
 	
-	private static int GENERATION = 0;
-	private static Object GENERATION_LOCK = new Object();
-	private static int newGeneration(){
-		int ret = 0;
-		synchronized( GENERATION_LOCK ){
-			ret = ++ GENERATION;
-		}
-		return ret;
-	}
 	
 	
-	AsyncSender( AsyncGenericConnectionPool sc ){
+	
+	TcpSender( TcpGenericConnectionPool sc ){
 		this.pool = sc;
 	}
 	
@@ -75,24 +64,7 @@ class AsyncSender implements Runnable{
 		return requestCount;
 	}
 
-	/**
-	 * �߳�����
-	 *
-	 */
-	public void startThread(){
-		sleepTime = minSleepTime;
-		this.generation = pool.getServerConfig().name+"(Sender" + newGeneration() + ")";
-		_thread = new Thread(this, this.generation);
-		_thread.start();
-	}
-	/**
-	 * �߳�ֹͣ
-	 * *ע��* ����stopThread������ζ���߳�����ֹͣ
-	 *
-	 */
-	public void stopThread(){
-		_thread = null;
-	}
+	
 	
 	public void run() {
 		while (true) {
@@ -109,7 +81,7 @@ class AsyncSender implements Runnable{
 			boolean doneSomething = false;
 			do{
 				
-				AsyncServerStatus[] sss = null;
+				TcpServerStatus[] sss = null;
 				sss = pool.getAllStatus();
 				if (sss == null) {
 					break;
@@ -120,7 +92,7 @@ class AsyncSender implements Runnable{
 					
 						log.info(generation + "CheckServer:"+i+" ,time:"+now);
 					
-					AsyncServerStatus ss = sss[i];
+					TcpServerStatus ss = sss[i];
 					if (ss == null){
 						
 							log.info(generation + "CheckServer:"+i+",ServerStatus is NULL, toContinue");
@@ -218,9 +190,9 @@ class AsyncSender implements Runnable{
 	 * @param request
 	 * @return
 	 */
-	int senderSendRequest( AsyncRequest request){
+	public int sendRequest( TcpRequest request){
 		
-		AsyncServerStatus ss = request.getServer();
+		TcpServerStatus ss = request.getServer();
 		
 		assert( ss != null );
 		
@@ -267,6 +239,12 @@ class AsyncSender implements Runnable{
 
 	public void setYieldTime(long yieldTime) {
 		this.yieldTime = yieldTime;
+	}
+
+	@Override
+	protected String getServerConfigName() {
+		// TODO Auto-generated method stub
+		return this.pool.getServerConfig().name;
 	}
 	
 }

@@ -1,15 +1,15 @@
-package lava.rt.aio.async;
+package lava.rt.aio.tcp;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-class AsyncChecker implements Runnable {
+class TcpChecker implements Runnable {
 
-	protected AsyncGenericConnectionPool pool = null;
+	protected TcpGenericConnectionPool pool = null;
 	protected Thread _thread = null;
 	protected Object _threadLock = new Object();
 	
-	protected AsyncChecker(AsyncGenericConnectionPool pool){
+	protected TcpChecker(TcpGenericConnectionPool pool){
 		this.pool = pool;
 	}
 	
@@ -39,7 +39,7 @@ class AsyncChecker implements Runnable {
 				sb.append(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
 				sb.append("--\t\t\t");
 				
-				AsyncServerStatus[] sss = this.pool.getAllStatus();
+				TcpServerStatus[] sss = this.pool.getAllStatus();
 				if( sss == null ) break;
 				
 				int liveServers = 0;
@@ -50,7 +50,7 @@ class AsyncChecker implements Runnable {
 				int hasFreeServer = 0; 
 				for (int i = 0; i < sss.length; i++) {
 					
-					AsyncServerStatus ss = sss[i]; 
+					TcpServerStatus ss = sss[i]; 
 					ss.statusLog(sb);
 					if (ss != null && ss.isServerAlive()){
 						if (ss.getServerAvgTime() > 0){
@@ -87,7 +87,7 @@ class AsyncChecker implements Runnable {
                 // System.out.println("freeServer num:"+hasFreeServer);
 					
 				for (int i = 0; i < sss.length; i++) {
-					AsyncServerStatus ss = sss[i]; 
+					TcpServerStatus ss = sss[i]; 
 					if (ss != null){
 						ss.shouldCloneFlag = shouldClone;
 					}
@@ -96,7 +96,7 @@ class AsyncChecker implements Runnable {
 				if (avgTime > 0){
 					for (int i = 0; i < sss.length; i++) {
 						//���Ŀǰ��Ϊƽ��ʱ������������Ļ���״̬
-						AsyncServerStatus ss = sss[i]; 
+						TcpServerStatus ss = sss[i]; 
 						if (ss != null && ss.longRequestDead){
 							if (ss.getServerAvgTime() < pool.getServerConfig().getMaxResponseTime() || ss.getServerAvgTime()/avgTime < pool.getServerConfig().getMaxResponseRadio()){
 								//debug bart
@@ -131,13 +131,13 @@ class AsyncChecker implements Runnable {
 	/**
 	 * @return the pool
 	 */
-	public AsyncGenericConnectionPool getPool() {
+	public TcpGenericConnectionPool getPool() {
 		return pool;
 	}
 	/**
 	 * @param pool the pool to set
 	 */
-	public void setPool(AsyncGenericConnectionPool pool) {
+	public void setPool(TcpGenericConnectionPool pool) {
 		this.pool = pool;
 	}
 }

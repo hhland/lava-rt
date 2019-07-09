@@ -4,7 +4,7 @@
  *  Created on 2006-09-23
  *   
  */
-package lava.rt.aio.async;
+package lava.rt.aio.tcp;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -15,7 +15,7 @@ import lava.rt.logging.Log;
 
 
 
-public abstract class AsyncGenericQueryClient {
+public abstract class TcpGenericQueryClient {
 
 	public static final int STS_OPEN = 0;
 	public static final int STS_CONN = 1;
@@ -68,14 +68,14 @@ public abstract class AsyncGenericQueryClient {
 
 	private Object channelLock = new Object();
 	private volatile SocketChannel channel = null;
-	protected AsyncServerStatus serverStatus;
+	protected TcpServerStatus serverStatus;
 	
 	protected boolean using = false;
 	
 	
 	protected int life = 0;
 	
-	private volatile AsyncRequest request ;
+	private volatile TcpRequest request ;
 	
 	public void setLife(int lf) {
 		this.life = lf;
@@ -190,12 +190,12 @@ public abstract class AsyncGenericQueryClient {
 	}
 	protected abstract Log getLogger();
 
-	public AsyncRequest getRequest() {
+	public TcpRequest getRequest() {
 		return request;
 	}
 
 	
-	public void setRequest(AsyncRequest request) {
+	public void setRequest(TcpRequest request) {
 		this.request = request;
 	}
 

@@ -1,5 +1,5 @@
 
-package lava.rt.aio.async;
+package lava.rt.aio.tcp;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -17,40 +17,40 @@ import lava.rt.logging.Log;
 
 
 
-public abstract class AsyncGenericConnectionPool extends ConnectionPool {
+public abstract class TcpGenericConnectionPool extends ConnectionPool<TcpRequest> {
 
     // / random
     protected static final Random random                   = new Random();
 
     
-    protected AsyncServerStatus[]      status;
+    protected TcpServerStatus[]      status;
    
     protected int                 inplaceConnectionLife    = 500;
 
     
 
-    protected AsyncReceiver            recver;
-    protected AsyncSender              sender;
-    protected AsyncChecker             checker;
+    protected TcpReceiver            recver;
+    protected TcpSender              sender;
+    protected TcpChecker             checker;
 
     protected Object              recverLock               = new Object();
     protected Object              senderLock               = new Object();
 
-    protected AsyncClientFactory  factory;
+    protected TcpClientFactory  factory;
 
     protected ServerConfig serverConfig=new ServerConfig();
     
     private boolean               isAutoSwitchToNextServer = true;
 
     
-    protected AsyncGenericConnectionPool(AsyncClientFactory factory,ServerConfig serverConfig) {
+    protected TcpGenericConnectionPool(TcpClientFactory factory,ServerConfig serverConfig) {
         this.factory = factory;
         this.serverConfig=serverConfig;
         
         
     }
    
-    protected AsyncGenericConnectionPool(AsyncClientFactory factory, String name) {
+    protected TcpGenericConnectionPool(TcpClientFactory factory, String name) {
         this.factory = factory;
         
         this.serverConfig.name = name;
@@ -59,7 +59,7 @@ public abstract class AsyncGenericConnectionPool extends ConnectionPool {
 
     public void init() throws Exception {
 
-        List<AsyncServerStatus> servers = new ArrayList<>();
+        List<TcpServerStatus> servers = new ArrayList<>();
 
         if (this.serverConfig.servers == null)
             throw new IllegalArgumentException("config is NULL");
@@ -67,24 +67,24 @@ public abstract class AsyncGenericConnectionPool extends ConnectionPool {
         String[] list = pat.split(this.serverConfig.servers);
 
         for (int i = 0; i < list.length; i++) {
-            AsyncServerStatus ss = new AsyncServerStatus(list[i], this);
+            TcpServerStatus ss = new TcpServerStatus(list[i], this);
             servers.add(servers.size(), ss);
         }
 
-        AsyncServerStatus[] serverStatus = (AsyncServerStatus[]) servers.toArray(new AsyncServerStatus[servers.size()]);
+        TcpServerStatus[] serverStatus = (TcpServerStatus[]) servers.toArray(new TcpServerStatus[servers.size()]);
 
         selector = Selector.open();
 
         this.status = serverStatus;
 
-        recver = new AsyncReceiver(this);
-        sender = new AsyncSender(this);
+        recver = new TcpReceiver(this);
+        sender = new TcpSender(this);
 
         recver.startThread();
         sender.startThread();
 
         if (this.serverConfig.maxResponseTime > 0) {
-            checker = new AsyncChecker(this);
+            checker = new TcpChecker(this);
             checker.startThread();
         }
     }
@@ -96,7 +96,7 @@ public abstract class AsyncGenericConnectionPool extends ConnectionPool {
      */
     protected abstract Log getLogger();
 
-    public int sendRequest(AsyncRequest request) {
+    public int sendRequest(TcpRequest request) {
 
         if (request == null) {
             return -1;
@@ -110,14 +110,14 @@ public abstract class AsyncGenericConnectionPool extends ConnectionPool {
         int serverCount = this.getServerIdCount();
         int ret = request.getServerId(serverCount);
 
-        if (!isServerAvaliable(ret) && request.clonableRequest && request.connectType == AsyncRequest.NORMAL_REQUEST
+        if (!isServerAvaliable(ret) && request.clonableRequest && request.connectType == TcpRequest.NORMAL_REQUEST
                 && isServerShouldRerty(ret)) {
             // debug bart
             System.out.println("[pool " + request.ruid + "]Retry server " + getStatus(ret).serverInfo);
             
-            AsyncRequest req = request.clone();
-            req.connectType = AsyncRequest.RETRY_REQUEST;
-            AsyncServerStatus ss = getStatus(ret);
+            TcpRequest req = request.clone();
+            req.connectType = TcpRequest.RETRY_REQUEST;
+            TcpServerStatus ss = getStatus(ret);
             if (ss != null) {
                 ss.retryCount++;
             }
@@ -125,15 +125,15 @@ public abstract class AsyncGenericConnectionPool extends ConnectionPool {
         }
 
         
-        if (!isServerAvaliable(ret) && request.connectType == AsyncRequest.NORMAL_REQUEST && !isAutoSwitchToNextServer) {
+        if (!isServerAvaliable(ret) && request.connectType == TcpRequest.NORMAL_REQUEST && !isAutoSwitchToNextServer) {
             request.serverDown("No server available, and no alternatives will be picked");
             return -1;
         }
 
         
-        if (request.connectType == AsyncRequest.SHADOW_NORMAL_REQUEST
-                || request.connectType == AsyncRequest.SHADOW_QUEUE_REQUEST ||
-                (!isServerAvaliable(ret) && request.connectType != AsyncRequest.RETRY_REQUEST)) {
+        if (request.connectType == TcpRequest.SHADOW_NORMAL_REQUEST
+                || request.connectType == TcpRequest.SHADOW_QUEUE_REQUEST ||
+                (!isServerAvaliable(ret) && request.connectType != TcpRequest.RETRY_REQUEST)) {
 
             // System.out.println("server is not avaliable");
             int avaliableServerCount = 0;
@@ -144,7 +144,7 @@ public abstract class AsyncGenericConnectionPool extends ConnectionPool {
             }
 
             // ����Ӱ�����󣬲��ܷ��͸�����
-            if ((request.connectType == AsyncRequest.SHADOW_NORMAL_REQUEST || request.connectType == AsyncRequest.SHADOW_QUEUE_REQUEST)
+            if ((request.connectType == TcpRequest.SHADOW_NORMAL_REQUEST || request.connectType == TcpRequest.SHADOW_QUEUE_REQUEST)
                     && isServerAvaliable(ret)) {
                 avaliableServerCount--;
             }
@@ -190,7 +190,7 @@ public abstract class AsyncGenericConnectionPool extends ConnectionPool {
             return -1;
         }
 
-        AsyncServerStatus ss = getStatus(serverId);
+        TcpServerStatus ss = getStatus(serverId);
 
         if (ss == null) {
             request.serverDown("���ܻ�ȡserver״̬");
@@ -200,7 +200,7 @@ public abstract class AsyncGenericConnectionPool extends ConnectionPool {
         request.setServer(ss);
         request.setServerInfo(ss.getServerInfo());
         request.queueSend();
-        sender.senderSendRequest(request);
+        sender.sendRequest(request);
 
         return 0;
     }
@@ -234,7 +234,7 @@ public abstract class AsyncGenericConnectionPool extends ConnectionPool {
      * @return �ɹ����
      */
     public boolean holdServer(int key, boolean action) {
-        AsyncServerStatus ss = null;
+        TcpServerStatus ss = null;
         if (status != null && key >= 0 && key < status.length) {
             ss = status[key];
         }
@@ -302,7 +302,7 @@ public abstract class AsyncGenericConnectionPool extends ConnectionPool {
 
     private static Pattern pat = Pattern.compile("\\s+");
 
-    public AsyncServerStatus[] getAllStatus() {
+    public TcpServerStatus[] getAllStatus() {
         return status;
     }
 
@@ -312,7 +312,7 @@ public abstract class AsyncGenericConnectionPool extends ConnectionPool {
      * @param i
      * @return ���ָ����ŵķ�����������,�򷵻�null
      */
-    public AsyncServerStatus getStatus(int i) {
+    public TcpServerStatus getStatus(int i) {
         if (status != null
                 && i >= 0
                 && i < status.length) {
@@ -324,7 +324,7 @@ public abstract class AsyncGenericConnectionPool extends ConnectionPool {
     }
 
     public boolean isServerShouldRerty(int i) {
-        AsyncServerStatus ss = null;
+        TcpServerStatus ss = null;
         if (status != null && i >= 0 && i < status.length) {
             ss = status[i];
         }
@@ -336,7 +336,7 @@ public abstract class AsyncGenericConnectionPool extends ConnectionPool {
     }
 
     public boolean isServerAvaliable(int i) {
-        AsyncServerStatus ss = null;
+        TcpServerStatus ss = null;
         if (status != null && i >= 0 && i < status.length) {
             ss = status[i];
         }
@@ -408,11 +408,11 @@ public abstract class AsyncGenericConnectionPool extends ConnectionPool {
         sender = null;
         recver.stopThread();
         recver = null;
-        AsyncServerStatus[] temp = status;
+        TcpServerStatus[] temp = status;
         status = null;
         if (temp != null) {
             for (int i = 0; i < temp.length; i++) {
-                AsyncServerStatus ss = temp[i];
+                TcpServerStatus ss = temp[i];
                 if (ss == null)
                     continue;
                 ss.destroy();

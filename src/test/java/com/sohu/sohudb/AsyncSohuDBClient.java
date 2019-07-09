@@ -6,13 +6,13 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.SocketChannel;
 
-import lava.rt.aio.async.AsyncGenericQueryClient;
+import lava.rt.aio.tcp.TcpGenericQueryClient;
 import lava.rt.logging.Log;
 import lava.rt.logging.LogFactory;
 
 
 
-public class AsyncSohuDBClient extends AsyncGenericQueryClient {
+public class AsyncSohuDBClient extends TcpGenericQueryClient {
 	
 	private static byte[] zeroData = {};
 	

@@ -1,4 +1,4 @@
-package lava.rt.aio.async;
+package lava.rt.aio.tcp;
 
 import java.lang.ref.WeakReference;
 
@@ -6,7 +6,7 @@ import lava.rt.aio.Request;
 
 
 
-public abstract class AsyncRequest implements Request{
+public abstract class TcpRequest implements Request{
 	volatile long requestId;
 	volatile String serverInfo; 
 	protected volatile String ruid = "";   //uniq id per request
@@ -50,13 +50,13 @@ public abstract class AsyncRequest implements Request{
 	/**
 	 * Ϊclone֮���object׼��������request, ��request������¼��Ҫ���͵ĸ�����Ϣ
 	 */
-	volatile public AsyncRequest clonedFrom = null;
-	volatile public AsyncRequest clonedTo = null;
-	volatile public AsyncRequest actualRequest = null;
+	volatile public TcpRequest clonedFrom = null;
+	volatile public TcpRequest clonedTo = null;
+	volatile public TcpRequest actualRequest = null;
 	volatile public boolean clonableRequest = false;
 	
 	//ʵ�ʴ��������
-	public AsyncRequest timedRequest(){
+	public TcpRequest timedRequest(){
 		if (actualRequest != null){
 			return actualRequest;
 		}
@@ -72,8 +72,8 @@ public abstract class AsyncRequest implements Request{
 		return clonableRequest&&(clonedFrom!=null||clonedTo!=null);
 	}
 	
-	public AsyncRequest clone(){
-		AsyncRequest clone = new AsyncRequest() {
+	public TcpRequest clone(){
+		TcpRequest clone = new TcpRequest() {
 			
 			@Override
 			public boolean isValid() {
@@ -100,7 +100,7 @@ public abstract class AsyncRequest implements Request{
 	/**
 	 * �������
 	 */
-	volatile AsyncServerStatus server = null;
+	volatile TcpServerStatus server = null;
 	
 	@SuppressWarnings("rawtypes")
 	WeakReference ref;
@@ -210,7 +210,7 @@ public abstract class AsyncRequest implements Request{
 		if (!clonableRequest&&this.clonedFrom==null){
 			return;
 		}
-		AsyncServerStatus ss = this.server;
+		TcpServerStatus ss = this.server;
 		if (ss != null){
 			ss.mark(this);
 			//debug bart
@@ -376,10 +376,10 @@ public abstract class AsyncRequest implements Request{
 				);
 
 	}
-	public final AsyncServerStatus getServer() {
+	public final TcpServerStatus getServer() {
 		return server;
 	}
-	public final void setServer(AsyncServerStatus server) {
+	public final void setServer(TcpServerStatus server) {
 		this.server = server;
 	}
 	public final void timeIoend(){

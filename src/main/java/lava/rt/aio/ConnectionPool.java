@@ -8,9 +8,10 @@ import java.nio.channels.Selector;
 import java.nio.channels.spi.AbstractSelectableChannel;
 import java.util.Set;
 
-import lava.rt.aio.async.AsyncGenericQueryClient;
+import lava.rt.aio.tcp.TcpGenericQueryClient;
+import lava.rt.aio.udp.UdpRequest;
 
-public abstract class ConnectionPool  {
+public abstract class ConnectionPool<R>  {
 
 	
 	protected Selector selector;
@@ -36,4 +37,7 @@ public abstract class ConnectionPool  {
 	public Set<SelectionKey> selectedKeys() {
 		return selector.selectedKeys();
 	}
+	
+	
+	abstract public int sendRequest(R request );
 }

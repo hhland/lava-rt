@@ -16,51 +16,30 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
 
+import lava.rt.aio.Receiver;
 import lava.rt.logging.Log;
 import lava.rt.logging.LogFactory;
 
 
-class UdpReceiver implements Runnable{
+class UdpReceiver extends Receiver<UdpGenericQueryClient>{
 	
 	private static final Log logger = LogFactory.SYSTEM.getLog( UdpReceiver.class);
 
-	String generation = "(RecverErr)";
+	
 	volatile Thread _thread;
-	private LinkedList selectionKeyQueue = new LinkedList();
+	
 	UdpGenericConnectionPool pool ;
 	
-	private static int GENERATION = 0;
-	private static Object GENERATION_LOCK = new Object();
-	private static int newGeneration(){
-		int ret = 0;
-		synchronized( GENERATION_LOCK ){
-			ret = ++ GENERATION;
-		}
-		return ret;
-	}
+	
 	
 	UdpReceiver(UdpGenericConnectionPool p){
 		this.pool = p;
-		this.generation = "(RecverErr)";
+		
 	}
 
-	void queueChannel(UdpGenericQueryClient obj){
-		synchronized( selectionKeyQueue){
-			selectionKeyQueue.offer( obj );
-		}
-		
-			logger.info(this.generation + "Add one Client to Busyqueue");
-		
-	}
 	
-	public void startThread(){
-		this.generation = this.pool.serverConfig.name + "(Recver" + newGeneration() + ")";
-		_thread = new Thread(this, this.generation );
-		_thread.start();
-	}
-	public void stopThread(){
-		_thread = null;
-	}
+	
+	
 
 	private void registerNewChannel(){
 		long start = System.currentTimeMillis();
@@ -273,5 +252,13 @@ class UdpReceiver implements Runnable{
 				e.printStackTrace();
 			}
 		}
+	}
+
+
+
+	@Override
+	protected String getServerConfigName() {
+		// TODO Auto-generated method stub
+		return pool.serverConfig.name;
 	}
 }

@@ -1,11 +1,11 @@
 package com.sohu.sohudb;
 
-import lava.rt.aio.async.AsyncClientFactory;
-import lava.rt.aio.async.AsyncGenericQueryClient;
+import lava.rt.aio.tcp.TcpClientFactory;
+import lava.rt.aio.tcp.TcpGenericQueryClient;
 
-public class AsyncSohuDBClientFactory implements AsyncClientFactory {
+public class AsyncSohuDBClientFactory implements TcpClientFactory {
 
-	public AsyncGenericQueryClient newInstance() {
+	public TcpGenericQueryClient newInstance() {
 		return new AsyncSohuDBClient();
 	}
 
@@ -17,7 +17,7 @@ public class AsyncSohuDBClientFactory implements AsyncClientFactory {
 		
 		AsyncSohuDBClientFactory factory=new AsyncSohuDBClientFactory();
 		
-		AsyncGenericQueryClient client=factory.newInstance();
+		TcpGenericQueryClient client=factory.newInstance();
 		
 		AsyncSohuDBPool pool=new AsyncSohuDBPool();
 		

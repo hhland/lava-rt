@@ -3,10 +3,10 @@ package com.sohu.sohudb;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import lava.rt.aio.async.AsyncRequest;
+import lava.rt.aio.tcp.TcpRequest;
 
 
-public class SohuDBRequest extends AsyncRequest {
+public class SohuDBRequest extends TcpRequest {
 
 	private volatile byte[] key;
 	private volatile int keyLen = -1;

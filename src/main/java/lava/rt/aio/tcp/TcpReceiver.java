@@ -1,4 +1,4 @@
-package lava.rt.aio.async;
+package lava.rt.aio.tcp;
 
 import java.io.IOException;
 import java.nio.channels.CancelledKeyException;
@@ -12,53 +12,31 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
 
+import lava.rt.aio.Receiver;
 import lava.rt.logging.Log;
 import lava.rt.logging.LogFactory;
 
 
 
 
-class AsyncReceiver implements Runnable{
+class TcpReceiver extends Receiver<TcpGenericQueryClient>{
 	
-	private static final Log logger = LogFactory.SYSTEM.getLog( AsyncReceiver.class);
+	private static final Log logger = LogFactory.SYSTEM.getLog( TcpReceiver.class);
 
-	String generation = "(RecverErr)";
-	volatile Thread _thread;
-	private LinkedList selectionKeyQueue = new LinkedList();
-	AsyncGenericConnectionPool pool ;
+
 	
-	private static int GENERATION = 0;
-	private static Object GENERATION_LOCK = new Object();
-	private static int newGeneration(){
-		int ret = 0;
-		synchronized( GENERATION_LOCK ){
-			ret = ++ GENERATION;
-		}
-		return ret;
-	}
+	TcpGenericConnectionPool pool ;
 	
-	AsyncReceiver(AsyncGenericConnectionPool p){
+	
+	
+	TcpReceiver(TcpGenericConnectionPool p){
 		this.pool = p;
 		this.generation = "(RecverErr)";
 	}
 
-	void queueChannel(AsyncGenericQueryClient obj){
-		synchronized( selectionKeyQueue){
-			selectionKeyQueue.offer( obj );
-		}
-		
-			logger.info(this.generation + "Add one Client to Busyqueue");
-		
-	}
 	
-	public void startThread(){
-		this.generation = this.pool.getServerConfig().name + "(Recver" + newGeneration() + ")";
-		_thread = new Thread(this, this.generation );
-		_thread.start();
-	}
-	public void stopThread(){
-		_thread = null;
-	}
+	
+	
 
 	/**
 	 * ��������
@@ -67,9 +45,9 @@ class AsyncReceiver implements Runnable{
 	 *   0 ����Ƿ�, ֪ͨuser-thread. �黹���ӱ���
 	 *  
 	 */
-	private int sendRequest(AsyncGenericQueryClient sc){
+	private int sendRequest(TcpGenericQueryClient sc){
 		int status = -1;
-		AsyncRequest request = sc.getRequest();
+		TcpRequest request = sc.getRequest();
 		
 		if( request == null ) 
 			return 0;
@@ -125,11 +103,11 @@ class AsyncReceiver implements Runnable{
 		synchronized( selectionKeyQueue ){
 			do {
 
-				AsyncGenericQueryClient sc = (AsyncGenericQueryClient)selectionKeyQueue.poll();
+				TcpGenericQueryClient sc = (TcpGenericQueryClient)selectionKeyQueue.poll();
 				
 				if( sc == null ) break;
 				
-				AsyncRequest request = sc.getRequest();
+				TcpRequest request = sc.getRequest();
 				
 				if( request == null ) break;
 				
@@ -227,7 +205,7 @@ class AsyncReceiver implements Runnable{
 		
 			logger.info(this.generation+"CheckTimeout:" + start );
 		
-		AsyncServerStatus[] sss = this.pool.getAllStatus();
+		TcpServerStatus[] sss = this.pool.getAllStatus();
 		if( sss != null ){
 			for( int i =0; i<sss.length; i++ ){
 				long tstart = System.currentTimeMillis();
@@ -281,7 +259,7 @@ class AsyncReceiver implements Runnable{
 							
 								logger.info(this.generation+"ReadKey:" + (System.currentTimeMillis()-cycleStart) );
 							
-							AsyncGenericQueryClient conn = (AsyncGenericQueryClient )key.attachment();
+							TcpGenericQueryClient conn = (TcpGenericQueryClient )key.attachment();
 							
 							try{
 								int status = conn.handleInput();
@@ -299,7 +277,7 @@ class AsyncReceiver implements Runnable{
 								} else if( status < 0 ) {
 									
 										// socket Closed by Server
-									AsyncRequest request = conn.getRequest();
+									TcpRequest request = conn.getRequest();
 									if( request != null ){
 										// һ����-1�������ѹ��Է�����������չ��
 										// < -50 ��ʾ���Զ���Ĵ����룬ͨ�����Ƿ������˵���Ӧ���Ϸ�
@@ -323,7 +301,7 @@ class AsyncReceiver implements Runnable{
 							} catch ( Exception e){
 								key.cancel();
 								conn.serverStatus.sendError();
-								AsyncRequest request = conn.getRequest();
+								TcpRequest request = conn.getRequest();
 								if( request != null ){
 									request.serverDown("δ֪�쳣"+e.getMessage());
 								}
@@ -341,9 +319,9 @@ class AsyncReceiver implements Runnable{
 								logger.info(this.generation+"ConnKey:" + (System.currentTimeMillis()-cycleStart) );
 							
 		
-							AsyncGenericQueryClient conn = (AsyncGenericQueryClient )key.attachment();
+							TcpGenericQueryClient conn = (TcpGenericQueryClient )key.attachment();
 							
-							AsyncRequest request = conn.getRequest();
+							TcpRequest request = conn.getRequest();
 							if( request != null ){
 								request.time_connect_end();
 							}
@@ -410,5 +388,15 @@ class AsyncReceiver implements Runnable{
 				e.printStackTrace();
 			}
 		}
+	}
+
+
+
+
+
+	@Override
+	protected String getServerConfigName() {
+		// TODO Auto-generated method stub
+		return pool.getServerConfig().name;
 	}
 }

@@ -26,7 +26,7 @@ import lava.rt.logging.Log;
  * @author LiuMingzhu (mingzhuliu@sohu-inc.com)
  *
  */
-public abstract class UdpGenericConnectionPool extends ConnectionPool {
+public abstract class UdpGenericConnectionPool extends ConnectionPool<UdpRequest> {
 
 	/// random
 	protected static final Random random = new Random();
@@ -197,7 +197,7 @@ public abstract class UdpGenericConnectionPool extends ConnectionPool {
 		request.setServer(ss);
 		request.setServerInfo( ss.getServerInfo() );
 		request.queueSend();
-		sender.senderSendRequest(request);
+		sender.sendRequest(request);
 
 		return 0;
 		

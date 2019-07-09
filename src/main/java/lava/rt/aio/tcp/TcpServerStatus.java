@@ -1,4 +1,4 @@
-package lava.rt.aio.async;
+package lava.rt.aio.tcp;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -11,9 +11,9 @@ import lava.rt.logging.Log;
 import lava.rt.logging.LogFactory;
 
 
-public class AsyncServerStatus {
+public class TcpServerStatus {
 	
-	private static Log logger = LogFactory.SYSTEM.getLog(AsyncServerStatus.class);
+	private static Log logger = LogFactory.SYSTEM.getLog(TcpServerStatus.class);
 
 	Object key;
 	
@@ -48,13 +48,13 @@ public class AsyncServerStatus {
 	ArrayList allClients;
 	
 	
-	AsyncGenericConnectionPool pool;
+	TcpGenericConnectionPool pool;
 	
 	/**
 	 * ���캯��
 	 *
 	 */
-	public AsyncServerStatus() {
+	public TcpServerStatus() {
 	}
 
 	/**
@@ -64,7 +64,7 @@ public class AsyncServerStatus {
 	public void checkTimeout (){
 		long now = System.currentTimeMillis();
 		for( int i=0; i< allClients.size();i++){
-			AsyncGenericQueryClient c = (AsyncGenericQueryClient)allClients.get(i);
+			TcpGenericQueryClient c = (TcpGenericQueryClient)allClients.get(i);
 			
 			do{
 				if( !c.isValid() ) break;
@@ -104,7 +104,7 @@ public class AsyncServerStatus {
 				
 				
 				
-				AsyncRequest request = c.getRequest();			
+				TcpRequest request = c.getRequest();			
 				if (isConnectTimeout || isSocketFailTimeout)
 				{
 					//�����һ������ʧ���˵�����
@@ -138,8 +138,8 @@ public class AsyncServerStatus {
 						if (shouldClone()){
 							System.out.println("[pool "+request.ruid+"]Short timeout is trigged for "+request.getServerInfo());
 							//��request����clone��������δ��clone
-							AsyncRequest request_cloned = request.clone();
-							request_cloned.connectType = AsyncRequest.SHADOW_NORMAL_REQUEST;
+							TcpRequest request_cloned = request.clone();
+							request_cloned.connectType = TcpRequest.SHADOW_NORMAL_REQUEST;
 							pool.sendRequest(request_cloned);
 						}
 					}
@@ -159,7 +159,7 @@ public class AsyncServerStatus {
 	 *   0 sent Successfully
 	 *   1 Server Busy
 	 */
-	int serverSendRequest(AsyncRequest request) {
+	int serverSendRequest(TcpRequest request) {
 		// ����������Ϸ���, �ͼ���ȴ�����.
 		boolean needQueue = false;
 		
@@ -196,7 +196,7 @@ public class AsyncServerStatus {
 	int innerSendRequest() {
 		// ����������Ϸ���, �ͼ���ȴ�����.
 		int sts;
-		AsyncRequest request = firstUserRequest();
+		TcpRequest request = firstUserRequest();
 		
 		if( request == null ) return 1;
 		
@@ -255,9 +255,9 @@ public class AsyncServerStatus {
 	 *   0 sent Successfully
 	 *   1 Server Busy
 	 */
-	int innerSendRequest(AsyncRequest request) {
+	int innerSendRequest(TcpRequest request) {
 		
-		if (!isServerAlive() && request.connectType != AsyncRequest.RETRY_REQUEST) {
+		if (!isServerAlive() && request.connectType != TcpRequest.RETRY_REQUEST) {
 			
 				logger.info("server is down, Don't waste Time");
 			
@@ -284,27 +284,27 @@ public class AsyncServerStatus {
 					LinkedList sendQueue = new LinkedList();
 					synchronized( waitQueue){
 						for( int i=0; i<waitQueue.size(); i++){
-							AsyncRequest req = (AsyncRequest)waitQueue.get(i);
+							TcpRequest req = (TcpRequest)waitQueue.get(i);
 							if (now - req.getStartTime() > pool.getServerConfig().getQueueShortTimeout()){
 								if (req.clonableRequest && req.clonedTo == null && req.clonedFrom == null){
 									System.out.println("[pool "+req.ruid+"]Short queue timeout is trigged for "+req.getServerInfo());
 									//��request����clone��������δ��clone
-									AsyncRequest request_cloned = req.clone();
-									request_cloned.connectType = AsyncRequest.SHADOW_QUEUE_REQUEST;
+									TcpRequest request_cloned = req.clone();
+									request_cloned.connectType = TcpRequest.SHADOW_QUEUE_REQUEST;
 									sendQueue.addLast(request_cloned);
 								}
 							}
 						}
 					}
 					for( int i=0; i<sendQueue.size(); i++){
-						AsyncRequest req = (AsyncRequest)sendQueue.get(i);
+						TcpRequest req = (TcpRequest)sendQueue.get(i);
 						pool.sendRequest(req);
 					}
 				}
 		}
 
 		do{
-			AsyncGenericQueryClient sc = removeFirstFreeClient();
+			TcpGenericQueryClient sc = removeFirstFreeClient();
 
 			if (sc == null){
 				
@@ -440,14 +440,14 @@ public class AsyncServerStatus {
 		return 1;
 	}
 	
-	private AsyncGenericQueryClient removeFirstFreeClient(){
-		AsyncGenericQueryClient client;
+	private TcpGenericQueryClient removeFirstFreeClient(){
+		TcpGenericQueryClient client;
 		synchronized( freeChannelList ){
 			if( freeChannelList.size() > 0 ){
 				
 					logger.info("Get One Client From " + freeChannelList.size());
 				
-				client = (AsyncGenericQueryClient)freeChannelList.removeFirst( );
+				client = (TcpGenericQueryClient)freeChannelList.removeFirst( );
 				client.using = true;
 				client.requestSent = false;
 			} else {
@@ -459,7 +459,7 @@ public class AsyncServerStatus {
 		}
 		return client;
 	}
-	void freeClient(AsyncGenericQueryClient client) {
+	void freeClient(TcpGenericQueryClient client) {
 		synchronized (freeChannelList) {
 			if (client.using) {
 				
@@ -475,20 +475,20 @@ public class AsyncServerStatus {
 		this.pool.sender.checkSenderThread();
 	}
 
-	private AsyncRequest firstUserRequest(){
+	private TcpRequest firstUserRequest(){
 		synchronized( waitQueue ){
 			if( waitQueue.isEmpty() ){
 				return null;
 			} else {
-				return (AsyncRequest)this.waitQueue.element();
+				return (TcpRequest)this.waitQueue.element();
 			}
 		}
 	}
 
-	private AsyncRequest removeFirstUserRequest(){
-		AsyncRequest client;
+	private TcpRequest removeFirstUserRequest(){
+		TcpRequest client;
 		synchronized( waitQueue ){
-			client = (AsyncRequest)waitQueue.removeFirst( );
+			client = (TcpRequest)waitQueue.removeFirst( );
 		}
 		
 			logger.info("Remove a request from the queue");
@@ -538,7 +538,7 @@ public class AsyncServerStatus {
 
 //	public ServerStatus(){}
 	
-	public AsyncServerStatus(String line, AsyncGenericConnectionPool pool ) throws IllegalArgumentException{
+	public TcpServerStatus(String line, TcpGenericConnectionPool pool ) throws IllegalArgumentException{
 		if( line == null ) throw new IllegalArgumentException("ServerStatus Null Line Parameter");
 		
 		line = line.trim();
@@ -576,7 +576,7 @@ public class AsyncServerStatus {
 		LinkedList deactiveChannelSet = new LinkedList();
 		for(int i=0;i<count;i++){
 			
-			AsyncGenericQueryClient ace = pool.factory.newInstance();
+			TcpGenericQueryClient ace = pool.factory.newInstance();
 			ace.serverStatus = this;
 //			SocketChannel socketChannel =null;
 //			ace.channel = socketChannel;
@@ -661,7 +661,7 @@ public class AsyncServerStatus {
 		this.addr = addr;
 	}
 
-	protected final int queueRequest(AsyncRequest request){
+	protected final int queueRequest(TcpRequest request){
 		request.setServerInfo( this.getServerInfo() );
 		synchronized(waitQueue){
 			waitQueue.addLast( request );
@@ -677,7 +677,7 @@ public class AsyncServerStatus {
 			sb.append( '\n' );
 
 			for( int i=0; i<waitQueue.size(); i++){
-				AsyncRequest req = (AsyncRequest)waitQueue.get(i);
+				TcpRequest req = (TcpRequest)waitQueue.get(i);
 				sb.append( req.dumpTimeStatus() );
 				sb.append('\n');
 			}
@@ -712,7 +712,7 @@ public class AsyncServerStatus {
 		
 		for( int i=0; i< this.allClients.size(); i++){
 			sb.append( '\t' );
-			AsyncGenericQueryClient ace = (AsyncGenericQueryClient)this.allClients.get(i);
+			TcpGenericQueryClient ace = (TcpGenericQueryClient)this.allClients.get(i);
 			sb.append( ace.getStatus() );
 			sb.append('\n');
 		}
@@ -749,7 +749,7 @@ public class AsyncServerStatus {
 		sb.append( '\t' );
 		
 		for( int i=0; i< this.allClients.size(); i++){
-			AsyncGenericQueryClient ace = (AsyncGenericQueryClient)this.allClients.get(i);
+			TcpGenericQueryClient ace = (TcpGenericQueryClient)this.allClients.get(i);
 			sb.append( ace.getStatus() );
 			sb.append( '.' );
 		}
@@ -763,7 +763,7 @@ public class AsyncServerStatus {
 	public void destroy(){
 		ArrayList allClients = this.allClients;
 		for( int i=0; allClients != null && i< allClients.size();i++){
-			AsyncGenericQueryClient c = (AsyncGenericQueryClient)allClients.get(i);
+			TcpGenericQueryClient c = (TcpGenericQueryClient)allClients.get(i);
 			c.close();
 		}
 	}
@@ -776,11 +776,11 @@ public class AsyncServerStatus {
 	protected int totalClone = 0;
 	protected Object markerLocker = new Object();
 	
-	protected void mark(AsyncRequest request){
+	protected void mark(TcpRequest request){
 		synchronized(markerLocker){
 			while(true){
 				//��������
-				if (request.connectType == AsyncRequest.RETRY_REQUEST){
+				if (request.connectType == TcpRequest.RETRY_REQUEST){
 					retryCount--;
 				}
 				//ʧ�ܵ����󲻽���ͳ��?
@@ -789,7 +789,7 @@ public class AsyncServerStatus {
 				//}
 				
 				//���MARKER_ARRAY_LENGTH�������б�clone��ȥ�ز�Ĵ���
-				boolean isClone = (request.clonedTo != null && request.clonedTo.connectType == AsyncRequest.SHADOW_NORMAL_REQUEST);
+				boolean isClone = (request.clonedTo != null && request.clonedTo.connectType == TcpRequest.SHADOW_NORMAL_REQUEST);
 				int marker_perarray = (int)(marker%MARKER_ARRAY_LENGTH);
 				if (isClone)
 					totalClone--;

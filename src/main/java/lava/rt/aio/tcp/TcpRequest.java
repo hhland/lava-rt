@@ -6,7 +6,7 @@ import lava.rt.aio.Request;
 
 
 
-public abstract class TcpRequest implements Request{
+public abstract class TcpRequest extends Request<TcpServerStatus>{
 	volatile long requestId;
 	volatile String serverInfo; 
 	protected volatile String ruid = "";   //uniq id per request
@@ -17,27 +17,7 @@ public abstract class TcpRequest implements Request{
 	public static final int SHADOW_QUEUE_REQUEST = -2;
 	
 	
-	// set by pool, to indicate time status 
-	protected volatile Long time_start = Long.valueOf(0l); // ���뷢��������е�ʱ��
 	
-	protected volatile Long time_enqueue = Long.valueOf(0l);
-	protected volatile Long time_enqueue_end = Long.valueOf(0l);
-	protected volatile Long time_outqueue = Long.valueOf(0l);
-	
-	protected volatile Long time_waitqueue = Long.valueOf(0l);
-	protected volatile Long time_outwaitqueue = Long.valueOf(0l);
-	
-	protected volatile Long time_connect = Long.valueOf(0l); // ��������
-	protected volatile Long time_connect_end = Long.valueOf(0l); // ���ӽ�����ʱ��( ������Ҫ�����������) 
-	protected volatile Long time_request = Long.valueOf(0l); // �����socket���ͳ�ȥ��ʱ��
-	protected volatile Long time_end = Long.valueOf(0l); // ��Ӧ������ȫ��ʱ��
-	protected volatile Long time_ioend = Long.valueOf(0l);
-	protected volatile Long endDumpTime = Long.valueOf(0l);
-	// set by user thread. to indicate time status
-	volatile Long cancelledTime = Long.valueOf(0l);
-	
-	protected volatile Long startLocktime=Long.valueOf(0l);
-	protected volatile Long endLocktime=Long.valueOf(0l);
 	
 	/**
 	 * ����������
@@ -97,10 +77,7 @@ public abstract class TcpRequest implements Request{
 		return clone;
 	}
 	
-	/**
-	 * �������
-	 */
-	volatile TcpServerStatus server = null;
+	
 	
 	@SuppressWarnings("rawtypes")
 	WeakReference ref;
@@ -333,17 +310,10 @@ public abstract class TcpRequest implements Request{
 		return this.requestId;
 	}
 
-	@Override
-	public final void setServerInfo(String info) {
-		this.serverInfo = info;
-	}
 
-	@Override
-	public final void setTime(long t) {
-		// dummy time��������ģ����ܸ�ֵ��
-	}
-	public abstract boolean isValid();
-	public abstract int getServerId(int total);
+	
+	
+	
 	public final long getCancelledTime() {
 		return cancelledTime;
 	}
@@ -376,57 +346,8 @@ public abstract class TcpRequest implements Request{
 				);
 
 	}
-	public final TcpServerStatus getServer() {
-		return server;
-	}
-	public final void setServer(TcpServerStatus server) {
-		this.server = server;
-	}
-	public final void timeIoend(){
-		this.time_ioend = System.currentTimeMillis();
-	}
-	public final long getIoTime(){
-		return getIoTime(0);
-	}
-	public final long getIoTime(long defaultValue){
-		if( time_request > 0 ){
-			if( time_ioend > 0 ){
-				return time_ioend - time_request;
-			} else {
-				return System.currentTimeMillis() - time_request;
-			}
-		} else {
-			return defaultValue;
-		}
-	}
-	public final long getConnectTime(){
-		return ((time_connect_end==0||time_connect==0)?0:(time_connect_end-time_connect));
-	}
-
-	public final void time_connect() {
-		this.time_connect = System.currentTimeMillis();
-	}
-
-	public final void time_enqueue() {
-		this.time_enqueue = System.currentTimeMillis();
-	}
-
-	public final void time_enqueue_end() {
-		this.time_enqueue_end = System.currentTimeMillis();
-	}
-
-	public final void time_outqueue() {
-		this.time_outqueue =System.currentTimeMillis();
-	}
-	public final void time_connect_end(){
-		this.time_connect_end = System.currentTimeMillis();
-	}
-	public final void time_waitqueue() {
-		this.time_waitqueue =System.currentTimeMillis();
-	}
-	public final void time_outwaitqueue(){
-		this.time_outwaitqueue = System.currentTimeMillis();
-	}
+	
+	
 	public final void setQueueTime(long t ){
 		
 	}
@@ -466,14 +387,7 @@ public abstract class TcpRequest implements Request{
 			return 0;
 		}
 	}
-	@Override
-	public final int getStatus() {
-		return status;
-	}
-	@Override
-	public final void setStatus(int status) {
-		this.status = status;
-	}
+
 
 	public boolean isResultReady() {
 		return isResultReady;

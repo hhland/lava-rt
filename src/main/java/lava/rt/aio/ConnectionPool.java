@@ -62,5 +62,14 @@ public abstract class ConnectionPool<R>  {
 			selector.close();
 		
     }
+
+
+	@Override
+	protected void finalize() throws Throwable {
+		// TODO Auto-generated method stub
+		destroy();
+	}
+    
+    
     
 }

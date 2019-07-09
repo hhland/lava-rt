@@ -6,10 +6,10 @@ package lava.rt.aio.udp;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.channels.Selector;
+
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.regex.Pattern;
+
 
 import lava.rt.aio.ClientFactory;
 import lava.rt.aio.ConnectionPool;
@@ -48,7 +48,7 @@ public abstract class UdpConnectionPool extends ConnectionPool<UdpRequest> {
 	// ���Ӷ����factory
 	protected ClientFactory<UdpQueryClient> factory;
 	// �������factory
-	protected RequestFactory requestFactory;
+	protected RequestFactory<UdpServerStatus> requestFactory;
 
 	protected UdpServerConfig serverConfig;
 	
@@ -67,7 +67,7 @@ public abstract class UdpConnectionPool extends ConnectionPool<UdpRequest> {
 	 * @param name ���ӳص����֣��������ⶨ�塣��Ϊnull�ᰴ��"Pool"������
 	 * @param reqestFactory ���Ͷ���(Request)��factory
 	 */
-	protected UdpConnectionPool(ClientFactory<UdpQueryClient> factory, UdpServerConfig config, RequestFactory reqestFactory)
+	protected UdpConnectionPool(ClientFactory<UdpQueryClient> factory, UdpServerConfig config, RequestFactory<UdpServerStatus> reqestFactory)
 	{
 		this.factory = factory;
 		
@@ -237,7 +237,7 @@ public abstract class UdpConnectionPool extends ConnectionPool<UdpRequest> {
 		this.inplaceConnectionLife = inplaceConnectionLife;
 	}
 	
-	private static Pattern pat = Pattern.compile("\\s+");
+	
 	
 
 	public UdpServerStatus[] getAllStatus() {
@@ -319,9 +319,7 @@ public abstract class UdpConnectionPool extends ConnectionPool<UdpRequest> {
 			return status[i].getAddr();
 		}
 	}
-	public void finalize(){
-		destroy();
-	}
+	
 	
 	/**
 	 * �������ӳض���
@@ -362,19 +360,7 @@ public abstract class UdpConnectionPool extends ConnectionPool<UdpRequest> {
 		return sb.toString();
 	}
 
-	/**
-	 * @return the requestFactory
-	 */
-	public RequestFactory getRequestFactory() {
-		return requestFactory;
-	}
-
-	/**
-	 * @param requestFactory the requestFactory to set
-	 */
-	public void setRequestFactory(RequestFactory requestFactory) {
-		this.requestFactory = requestFactory;
-	}
+	
 
 	
 	

@@ -34,10 +34,17 @@ public final class ReflectCommon {
     
 	
 	
-    
+    public static File getFile(String fileName) {
+    	String path=getClassPath()+fileName;
+    	File file=new File(path);
+    	return file;
+    }
 	
 
-	
+	public static String getClassPath() {
+		String ret= ReflectCommon.class.getClassLoader().getResource("").getPath().replace("file:/", "");
+	    return ret;
+	}
 
 	
 

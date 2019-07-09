@@ -1,10 +1,10 @@
 package lava.rt.aio;
 
-public interface RequestFactory {
+public interface RequestFactory<S> {
 	
 	
-	public Request newRequest();
+	public Request<S> newRequest();
 
 	
-	public Request newProbeRequest();
+	public Request<S> newProbeRequest();
 }

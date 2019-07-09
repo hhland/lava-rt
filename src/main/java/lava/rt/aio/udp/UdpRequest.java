@@ -6,39 +6,18 @@ import lava.rt.aio.Request;
 
 
 
-public abstract class UdpRequest implements Request{
+public abstract class UdpRequest extends Request<UdpServerStatus>{
 	Object identityObj;
-	long requestId;
-	String serverInfo;
+	
+
 	int serverId;
 	boolean isProbe = false;
 	
-	/**
-	 * ͳ��ʱ�����
-	 */
-	// set by pool, to indicate time status 
-	protected Long time_start = Long.valueOf(0l); // ���뷢��������е�ʱ��
-	
-	protected Long time_enqueue = Long.valueOf(0l);
-	protected Long time_enqueue_end = Long.valueOf(0l);
-	protected Long time_outqueue = Long.valueOf(0l);
-	
-	protected Long time_waitqueue = Long.valueOf(0l);
-	protected Long time_outwaitqueue = Long.valueOf(0l);
-	
-	protected Long time_connect = Long.valueOf(0l); // ��������
-	protected Long time_connect_end = Long.valueOf(0l); // ���ӽ�����ʱ��( ������Ҫ�����������) 
+	 
 	protected Long time_trySend = Long.valueOf(0l); // sender��ͼ���͵�ʱ��
-	protected Long time_request = Long.valueOf(0l); // �����socket���ͳ�ȥ��ʱ��
-	protected Long time_handleInput = Long.valueOf(0l); // ���һ�ν�����Ӧ��ʱ��
-	protected Long time_end = Long.valueOf(0l); // ��Ӧ������ȫ��ʱ��
-	protected Long time_ioend = Long.valueOf(0l);
-	protected Long endDumpTime = Long.valueOf(0l);
-	// set by user thread. to indicate time status
-	Long cancelledTime = Long.valueOf(0l);
 	
-	protected  Long startLocktime=Long.valueOf(0l);
-	protected  Long endLocktime=Long.valueOf(0l);
+	protected Long time_handleInput = Long.valueOf(0l); // ���һ�ν�����Ӧ��ʱ��
+	
 	
 	
 	/**
@@ -49,20 +28,10 @@ public abstract class UdpRequest implements Request{
 	boolean isResultReadOnly = false;
 	Object resultLock = new Object();
 	
-	/**
-	 * �������
-	 */
-	UdpServerStatus server = null;
+	
 	
 	WeakReference ref;
 	
-	//  0, ��ʼ״̬
-	// -1, �Ŷӳ�ʱ
-	// -3, ���ֽڷ���
-	// -2, socket��ʱ
-	// -4, ����������
-	// -5, connect��ʱ
-	public int status = 0;
 	String reason;
 	
 	public void queueSend(){
@@ -170,9 +139,7 @@ public abstract class UdpRequest implements Request{
 		return time_start;
 	}
 
-	public String getServerInfo() {
-		return serverInfo;
-	}
+	
 
 	public final long getTime() {
 		long ret = getIoTime(Long.MIN_VALUE);
@@ -182,23 +149,11 @@ public abstract class UdpRequest implements Request{
 		return ret;
 	}
 
-	public void setRequestId(long id) {
-		this.requestId = id;
-	}
 	
-	public long getRequestId(){
-		return this.requestId;
-	}
 
-	public void setServerInfo(String info) {
-		this.serverInfo = info;
-	}
-
-	public final void setTime(long t) {
-		
-	}
-	public abstract boolean isValid();
-	public abstract int getServerId(int total);
+	
+	
+	
 	public long getCancelledTime() {
 		return cancelledTime;
 	}
@@ -246,57 +201,8 @@ public abstract class UdpRequest implements Request{
 				);
 
 	}
-	public UdpServerStatus getServer() {
-		return server;
-	}
-	public void setServer(UdpServerStatus server) {
-		this.server = server;
-	}
-	public void timeIoend(){
-		this.time_ioend = System.currentTimeMillis();
-	}
-	public long getIoTime(){
-		return getIoTime(0);
-	}
-	public long getIoTime(long defaultValue){
-		if( time_request > 0 ){
-			if( time_ioend > 0 ){
-				return time_ioend - time_request;
-			} else {
-				return System.currentTimeMillis() - time_request;
-			}
-		} else {
-			return defaultValue;
-		}
-	}
-	public long getConnectTime(){
-		return ((time_connect_end==0||time_connect==0)?0:(time_connect_end-time_connect));
-	}
-
-	public void time_connect() {
-		this.time_connect = System.currentTimeMillis();
-	}
-
-	public void time_enqueue() {
-		this.time_enqueue = System.currentTimeMillis();
-	}
-
-	public void time_enqueue_end() {
-		this.time_enqueue_end = System.currentTimeMillis();
-	}
-
-	public void time_outqueue() {
-		this.time_outqueue =System.currentTimeMillis();
-	}
-	public void time_connect_end(){
-		this.time_connect_end = System.currentTimeMillis();
-	}
-	public void time_waitqueue() {
-		this.time_waitqueue =System.currentTimeMillis();
-	}
-	public void time_outwaitqueue(){
-		this.time_outwaitqueue = System.currentTimeMillis();
-	}
+	
+	
 	public void setQueueTime(long t ){
 		
 	}
@@ -336,12 +242,7 @@ public abstract class UdpRequest implements Request{
 			return 0;
 		}
 	}
-	public int getStatus() {
-		return status;
-	}
-	public void setStatus(int status) {
-		this.status = status;
-	}
+	
 	/**
 	 * @return the time_handleInput
 	 */
@@ -378,12 +279,7 @@ public abstract class UdpRequest implements Request{
 	public void setIdentityObj(Object identityObj) {
 		this.identityObj = identityObj;
 	}
-	/**
-	 * @return the serverId
-	 */
-	public int getServerId() {
-		return serverId;
-	}
+	
 	/**
 	 * @param serverId the serverId to set
 	 */

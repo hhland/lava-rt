@@ -6,6 +6,7 @@
  */
 package lava.rt.aio.tcp;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
@@ -15,7 +16,7 @@ import lava.rt.logging.Log;
 
 
 
-public abstract class TcpGenericQueryClient {
+public abstract class TcpGenericQueryClient implements Closeable {
 
 	public static final int STS_OPEN = 0;
 	public static final int STS_CONN = 1;

@@ -29,18 +29,13 @@ public class UdpServerStatus {
 	InetSocketAddress addr;
 	String serverInfo;
 	
-	protected LinkedList waitQueue = new LinkedList();
-	protected LinkedList freeChannelList;
-	ArrayList allClients;
+	protected LinkedList<UdpRequest> waitQueue = new LinkedList<>();
+	protected LinkedList<UdpGenericQueryClient> freeChannelList;
+	ArrayList<UdpGenericQueryClient> allClients;
 	
 	UdpGenericConnectionPool pool;
 	
-	/**
-	 * ���캯��
-	 *
-	 */
-	public UdpServerStatus() {
-	}
+	
 
 	/**
 	 * called by Receiver to check if any client has reached a socket timeout
@@ -49,7 +44,7 @@ public class UdpServerStatus {
 	public void checkTimeout (){
 		long now = System.currentTimeMillis();
 		for( int i=0; i< allClients.size();i++){
-			UdpGenericQueryClient c = (UdpGenericQueryClient)allClients.get(i);
+			UdpGenericQueryClient c = allClients.get(i);
 			
 			do{
 				if( !c.isValid() ) break;
@@ -60,7 +55,7 @@ public class UdpServerStatus {
 				// check time value.
 				if( ( !c.requestSent
 						|| c.getTime_request() == 0
-						|| 	now - c.getTime_request() <= pool.serverConfig.getSocketTimeout() )
+						|| 	now - c.getTime_request() <= pool.serverConfig.socketTimeout )
 					 )
 				{
 //					System.out.println("Socket or IO not timeOut"+c.requestSent);
@@ -69,9 +64,9 @@ public class UdpServerStatus {
 				
 				
 					logger.info("Socket TimeOut!!!"+c.requestSent+" "+c.getTime_request()
-							+ " "+(now - c.getTime_request())+" "+pool.serverConfig.getSocketTimeout() 
+							+ " "+(now - c.getTime_request())+" "+pool.serverConfig.socketTimeout
 							+ "\nIO TimeOut!!! "+c.getTime_connect()
-							+ " "+(now - c.getTime_connect())+" "+ pool.serverConfig.getConnectTimeout());
+							+ " "+(now - c.getTime_connect())+" "+ pool.serverConfig.connectTimeout);
 				
 				UdpRequest request = c.getRequest();
 				if( request != null ){
@@ -210,7 +205,7 @@ public class UdpServerStatus {
 		
 		long now = System.currentTimeMillis();
 		
-		if (now - request.getStartTime() > pool.serverConfig.getQueueTimeout()) { // �Ŷӳ�ʱ
+		if (now - request.getStartTime() > pool.serverConfig.queueTimeout) { // �Ŷӳ�ʱ
 			
 				logger.info("WaitQueue timeOut");
 			
@@ -345,7 +340,7 @@ public class UdpServerStatus {
 				
 					logger.info("Get One Client From " + freeChannelList.size());
 				
-				client = (UdpGenericQueryClient)freeChannelList.removeFirst( );
+				client = freeChannelList.removeFirst( );
 				client.using = true;
 				client.requestSent = false;
 			} else {
@@ -378,7 +373,7 @@ public class UdpServerStatus {
 			if( waitQueue.isEmpty() ){
 				return null;
 			} else {
-				return (UdpRequest)this.waitQueue.element();
+				return this.waitQueue.element();
 			}
 		}
 	}
@@ -386,7 +381,7 @@ public class UdpServerStatus {
 	private UdpRequest removeFirstUserRequest(){
 		UdpRequest client;
 		synchronized( waitQueue ){
-			client = (UdpRequest)waitQueue.removeFirst( );
+			client = waitQueue.removeFirst( );
 		}
 		
 			logger.info("Remove a request from the queue");
@@ -453,9 +448,9 @@ public class UdpServerStatus {
 		
 		
 		this.pool = pool;
-		int count = pool.serverConfig.getMaxConnectionsPerServer();
-		ArrayList al = new ArrayList( count );
-		LinkedList deactiveChannelSet = new LinkedList();
+		int count = pool.serverConfig.maxConnectionsPerServer;
+		ArrayList<UdpGenericQueryClient> al = new ArrayList<>( count );
+		LinkedList<UdpGenericQueryClient> deactiveChannelSet = new LinkedList<>();
 		for(int i=0;i<count;i++){
 			
 			UdpGenericQueryClient ace = pool.factory.newInstance();
@@ -551,7 +546,7 @@ public class UdpServerStatus {
 			sb.append( '\n' );
 
 			for( int i=0; i<waitQueue.size(); i++){
-				UdpRequest req = (UdpRequest)waitQueue.get(i);
+				UdpRequest req = waitQueue.get(i);
 				sb.append( req.dumpTimeStatus() );
 				sb.append('\n');
 			}
@@ -574,7 +569,7 @@ public class UdpServerStatus {
 		
 		for( int i=0; i< this.allClients.size(); i++){
 			sb.append( '\t' );
-			UdpGenericQueryClient ace = (UdpGenericQueryClient)this.allClients.get(i);
+			UdpGenericQueryClient ace = this.allClients.get(i);
 			sb.append( ace.getStatus() );
 			sb.append('\n');
 		}
@@ -591,9 +586,9 @@ public class UdpServerStatus {
 	 * �����ͷ���Դ
 	 */
 	public void destroy(){
-		ArrayList allClients = this.allClients;
+		//ArrayList allClients = this.allClients;
 		for( int i=0; allClients != null && i< allClients.size();i++){
-			UdpGenericQueryClient c = (UdpGenericQueryClient)allClients.get(i);
+			UdpGenericQueryClient c = allClients.get(i);
 			c.close();
 		}
 	}

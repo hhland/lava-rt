@@ -65,14 +65,7 @@ public class UdpSender extends Sender<UdpRequest>{
 		return requestCount;
 	}
 
-	/**
-	 * �߳�ֹͣ
-	 * *ע��* ����stopThread������ζ���߳�����ֹͣ
-	 *
-	 */
-	public void stopThread(){
-		_thread = null;
-	}
+	
 	
 	public void run() {
 		while (true) {

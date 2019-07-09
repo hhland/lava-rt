@@ -6,6 +6,7 @@
  */
 package lava.rt.aio.udp;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.DatagramChannel;
@@ -16,7 +17,7 @@ import lava.rt.logging.Log;
 /**
  * cache���첽���ӿͻ���
  */
-public abstract class UdpGenericQueryClient {
+public abstract class UdpGenericQueryClient implements Closeable {
 
 	public static final int STS_OPEN = 0;
 	public static final int STS_CONN = 1;

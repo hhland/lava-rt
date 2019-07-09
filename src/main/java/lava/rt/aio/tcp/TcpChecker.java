@@ -16,7 +16,7 @@ class TcpChecker implements Runnable {
 	public void startThread(){
 		synchronized(_threadLock){
 			if( _thread == null || !_thread.isAlive()){
-				_thread = new Thread(this, this.pool.getServerConfig().getName()+"(Checker)");
+				_thread = new Thread(this, this.pool.getServerConfig().name+"(Checker)");
 				_thread.start();
 			}
 		}
@@ -98,7 +98,7 @@ class TcpChecker implements Runnable {
 						//���Ŀǰ��Ϊƽ��ʱ������������Ļ���״̬
 						TcpServerStatus ss = sss[i]; 
 						if (ss != null && ss.longRequestDead){
-							if (ss.getServerAvgTime() < pool.getServerConfig().getMaxResponseTime() || ss.getServerAvgTime()/avgTime < pool.getServerConfig().getMaxResponseRadio()){
+							if (ss.getServerAvgTime() < pool.getServerConfig().maxResponseTime || ss.getServerAvgTime()/avgTime < pool.getServerConfig().maxResponseRadio){
 								//debug bart
 								System.out.println("[pool]Server is back from long request dead: "+ss.serverInfo);
 								ss.longRequestDead = false;
@@ -107,7 +107,7 @@ class TcpChecker implements Runnable {
 					}
 					if (!hasLongDead && maxServer >= 0 && liveServers == sss.length && liveServers > 2){
 						//Ŀǰserver������
-						if (maxTime >= pool.getServerConfig().getMaxResponseTime() && maxTime/avgTime >= pool.getServerConfig().getMaxResponseRadio()){
+						if (maxTime >= pool.getServerConfig().maxResponseTime && maxTime/avgTime >= pool.getServerConfig().maxResponseRadio){
 							//���server��Ӧʱ����ƽ����Ӧʱ�������
 							//�ߵ���server
 							//debug bart

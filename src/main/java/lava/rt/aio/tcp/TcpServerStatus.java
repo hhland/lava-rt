@@ -43,19 +43,14 @@ public class TcpServerStatus {
 	 */
 	protected boolean shouldCloneFlag = true;
 	
-	protected LinkedList waitQueue = new LinkedList();
-	protected LinkedList freeChannelList;
-	ArrayList allClients;
+	protected LinkedList<TcpRequest> waitQueue = new LinkedList<>();
+	protected LinkedList<TcpGenericQueryClient> freeChannelList;
+	ArrayList<TcpGenericQueryClient> allClients;
 	
 	
 	TcpGenericConnectionPool pool;
 	
-	/**
-	 * ���캯��
-	 *
-	 */
-	public TcpServerStatus() {
-	}
+	
 
 	/**
 	 * called by Receiver to check if any client has reached a socket timeout
@@ -64,7 +59,7 @@ public class TcpServerStatus {
 	public void checkTimeout (){
 		long now = System.currentTimeMillis();
 		for( int i=0; i< allClients.size();i++){
-			TcpGenericQueryClient c = (TcpGenericQueryClient)allClients.get(i);
+			TcpGenericQueryClient c = allClients.get(i);
 			
 			do{
 				if( !c.isValid() ) break;
@@ -77,14 +72,14 @@ public class TcpServerStatus {
 				boolean isSocketTimeout = true;
 				if( ( !c.requestSent
 						|| c.getTime_request() == 0
-						|| 	now - c.getTime_request() <= pool.getServerConfig().getSocketTimeout() )
+						|| 	now - c.getTime_request() <= pool.getServerConfig().socketTimeout )
 						){
 					isSocketTimeout = false;
 				}
 				boolean isConnectTimeout = true;
 				if( ( c.isConnected() 
 						|| c.getTime_connect() == 0
-						|| now - c.getTime_connect() <= pool.getServerConfig().getConnectTimeout() ) )
+						|| now - c.getTime_connect() <= pool.getServerConfig().connectTimeout ) )
 				{
 //					System.out.println("Socket or IO not timeOut"+c.requestSent);
 					isConnectTimeout = false;
@@ -97,7 +92,7 @@ public class TcpServerStatus {
 				boolean isSocketFailTimeout = true;
 				if( ( !c.requestSent
 						|| c.getTime_request() == 0
-						|| 	now - c.getTime_request() <= pool.getServerConfig().getSocketFailTimeout() )
+						|| 	now - c.getTime_request() <= pool.getServerConfig().socketFailTimeout )
 						){
 					isSocketFailTimeout = false;
 				}
@@ -110,9 +105,9 @@ public class TcpServerStatus {
 					//�����һ������ʧ���˵�����
 					
 						logger.info("Socket TimeOut!!!"+c.requestSent+" "+c.getTime_request()
-								+ " "+(now - c.getTime_request())+" "+pool.getServerConfig().getSocketTimeout() 
+								+ " "+(now - c.getTime_request())+" "+pool.getServerConfig().socketTimeout 
 								+ "\nIO TimeOut!!!"+c.isConnected()+" "+c.getTime_connect()
-								+ " "+(now - c.getTime_connect())+" "+ pool.getServerConfig().getConnectTimeout());
+								+ " "+(now - c.getTime_connect())+" "+ pool.getServerConfig().connectTimeout);
 					
 					if( request != null ){
 						if (isSocketFailTimeout)
@@ -267,7 +262,7 @@ public class TcpServerStatus {
 		
 		long now = System.currentTimeMillis();
 		
-		if (now - request.getStartTime() > pool.getServerConfig().getQueueTimeout()) { // �Ŷӳ�ʱ
+		if (now - request.getStartTime() > pool.getServerConfig().queueTimeout) { // �Ŷӳ�ʱ
 			
 				logger.info("WaitQueue timeOut");
 			
@@ -276,7 +271,7 @@ public class TcpServerStatus {
 			return -4;
 		}
 		
-		if (now - request.getStartTime() > pool.getServerConfig().getQueueShortTimeout()) { // �ŶӶ̳�ʱ
+		if (now - request.getStartTime() > pool.getServerConfig().queueShortTimeout) { // �ŶӶ̳�ʱ
 			//�ŶӶ̳�ʱ����
 				//debug bart
 				//�����Ŷӳ�ʱ��ת��
@@ -284,8 +279,8 @@ public class TcpServerStatus {
 					LinkedList sendQueue = new LinkedList();
 					synchronized( waitQueue){
 						for( int i=0; i<waitQueue.size(); i++){
-							TcpRequest req = (TcpRequest)waitQueue.get(i);
-							if (now - req.getStartTime() > pool.getServerConfig().getQueueShortTimeout()){
+							TcpRequest req = waitQueue.get(i);
+							if (now - req.getStartTime() > pool.getServerConfig().queueShortTimeout){
 								if (req.clonableRequest && req.clonedTo == null && req.clonedFrom == null){
 									System.out.println("[pool "+req.ruid+"]Short queue timeout is trigged for "+req.getServerInfo());
 									//��request����clone��������δ��clone
@@ -447,7 +442,7 @@ public class TcpServerStatus {
 				
 					logger.info("Get One Client From " + freeChannelList.size());
 				
-				client = (TcpGenericQueryClient)freeChannelList.removeFirst( );
+				client = freeChannelList.removeFirst( );
 				client.using = true;
 				client.requestSent = false;
 			} else {
@@ -480,7 +475,7 @@ public class TcpServerStatus {
 			if( waitQueue.isEmpty() ){
 				return null;
 			} else {
-				return (TcpRequest)this.waitQueue.element();
+				return this.waitQueue.element();
 			}
 		}
 	}
@@ -488,7 +483,7 @@ public class TcpServerStatus {
 	private TcpRequest removeFirstUserRequest(){
 		TcpRequest client;
 		synchronized( waitQueue ){
-			client = (TcpRequest)waitQueue.removeFirst( );
+			client = waitQueue.removeFirst( );
 		}
 		
 			logger.info("Remove a request from the queue");
@@ -516,7 +511,7 @@ public class TcpServerStatus {
 			return false;
 		long now = System.currentTimeMillis();
 		if (( retryCount <= 0  && recentErrorNumber > pool.getServerConfig().maxErrorsBeforeSleep 
-				&& (now - downtime ) >= pool.getServerConfig().getShortRetryTime() ))
+				&& (now - downtime ) >= pool.getServerConfig().shortRetryTime ))
 			return true;
 		if (recentErrorNumber <= pool.getServerConfig().maxErrorsBeforeSleep && longRequestDead)
 			return true;
@@ -571,7 +566,7 @@ public class TcpServerStatus {
 		
 		
 		this.pool = pool;
-		int count = pool.getServerConfig().getMaxConnectionsPerServer();
+		int count = pool.getServerConfig().maxConnectionsPerServer;
 		ArrayList al = new ArrayList( count );
 		LinkedList deactiveChannelSet = new LinkedList();
 		for(int i=0;i<count;i++){
@@ -677,7 +672,7 @@ public class TcpServerStatus {
 			sb.append( '\n' );
 
 			for( int i=0; i<waitQueue.size(); i++){
-				TcpRequest req = (TcpRequest)waitQueue.get(i);
+				TcpRequest req = waitQueue.get(i);
 				sb.append( req.dumpTimeStatus() );
 				sb.append('\n');
 			}
@@ -712,7 +707,7 @@ public class TcpServerStatus {
 		
 		for( int i=0; i< this.allClients.size(); i++){
 			sb.append( '\t' );
-			TcpGenericQueryClient ace = (TcpGenericQueryClient)this.allClients.get(i);
+			TcpGenericQueryClient ace = this.allClients.get(i);
 			sb.append( ace.getStatus() );
 			sb.append('\n');
 		}
@@ -748,8 +743,8 @@ public class TcpServerStatus {
 		sb.append( this.marker );
 		sb.append( '\t' );
 		
-		for( int i=0; i< this.allClients.size(); i++){
-			TcpGenericQueryClient ace = (TcpGenericQueryClient)this.allClients.get(i);
+		for( int i=0; i< allClients.size(); i++){
+			TcpGenericQueryClient ace = allClients.get(i);
 			sb.append( ace.getStatus() );
 			sb.append( '.' );
 		}
@@ -761,9 +756,9 @@ public class TcpServerStatus {
 		destroy();
 	}
 	public void destroy(){
-		ArrayList allClients = this.allClients;
+	
 		for( int i=0; allClients != null && i< allClients.size();i++){
-			TcpGenericQueryClient c = (TcpGenericQueryClient)allClients.get(i);
+			TcpGenericQueryClient c = allClients.get(i);
 			c.close();
 		}
 	}
@@ -812,7 +807,7 @@ public class TcpServerStatus {
 		//	return false;
 		//}
 		synchronized(markerLocker){
-			if (totalClone >= pool.getServerConfig().getMaxClonedRequest()){
+			if (totalClone >= pool.getServerConfig().maxClonedRequest){
 				return false;
 			}
 			totalClone++;

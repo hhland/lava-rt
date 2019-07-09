@@ -10,7 +10,7 @@ public class UdpSender extends Sender<UdpRequest>{
 	
 	
 	private volatile Thread _thread = null;
-	UdpGenericConnectionPool pool;
+	UdpConnectionPool pool;
 	
 	
 	
@@ -22,7 +22,7 @@ public class UdpSender extends Sender<UdpRequest>{
 	
 	
 	
-	UdpSender( UdpGenericConnectionPool sc ){
+	UdpSender( UdpConnectionPool sc ){
 		this.pool = sc;
 	}
 	

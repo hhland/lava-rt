@@ -21,18 +21,18 @@ import lava.rt.logging.Log;
 import lava.rt.logging.LogFactory;
 
 
-class UdpReceiver extends Receiver<UdpGenericQueryClient>{
+class UdpReceiver extends Receiver<UdpQueryClient>{
 	
 	private static final Log logger = LogFactory.SYSTEM.getLog( UdpReceiver.class);
 
 	
 	volatile Thread _thread;
 	
-	UdpGenericConnectionPool pool ;
+	UdpConnectionPool pool ;
 	
 	
 	
-	UdpReceiver(UdpGenericConnectionPool p){
+	UdpReceiver(UdpConnectionPool p){
 		this.pool = p;
 		
 	}
@@ -50,7 +50,7 @@ class UdpReceiver extends Receiver<UdpGenericQueryClient>{
 		synchronized( selectionKeyQueue ){
 			do {
 
-				UdpGenericQueryClient sc = (UdpGenericQueryClient)selectionKeyQueue.poll();
+				UdpQueryClient sc = (UdpQueryClient)selectionKeyQueue.poll();
 				
 				if( sc == null ) break;
 				
@@ -183,7 +183,7 @@ class UdpReceiver extends Receiver<UdpGenericQueryClient>{
 							
 								logger.info(this.generation+"ReadKey:" + (System.currentTimeMillis()-cycleStart) );
 							
-							UdpGenericQueryClient conn = (UdpGenericQueryClient )key.attachment();
+							UdpQueryClient conn = (UdpQueryClient )key.attachment();
 							
 							UdpRequest request = conn.getRequest();
 							

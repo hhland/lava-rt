@@ -19,17 +19,17 @@ import lava.rt.logging.LogFactory;
 
 
 
-class TcpReceiver extends Receiver<TcpGenericQueryClient>{
+class TcpReceiver extends Receiver<TcpQueryClient>{
 	
 	private static final Log logger = LogFactory.SYSTEM.getLog( TcpReceiver.class);
 
 
 	
-	TcpGenericConnectionPool pool ;
+	TcpConnectionPool pool ;
 	
 	
 	
-	TcpReceiver(TcpGenericConnectionPool p){
+	TcpReceiver(TcpConnectionPool p){
 		this.pool = p;
 		this.generation = "(RecverErr)";
 	}
@@ -45,7 +45,7 @@ class TcpReceiver extends Receiver<TcpGenericQueryClient>{
 	 *   0 ����Ƿ�, ֪ͨuser-thread. �黹���ӱ���
 	 *  
 	 */
-	private int sendRequest(TcpGenericQueryClient sc){
+	private int sendRequest(TcpQueryClient sc){
 		int status = -1;
 		TcpRequest request = sc.getRequest();
 		
@@ -103,7 +103,7 @@ class TcpReceiver extends Receiver<TcpGenericQueryClient>{
 		synchronized( selectionKeyQueue ){
 			do {
 
-				TcpGenericQueryClient sc = (TcpGenericQueryClient)selectionKeyQueue.poll();
+				TcpQueryClient sc = (TcpQueryClient)selectionKeyQueue.poll();
 				
 				if( sc == null ) break;
 				
@@ -259,7 +259,7 @@ class TcpReceiver extends Receiver<TcpGenericQueryClient>{
 							
 								logger.info(this.generation+"ReadKey:" + (System.currentTimeMillis()-cycleStart) );
 							
-							TcpGenericQueryClient conn = (TcpGenericQueryClient )key.attachment();
+							TcpQueryClient conn = (TcpQueryClient )key.attachment();
 							
 							try{
 								int status = conn.handleInput();
@@ -319,7 +319,7 @@ class TcpReceiver extends Receiver<TcpGenericQueryClient>{
 								logger.info(this.generation+"ConnKey:" + (System.currentTimeMillis()-cycleStart) );
 							
 		
-							TcpGenericQueryClient conn = (TcpGenericQueryClient )key.attachment();
+							TcpQueryClient conn = (TcpQueryClient )key.attachment();
 							
 							TcpRequest request = conn.getRequest();
 							if( request != null ){

@@ -8,7 +8,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.spi.AbstractSelectableChannel;
 import java.util.Set;
 
-import lava.rt.aio.tcp.TcpGenericQueryClient;
+import lava.rt.aio.tcp.TcpQueryClient;
 import lava.rt.aio.udp.UdpRequest;
 import lava.rt.logging.Log;
 import lava.rt.logging.LogFactory;
@@ -16,7 +16,7 @@ import lava.rt.logging.LogFactory;
 public abstract class ConnectionPool<R>  {
 
 	
-	protected Selector selector;
+	private Selector selector;
 	
     
     
@@ -51,4 +51,16 @@ public abstract class ConnectionPool<R>  {
     protected  Log getLogger() {
     	return LogFactory.SYSTEM.getLog(ConnectionPool.class);
     }
+    
+    
+    public void init() throws Exception {
+    	selector=Selector.open();
+    }
+    
+    public void destroy() throws IOException {
+    	
+			selector.close();
+		
+    }
+    
 }

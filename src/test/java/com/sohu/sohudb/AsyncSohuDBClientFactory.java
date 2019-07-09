@@ -2,13 +2,13 @@ package com.sohu.sohudb;
 
 import lava.rt.aio.ClientFactory;
 
-import lava.rt.aio.tcp.TcpGenericQueryClient;
+import lava.rt.aio.tcp.TcpQueryClient;
 import lava.rt.aio.tcp.TcpServerConfig;
 import lava.rt.logging.LogFactory;
 
-public class AsyncSohuDBClientFactory implements ClientFactory<TcpGenericQueryClient> {
+public class AsyncSohuDBClientFactory implements ClientFactory<TcpQueryClient> {
 
-	public TcpGenericQueryClient newInstance() {
+	public TcpQueryClient newInstance() {
 		return new AsyncSohuDBClient();
 	}
 
@@ -20,7 +20,7 @@ public class AsyncSohuDBClientFactory implements ClientFactory<TcpGenericQueryCl
 		
 		AsyncSohuDBClientFactory factory=new AsyncSohuDBClientFactory();
 		
-		TcpGenericQueryClient client=factory.newInstance();
+		TcpQueryClient client=factory.newInstance();
 		
 		LogFactory.SYSTEM.level=LogFactory.LEVEL_WARN;
 		

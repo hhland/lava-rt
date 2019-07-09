@@ -5,11 +5,11 @@ import java.util.Date;
 
 class TcpChecker implements Runnable {
 
-	protected TcpGenericConnectionPool pool = null;
+	protected TcpConnectionPool pool = null;
 	protected Thread _thread = null;
 	protected Object _threadLock = new Object();
 	
-	protected TcpChecker(TcpGenericConnectionPool pool){
+	protected TcpChecker(TcpConnectionPool pool){
 		this.pool = pool;
 	}
 	
@@ -131,13 +131,13 @@ class TcpChecker implements Runnable {
 	/**
 	 * @return the pool
 	 */
-	public TcpGenericConnectionPool getPool() {
+	public TcpConnectionPool getPool() {
 		return pool;
 	}
 	/**
 	 * @param pool the pool to set
 	 */
-	public void setPool(TcpGenericConnectionPool pool) {
+	public void setPool(TcpConnectionPool pool) {
 		this.pool = pool;
 	}
 }

@@ -28,7 +28,7 @@ import lava.rt.logging.Log;
  * @author LiuMingzhu (mingzhuliu@sohu-inc.com)
  *
  */
-public abstract class UdpGenericConnectionPool extends ConnectionPool<UdpRequest> {
+public abstract class UdpConnectionPool extends ConnectionPool<UdpRequest> {
 
 	/// random
 	protected static final Random random = new Random();
@@ -46,7 +46,7 @@ public abstract class UdpGenericConnectionPool extends ConnectionPool<UdpRequest
 	
 	
 	// ���Ӷ����factory
-	protected ClientFactory<UdpGenericQueryClient> factory;
+	protected ClientFactory<UdpQueryClient> factory;
 	// �������factory
 	protected RequestFactory requestFactory;
 
@@ -57,7 +57,7 @@ public abstract class UdpGenericConnectionPool extends ConnectionPool<UdpRequest
 	 * @param factory ���Ӷ����factory���ض������ӳ�Ҫ�Լ�ʵ�����Ӷ���
 	 * @param name ���ӳص����֣��������ⶨ�塣��Ϊnull�ᰴ��"Pool"������
 	 */
-	protected UdpGenericConnectionPool(ClientFactory<UdpGenericQueryClient> factory,UdpServerConfig config)
+	protected UdpConnectionPool(ClientFactory<UdpQueryClient> factory,UdpServerConfig config)
 	{
 		this(factory, config, null);
 	}
@@ -67,7 +67,7 @@ public abstract class UdpGenericConnectionPool extends ConnectionPool<UdpRequest
 	 * @param name ���ӳص����֣��������ⶨ�塣��Ϊnull�ᰴ��"Pool"������
 	 * @param reqestFactory ���Ͷ���(Request)��factory
 	 */
-	protected UdpGenericConnectionPool(ClientFactory<UdpGenericQueryClient> factory, UdpServerConfig config, RequestFactory reqestFactory)
+	protected UdpConnectionPool(ClientFactory<UdpQueryClient> factory, UdpServerConfig config, RequestFactory reqestFactory)
 	{
 		this.factory = factory;
 		
@@ -77,7 +77,7 @@ public abstract class UdpGenericConnectionPool extends ConnectionPool<UdpRequest
 	}
 
 	public void init() throws Exception{
-		
+		super.init();
 		ArrayList<UdpServerStatus> servers = new ArrayList<>();
 		
 	
@@ -91,7 +91,7 @@ public abstract class UdpGenericConnectionPool extends ConnectionPool<UdpRequest
 
 		UdpServerStatus[] serverStatus = servers.toArray( new UdpServerStatus[servers.size()] );
 
-		selector = Selector.open();
+		
 		
 		this.status = serverStatus;
 		
@@ -341,7 +341,7 @@ public abstract class UdpGenericConnectionPool extends ConnectionPool<UdpRequest
 			}
 		}
 		try{
-			this.selector.close();
+			super.destroy();
 		}catch( IOException e){
 			// dummy
 		}

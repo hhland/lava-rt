@@ -18,7 +18,7 @@ import lava.rt.logging.Log;
 
 
 
-public abstract class TcpGenericConnectionPool extends ConnectionPool<TcpRequest> {
+public abstract class TcpConnectionPool extends ConnectionPool<TcpRequest> {
 
     // / random
     protected static final Random random                   = new Random();
@@ -37,14 +37,14 @@ public abstract class TcpGenericConnectionPool extends ConnectionPool<TcpRequest
     protected Object              recverLock               = new Object();
     protected Object              senderLock               = new Object();
 
-    protected ClientFactory<TcpGenericQueryClient>  factory;
+    protected ClientFactory<TcpQueryClient>  factory;
 
     protected TcpServerConfig TcpServerConfig;
     
     private boolean               isAutoSwitchToNextServer = true;
 
     
-    protected TcpGenericConnectionPool(ClientFactory<TcpGenericQueryClient> factory,TcpServerConfig TcpServerConfig) {
+    protected TcpConnectionPool(ClientFactory<TcpQueryClient> factory,TcpServerConfig TcpServerConfig) {
         this.factory = factory;
         this.TcpServerConfig=TcpServerConfig;
         
@@ -55,6 +55,8 @@ public abstract class TcpGenericConnectionPool extends ConnectionPool<TcpRequest
 
     public void init() throws Exception {
 
+    	super.init();
+    	
         List<TcpServerStatus> servers = new ArrayList<>();
 
         
@@ -68,7 +70,7 @@ public abstract class TcpGenericConnectionPool extends ConnectionPool<TcpRequest
 
         TcpServerStatus[] serverStatus =  servers.toArray(new TcpServerStatus[servers.size()]);
 
-        selector = Selector.open();
+        
 
         this.status = serverStatus;
 
@@ -82,6 +84,7 @@ public abstract class TcpGenericConnectionPool extends ConnectionPool<TcpRequest
             checker = new TcpChecker(this);
             checker.startThread();
         }
+        
     }
 
    
@@ -394,6 +397,8 @@ public abstract class TcpGenericConnectionPool extends ConnectionPool<TcpRequest
     }
 
     public void destroy() {
+    	
+    	
         sender.stopThread();
         sender = null;
         recver.stopThread();
@@ -409,7 +414,7 @@ public abstract class TcpGenericConnectionPool extends ConnectionPool<TcpRequest
             }
         }
         try {
-            this.selector.close();
+            super.destroy();
         }
         catch (IOException e) {
 

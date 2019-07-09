@@ -4,19 +4,20 @@
  *  Created on 2006-09-23
  *   
  */
-package lava.rt.aio.tcp;
+package lava.rt.aio.udp;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.channels.SocketChannel;
+import java.nio.channels.DatagramChannel;
 
 import lava.rt.logging.Log;
 
 
-
-
-public abstract class TcpGenericQueryClient implements Closeable {
+/**
+ * cache���첽���ӿͻ���
+ */
+public abstract class UdpQueryClient implements Closeable {
 
 	public static final int STS_OPEN = 0;
 	public static final int STS_CONN = 1;
@@ -27,7 +28,7 @@ public abstract class TcpGenericQueryClient implements Closeable {
 	volatile Long time_connect = 0l;
 	volatile Long time_request = 0l;
 //	boolean needRequest = false;
-	boolean requestSent = true;
+	volatile boolean requestSent = true;
 	
 	public long getTime_connect() {
 		return time_connect;
@@ -46,7 +47,7 @@ public abstract class TcpGenericQueryClient implements Closeable {
 	}
 
 	public int getStatus(){
-		SocketChannel channel;
+		DatagramChannel channel;
 		boolean using;
 		synchronized( channelLock) {
 			channel = this.channel;
@@ -56,27 +57,25 @@ public abstract class TcpGenericQueryClient implements Closeable {
 				return STS_CLOS;
 			} else if( ! channel.isConnected() ){
 				return STS_OPEN;
-			} else if( channel.isConnectionPending() ){
-				return STS_CONN;
 			} else if( !using ){
 				return STS_FREE;
 			} else {
 				return STS_BUSY;
 			}
 	}
-	
-	//private Log logger = getLogger();
+	// ��¼��
+	private Log logger = getLogger();
 
 	private Object channelLock = new Object();
-	private volatile SocketChannel channel = null;
-	protected TcpServerStatus serverStatus;
+	private volatile DatagramChannel channel = null;
+	protected UdpServerStatus serverStatus;
 	
-	protected boolean using = false;
+	protected volatile boolean using = false;
 	
-	
+	// ���ӵ�����ֵ.����0��ʾ���ɿ�.
 	protected int life = 0;
 	
-	private volatile TcpRequest request ;
+	private volatile UdpRequest request ;
 	
 	public void setLife(int lf) {
 		this.life = lf;
@@ -86,9 +85,11 @@ public abstract class TcpGenericQueryClient implements Closeable {
 		return this.life;
 	}
 
-	
-	final public void close() {
-		SocketChannel channel;
+	/**
+	 * �ر�����
+	 */
+	public void close() {
+		DatagramChannel channel;
 		synchronized( channelLock ){
 			channel = this.channel;
 			this.channel = null;
@@ -97,7 +98,7 @@ public abstract class TcpGenericQueryClient implements Closeable {
 			try {
 				channel.close();
 			} catch (IOException e) {
-				//logger.debug(this, e);
+				logger.info(this);
 			}
 		}
 	}
@@ -118,13 +119,6 @@ public abstract class TcpGenericQueryClient implements Closeable {
 					&& channel.isRegistered()	 );
 		}
 	}
-	
-	public boolean isConnected(){
-		synchronized( channelLock ){
-			return ( channel != null 
-					&& channel.isConnected() );
-		}
-	}
 
 	public boolean isActive(){
 		synchronized( channelLock ){
@@ -134,20 +128,8 @@ public abstract class TcpGenericQueryClient implements Closeable {
 		}
 	}
 	
-	public boolean isConnectionPending(){
-		synchronized( channelLock ){
-			return ( channel != null 
-					&& channel.isConnectionPending() );
-		}
-		
-	}
-
-
 	/**
-	 * callback function, �����ӳص�Receiver�̵߳��ã�ÿ��ʵ�����ӳص�ʵ���߱���ʵ�ִ˷�����
-	 * ��һ����Ӧ���ݵĽ��ܹ����У��÷����ᱻ��ε��á�ʵ�ֽ�����д��Buffer�Ĺ��̡�
-	 * �������ӳ����಻����client�˵�Buffer����ʵ�ַ�ʽ�����Ա���ÿ��������������ɡ�
-	 * ����ע�⣺��Ҫ�����е����������
+	 * callback function, by Receiver
 	 * @return true  - if a complete reponse body has been received
 	 * @throws Exception  - IOException is thrown if there is any IO problem.
 	 *                      or NullPointerException for hell code.
@@ -161,11 +143,10 @@ public abstract class TcpGenericQueryClient implements Closeable {
 	 *  =0 request needn't to be sent
 	 *  <0 some Exception happeds, need reset
 	 */
-	public abstract int sendRequest() throws IOException;
+	public abstract int sendRequest() throws IOException, IllegalArgumentException;
 	/**
-	 * callback function, �����ӳص�Receiver�̵߳��ã�ÿ��ʵ�����ӳص�ʵ���߱���ʵ�ִ˷�����
-	 * ��һ����Ӧ���ݽ��չ����У��÷����ᱻ��ε��ã�ʵ���߱���ÿ�ζ�Ҫ�����������Ѿ�������
-	 * �ǵĻ����ͷ���true�����򷵻�false��ͬʱע�⣬Buffer��������״̬�ģ���Ҫ���Ѿ����յ������ݸ��ǵ���
+	 * callback function, by Receiver
+	 * if a full response has been received, extract information from data, and return ture
 	 * @return
 	 * @throws Exception
 	 */
@@ -173,17 +154,15 @@ public abstract class TcpGenericQueryClient implements Closeable {
 
 	/**
 	 * callback function, by receiver or sender, if some Exceptions thrown.
-	 * client���ͷź󱻵��ã�����ִ������������Ա���һ�������á�һ�������������롢���buffer�����������
 	 *
 	 */
 	public abstract void reset() throws IOException;
 	
 
 	public void connect(InetSocketAddress addr) throws IOException {
-		SocketChannel channel = SocketChannel.open(); 
+		DatagramChannel channel = DatagramChannel.open(); 
 		channel.configureBlocking(false);
 		channel.connect(addr);
-		channel.finishConnect();
 		
 		synchronized( channelLock ){
 			this.channel = channel;
@@ -191,12 +170,12 @@ public abstract class TcpGenericQueryClient implements Closeable {
 	}
 	protected abstract Log getLogger();
 
-	public TcpRequest getRequest() {
+	public UdpRequest getRequest() {
 		return request;
 	}
 
 	
-	public void setRequest(TcpRequest request) {
+	public void setRequest(UdpRequest request) {
 		this.request = request;
 	}
 
@@ -217,7 +196,7 @@ public abstract class TcpGenericQueryClient implements Closeable {
 		this.requestSent = needRequest;
 	}
 
-	public SocketChannel getChannel() {
+	public DatagramChannel getChannel() {
 		return channel;
 	}
 

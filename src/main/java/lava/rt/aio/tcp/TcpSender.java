@@ -9,7 +9,7 @@ class TcpSender extends Sender<TcpRequest>{
 	private static final Log log = LogFactory.SYSTEM.getLog(TcpSender.class);
 	
 
-	TcpGenericConnectionPool pool;
+	TcpConnectionPool pool;
 	
 	
 	
@@ -21,7 +21,7 @@ class TcpSender extends Sender<TcpRequest>{
 	
 	
 	
-	TcpSender( TcpGenericConnectionPool sc ){
+	TcpSender( TcpConnectionPool sc ){
 		this.pool = sc;
 	}
 	

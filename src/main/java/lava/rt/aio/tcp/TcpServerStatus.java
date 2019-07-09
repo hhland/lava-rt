@@ -44,11 +44,11 @@ public class TcpServerStatus {
 	protected boolean shouldCloneFlag = true;
 	
 	protected LinkedList<TcpRequest> waitQueue = new LinkedList<>();
-	protected LinkedList<TcpGenericQueryClient> freeChannelList;
-	ArrayList<TcpGenericQueryClient> allClients;
+	protected LinkedList<TcpQueryClient> freeChannelList;
+	ArrayList<TcpQueryClient> allClients;
 	
 	
-	TcpGenericConnectionPool pool;
+	TcpConnectionPool pool;
 	
 	
 
@@ -59,7 +59,7 @@ public class TcpServerStatus {
 	public void checkTimeout (){
 		long now = System.currentTimeMillis();
 		for( int i=0; i< allClients.size();i++){
-			TcpGenericQueryClient c = allClients.get(i);
+			TcpQueryClient c = allClients.get(i);
 			
 			do{
 				if( !c.isValid() ) break;
@@ -299,7 +299,7 @@ public class TcpServerStatus {
 		}
 
 		do{
-			TcpGenericQueryClient sc = removeFirstFreeClient();
+			TcpQueryClient sc = removeFirstFreeClient();
 
 			if (sc == null){
 				
@@ -435,8 +435,8 @@ public class TcpServerStatus {
 		return 1;
 	}
 	
-	private TcpGenericQueryClient removeFirstFreeClient(){
-		TcpGenericQueryClient client;
+	private TcpQueryClient removeFirstFreeClient(){
+		TcpQueryClient client;
 		synchronized( freeChannelList ){
 			if( freeChannelList.size() > 0 ){
 				
@@ -454,7 +454,7 @@ public class TcpServerStatus {
 		}
 		return client;
 	}
-	void freeClient(TcpGenericQueryClient client) {
+	void freeClient(TcpQueryClient client) {
 		synchronized (freeChannelList) {
 			if (client.using) {
 				
@@ -533,7 +533,7 @@ public class TcpServerStatus {
 
 //	public ServerStatus(){}
 	
-	public TcpServerStatus(String line, TcpGenericConnectionPool pool ) throws IllegalArgumentException{
+	public TcpServerStatus(String line, TcpConnectionPool pool ) throws IllegalArgumentException{
 		if( line == null ) throw new IllegalArgumentException("ServerStatus Null Line Parameter");
 		
 		line = line.trim();
@@ -571,7 +571,7 @@ public class TcpServerStatus {
 		LinkedList deactiveChannelSet = new LinkedList();
 		for(int i=0;i<count;i++){
 			
-			TcpGenericQueryClient ace = pool.factory.newInstance();
+			TcpQueryClient ace = pool.factory.newInstance();
 			ace.serverStatus = this;
 //			SocketChannel socketChannel =null;
 //			ace.channel = socketChannel;
@@ -707,7 +707,7 @@ public class TcpServerStatus {
 		
 		for( int i=0; i< this.allClients.size(); i++){
 			sb.append( '\t' );
-			TcpGenericQueryClient ace = this.allClients.get(i);
+			TcpQueryClient ace = this.allClients.get(i);
 			sb.append( ace.getStatus() );
 			sb.append('\n');
 		}
@@ -744,7 +744,7 @@ public class TcpServerStatus {
 		sb.append( '\t' );
 		
 		for( int i=0; i< allClients.size(); i++){
-			TcpGenericQueryClient ace = allClients.get(i);
+			TcpQueryClient ace = allClients.get(i);
 			sb.append( ace.getStatus() );
 			sb.append( '.' );
 		}
@@ -758,7 +758,7 @@ public class TcpServerStatus {
 	public void destroy(){
 	
 		for( int i=0; allClients != null && i< allClients.size();i++){
-			TcpGenericQueryClient c = allClients.get(i);
+			TcpQueryClient c = allClients.get(i);
 			c.close();
 		}
 	}

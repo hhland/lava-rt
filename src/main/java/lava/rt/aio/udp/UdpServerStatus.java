@@ -30,10 +30,10 @@ public class UdpServerStatus {
 	String serverInfo;
 	
 	protected LinkedList<UdpRequest> waitQueue = new LinkedList<>();
-	protected LinkedList<UdpGenericQueryClient> freeChannelList;
-	ArrayList<UdpGenericQueryClient> allClients;
+	protected LinkedList<UdpQueryClient> freeChannelList;
+	ArrayList<UdpQueryClient> allClients;
 	
-	UdpGenericConnectionPool pool;
+	UdpConnectionPool pool;
 	
 	
 
@@ -44,7 +44,7 @@ public class UdpServerStatus {
 	public void checkTimeout (){
 		long now = System.currentTimeMillis();
 		for( int i=0; i< allClients.size();i++){
-			UdpGenericQueryClient c = allClients.get(i);
+			UdpQueryClient c = allClients.get(i);
 			
 			do{
 				if( !c.isValid() ) break;
@@ -215,7 +215,7 @@ public class UdpServerStatus {
 		}
 
 		do{
-			UdpGenericQueryClient sc = removeFirstFreeClient();
+			UdpQueryClient sc = removeFirstFreeClient();
 
 			if (sc == null){
 				
@@ -333,8 +333,8 @@ public class UdpServerStatus {
 		return 1;
 	}
 	
-	private UdpGenericQueryClient removeFirstFreeClient(){
-		UdpGenericQueryClient client;
+	private UdpQueryClient removeFirstFreeClient(){
+		UdpQueryClient client;
 		synchronized( freeChannelList ){
 			if( freeChannelList.size() > 0 ){
 				
@@ -352,7 +352,7 @@ public class UdpServerStatus {
 		}
 		return client;
 	}
-	void freeClient(UdpGenericQueryClient client) {
+	void freeClient(UdpQueryClient client) {
 		synchronized (freeChannelList) {
 			if (client.using) {
 				
@@ -415,7 +415,7 @@ public class UdpServerStatus {
 
 //	public ServerStatus(){}
 	
-	public UdpServerStatus(String line, UdpGenericConnectionPool pool ) throws IllegalArgumentException{
+	public UdpServerStatus(String line, UdpConnectionPool pool ) throws IllegalArgumentException{
 		if( line == null ) throw new IllegalArgumentException("ServerStatus Null Line Parameter");
 		
 		line = line.trim();
@@ -449,11 +449,11 @@ public class UdpServerStatus {
 		
 		this.pool = pool;
 		int count = pool.serverConfig.maxConnectionsPerServer;
-		ArrayList<UdpGenericQueryClient> al = new ArrayList<>( count );
-		LinkedList<UdpGenericQueryClient> deactiveChannelSet = new LinkedList<>();
+		ArrayList<UdpQueryClient> al = new ArrayList<>( count );
+		LinkedList<UdpQueryClient> deactiveChannelSet = new LinkedList<>();
 		for(int i=0;i<count;i++){
 			
-			UdpGenericQueryClient ace = pool.factory.newInstance();
+			UdpQueryClient ace = pool.factory.newInstance();
 			ace.serverStatus = this;
 //			SocketChannel socketChannel =null;
 //			ace.channel = socketChannel;
@@ -569,7 +569,7 @@ public class UdpServerStatus {
 		
 		for( int i=0; i< this.allClients.size(); i++){
 			sb.append( '\t' );
-			UdpGenericQueryClient ace = this.allClients.get(i);
+			UdpQueryClient ace = this.allClients.get(i);
 			sb.append( ace.getStatus() );
 			sb.append('\n');
 		}
@@ -588,7 +588,7 @@ public class UdpServerStatus {
 	public void destroy(){
 		//ArrayList allClients = this.allClients;
 		for( int i=0; allClients != null && i< allClients.size();i++){
-			UdpGenericQueryClient c = allClients.get(i);
+			UdpQueryClient c = allClients.get(i);
 			c.close();
 		}
 	}

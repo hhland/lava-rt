@@ -84,12 +84,7 @@ public abstract class TcpGenericConnectionPool extends ConnectionPool<TcpRequest
         }
     }
 
-    /**
-     * ��ü�¼��ʵ��
-     * 
-     * @return
-     */
-    protected abstract Log getLogger();
+   
 
     public int sendRequest(TcpRequest request) {
 

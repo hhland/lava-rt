@@ -102,11 +102,7 @@ public abstract class UdpGenericConnectionPool extends ConnectionPool<UdpRequest
 		sender.startThread();
 	}
 
-	/**
-	 * ��ü�¼��ʵ��
-	 * @return
-	 */
-	protected abstract Log getLogger();
+	
 
 	public int sendRequest( UdpRequest request ){
 		

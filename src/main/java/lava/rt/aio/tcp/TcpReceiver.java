@@ -249,10 +249,10 @@ class TcpReceiver extends Receiver<TcpGenericQueryClient>{
 					continue;
 				}
 	
-				Set set = pool.selectedKeys();
-				Iterator it = set.iterator();
+				Set<SelectionKey> set = pool.selectedKeys();
+				Iterator<SelectionKey> it = set.iterator();
 				while( it.hasNext() ){
-					SelectionKey key = (SelectionKey)it.next();
+					SelectionKey key = it.next();
 					it.remove();
 					try{
 						if( key.isReadable() ){

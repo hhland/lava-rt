@@ -10,6 +10,8 @@ import java.util.Set;
 
 import lava.rt.aio.tcp.TcpGenericQueryClient;
 import lava.rt.aio.udp.UdpRequest;
+import lava.rt.logging.Log;
+import lava.rt.logging.LogFactory;
 
 public abstract class ConnectionPool<R>  {
 
@@ -40,4 +42,13 @@ public abstract class ConnectionPool<R>  {
 	
 	
 	abstract public int sendRequest(R request );
+	
+	 /**
+     * ��ü�¼��ʵ��
+     * 
+     * @return
+     */
+    protected  Log getLogger() {
+    	return LogFactory.SYSTEM.getLog(ConnectionPool.class);
+    }
 }

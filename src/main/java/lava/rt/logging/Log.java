@@ -1,5 +1,6 @@
 package lava.rt.logging;
 
+import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -9,6 +10,9 @@ public class Log {
 	final LogFactory factory;
 	
 	
+	
+	
+	
 	final static SimpleDateFormat SDF_YMDHMS=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
 	
@@ -16,13 +20,15 @@ public class Log {
 		// TODO Auto-generated constructor stub
 		this.cls=cls;
 		this.factory=factory;
+		
 	}
 
 	
 	public void warn(Object... vals) {
 		// TODO Auto-generated method stub
-		factory.infoStream.forEach(s->{
-			  
+		//factory.infoStream.forEach(s->{
+		if(factory.level<factory.LEVEL_WARN) return;
+		for(PrintStream s : factory.infoStreams) {  
 		       s.print(prefix("WARN"));
 		       if(vals.length==1) {
 		    	   s.print(vals[0]);
@@ -31,15 +37,16 @@ public class Log {
 		       }
 		       s.println(join(vals));
 		}
-	    );
+	   
 	}
 
 	
 
 	public void info(Object... vals) {
 		// TODO Auto-generated method stub
-		factory.infoStream.forEach(s->{
-			  
+		//factory.infoStream.forEach(s->{
+		if(factory.level<factory.LEVEL_INFO) return;
+		for(PrintStream s : factory.infoStreams) {  	  
 		       s.print(prefix("INFO"));
 		       if(vals.length==1) {
 		    	   s.print(vals[0]);
@@ -48,23 +55,25 @@ public class Log {
 		       }
 		       s.println(join(vals));
 		}
-	    );
+	    
 	}
 
 	public void error(Exception ex) {
 		// TODO Auto-generated method stub
-		factory.errStream.forEach(s->{
-	 	   
+		//factory.errStream.forEach(s->{
+		if(factory.level<factory.LEVEL_ERROR) return;
+		for(PrintStream s : factory.infoStreams) {     
 	       ex.printStackTrace(s);
 		}
-	    );
+	   // );
 	}
 	
 
 	public void error(Object... vals) {
 		// TODO Auto-generated method stub
-		factory.errStream.forEach(s->{
-		   
+		//factory.errStream.forEach(s->{
+		if(factory.level<factory.LEVEL_ERROR) return;
+		for(PrintStream s : factory.infoStreams) {  
 	       s.print(prefix("ERROR"));
 	       if(vals.length==1) {
 	    	   s.print(vals[0]);
@@ -73,7 +82,7 @@ public class Log {
 	       }
 	       s.println(join(vals));
 		}
-	    );
+	    
 	}
 
 	public static String join(Object... vals) {

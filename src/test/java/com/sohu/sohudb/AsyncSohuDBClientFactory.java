@@ -1,9 +1,12 @@
 package com.sohu.sohudb;
 
-import lava.rt.aio.tcp.TcpClientFactory;
-import lava.rt.aio.tcp.TcpGenericQueryClient;
+import lava.rt.aio.ClientFactory;
 
-public class AsyncSohuDBClientFactory implements TcpClientFactory {
+import lava.rt.aio.tcp.TcpGenericQueryClient;
+import lava.rt.aio.tcp.TcpServerConfig;
+import lava.rt.logging.LogFactory;
+
+public class AsyncSohuDBClientFactory implements ClientFactory<TcpGenericQueryClient> {
 
 	public TcpGenericQueryClient newInstance() {
 		return new AsyncSohuDBClient();
@@ -19,7 +22,11 @@ public class AsyncSohuDBClientFactory implements TcpClientFactory {
 		
 		TcpGenericQueryClient client=factory.newInstance();
 		
-		AsyncSohuDBPool pool=new AsyncSohuDBPool();
+		LogFactory.SYSTEM.level=LogFactory.LEVEL_WARN;
+		
+		TcpServerConfig config=new TcpServerConfig("test", "hhlin@localhost:8080");
+		
+		AsyncSohuDBPool pool=new AsyncSohuDBPool(config);
 		
 		pool.init();
 		

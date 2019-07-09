@@ -16,7 +16,7 @@ public class AsyncSohuDBClient extends TcpGenericQueryClient {
 	
 	private static byte[] zeroData = {};
 	
-	private static Log logger = LogFactory.SYSTEM.getLog(AsyncSohuDBClient.class);
+	
 
 	protected ByteBuffer[] outBuffs = null;
 	protected ByteBuffer[] inBuffs = null;
@@ -345,6 +345,7 @@ public class AsyncSohuDBClient extends TcpGenericQueryClient {
 
 	@Override
 	protected Log getLogger() {
-		return logger;
+		
+		return LogFactory.SYSTEM.getLog(AsyncSohuDBClient.class);
 	}
 }

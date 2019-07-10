@@ -1,6 +1,6 @@
 package lava.rt.aio.tcp;
 
-public class TcpServerConfig implements TcpServerConfigMBean  {
+public class TcpServerConfig   {
 
 	
 	/// �������ٴδ����,����sleep����
@@ -36,7 +36,7 @@ public class TcpServerConfig implements TcpServerConfigMBean  {
 	/* (non-Javadoc)
 	 * @see lava.rt.aio.tcp.TcpServerConfigMBean#getMaxErrorsBeforeSleep()
 	 */
-	@Override
+	  
 	public int getMaxErrorsBeforeSleep() {
 		return maxErrorsBeforeSleep;
 	}
@@ -44,7 +44,7 @@ public class TcpServerConfig implements TcpServerConfigMBean  {
 	/* (non-Javadoc)
 	 * @see lava.rt.aio.tcp.TcpServerConfigMBean#setMaxErrorsBeforeSleep(int)
 	 */
-	@Override
+	  
 	public void setMaxErrorsBeforeSleep(int maxErrorsBeforeSleep) {
 		this.maxErrorsBeforeSleep = maxErrorsBeforeSleep;
 	}
@@ -52,7 +52,7 @@ public class TcpServerConfig implements TcpServerConfigMBean  {
 	/* (non-Javadoc)
 	 * @see lava.rt.aio.tcp.TcpServerConfigMBean#getSleepMillisecondsAfterTimeOutError()
 	 */
-	@Override
+	  
 	public int getSleepMillisecondsAfterTimeOutError() {
 		return sleepMillisecondsAfterTimeOutError;
 	}
@@ -60,7 +60,7 @@ public class TcpServerConfig implements TcpServerConfigMBean  {
 	/* (non-Javadoc)
 	 * @see lava.rt.aio.tcp.TcpServerConfigMBean#setSleepMillisecondsAfterTimeOutError(int)
 	 */
-	@Override
+	  
 	public void setSleepMillisecondsAfterTimeOutError(int sleepMillisecondsAfterTimeOutError) {
 		this.sleepMillisecondsAfterTimeOutError = sleepMillisecondsAfterTimeOutError;
 	}
@@ -68,7 +68,7 @@ public class TcpServerConfig implements TcpServerConfigMBean  {
 	/* (non-Javadoc)
 	 * @see lava.rt.aio.tcp.TcpServerConfigMBean#getMaxConnectionsPerServer()
 	 */
-	@Override
+	  
 	public int getMaxConnectionsPerServer() {
 		return maxConnectionsPerServer;
 	}
@@ -76,7 +76,7 @@ public class TcpServerConfig implements TcpServerConfigMBean  {
 	/* (non-Javadoc)
 	 * @see lava.rt.aio.tcp.TcpServerConfigMBean#setMaxConnectionsPerServer(int)
 	 */
-	@Override
+	  
 	public void setMaxConnectionsPerServer(int maxConnectionsPerServer) {
 		this.maxConnectionsPerServer = maxConnectionsPerServer;
 	}
@@ -84,7 +84,7 @@ public class TcpServerConfig implements TcpServerConfigMBean  {
 	/* (non-Javadoc)
 	 * @see lava.rt.aio.tcp.TcpServerConfigMBean#getMaxClonedRequest()
 	 */
-	@Override
+	  
 	public int getMaxClonedRequest() {
 		return maxClonedRequest;
 	}
@@ -92,7 +92,7 @@ public class TcpServerConfig implements TcpServerConfigMBean  {
 	/* (non-Javadoc)
 	 * @see lava.rt.aio.tcp.TcpServerConfigMBean#setMaxClonedRequest(int)
 	 */
-	@Override
+	  
 	public void setMaxClonedRequest(int maxClonedRequest) {
 		this.maxClonedRequest = maxClonedRequest;
 	}
@@ -100,7 +100,7 @@ public class TcpServerConfig implements TcpServerConfigMBean  {
 	/* (non-Javadoc)
 	 * @see lava.rt.aio.tcp.TcpServerConfigMBean#getMaxQueueSize()
 	 */
-	@Override
+	  
 	public int getMaxQueueSize() {
 		return maxQueueSize;
 	}
@@ -108,7 +108,7 @@ public class TcpServerConfig implements TcpServerConfigMBean  {
 	/* (non-Javadoc)
 	 * @see lava.rt.aio.tcp.TcpServerConfigMBean#setMaxQueueSize(int)
 	 */
-	@Override
+	  
 	public void setMaxQueueSize(int maxQueueSize) {
 		this.maxQueueSize = maxQueueSize;
 	}
@@ -116,7 +116,7 @@ public class TcpServerConfig implements TcpServerConfigMBean  {
 	/* (non-Javadoc)
 	 * @see lava.rt.aio.tcp.TcpServerConfigMBean#getMaxResponseRadio()
 	 */
-	@Override
+	  
 	public int getMaxResponseRadio() {
 		return maxResponseRadio;
 	}
@@ -124,7 +124,7 @@ public class TcpServerConfig implements TcpServerConfigMBean  {
 	/* (non-Javadoc)
 	 * @see lava.rt.aio.tcp.TcpServerConfigMBean#setMaxResponseRadio(int)
 	 */
-	@Override
+	  
 	public void setMaxResponseRadio(int maxResponseRadio) {
 		this.maxResponseRadio = maxResponseRadio;
 	}
@@ -132,7 +132,7 @@ public class TcpServerConfig implements TcpServerConfigMBean  {
 	/* (non-Javadoc)
 	 * @see lava.rt.aio.tcp.TcpServerConfigMBean#getConnectTimeout()
 	 */
-	@Override
+	  
 	public long getConnectTimeout() {
 		return connectTimeout;
 	}
@@ -140,7 +140,7 @@ public class TcpServerConfig implements TcpServerConfigMBean  {
 	/* (non-Javadoc)
 	 * @see lava.rt.aio.tcp.TcpServerConfigMBean#setConnectTimeout(long)
 	 */
-	@Override
+	  
 	public void setConnectTimeout(long connectTimeout) {
 		this.connectTimeout = connectTimeout;
 	}
@@ -148,7 +148,7 @@ public class TcpServerConfig implements TcpServerConfigMBean  {
 	/* (non-Javadoc)
 	 * @see lava.rt.aio.tcp.TcpServerConfigMBean#getSocketTimeout()
 	 */
-	@Override
+	  
 	public long getSocketTimeout() {
 		return socketTimeout;
 	}
@@ -156,7 +156,7 @@ public class TcpServerConfig implements TcpServerConfigMBean  {
 	/* (non-Javadoc)
 	 * @see lava.rt.aio.tcp.TcpServerConfigMBean#setSocketTimeout(long)
 	 */
-	@Override
+	  
 	public void setSocketTimeout(long socketTimeout) {
 		this.socketTimeout = socketTimeout;
 	}
@@ -164,7 +164,7 @@ public class TcpServerConfig implements TcpServerConfigMBean  {
 	/* (non-Javadoc)
 	 * @see lava.rt.aio.tcp.TcpServerConfigMBean#getSocketFailTimeout()
 	 */
-	@Override
+	  
 	public long getSocketFailTimeout() {
 		return socketFailTimeout;
 	}
@@ -172,7 +172,7 @@ public class TcpServerConfig implements TcpServerConfigMBean  {
 	/* (non-Javadoc)
 	 * @see lava.rt.aio.tcp.TcpServerConfigMBean#setSocketFailTimeout(long)
 	 */
-	@Override
+	  
 	public void setSocketFailTimeout(long socketFailTimeout) {
 		this.socketFailTimeout = socketFailTimeout;
 	}
@@ -180,7 +180,7 @@ public class TcpServerConfig implements TcpServerConfigMBean  {
 	/* (non-Javadoc)
 	 * @see lava.rt.aio.tcp.TcpServerConfigMBean#getQueueShortTimeout()
 	 */
-	@Override
+	  
 	public long getQueueShortTimeout() {
 		return queueShortTimeout;
 	}
@@ -188,7 +188,7 @@ public class TcpServerConfig implements TcpServerConfigMBean  {
 	/* (non-Javadoc)
 	 * @see lava.rt.aio.tcp.TcpServerConfigMBean#setQueueShortTimeout(long)
 	 */
-	@Override
+	  
 	public void setQueueShortTimeout(long queueShortTimeout) {
 		this.queueShortTimeout = queueShortTimeout;
 	}
@@ -196,7 +196,7 @@ public class TcpServerConfig implements TcpServerConfigMBean  {
 	/* (non-Javadoc)
 	 * @see lava.rt.aio.tcp.TcpServerConfigMBean#getQueueTimeout()
 	 */
-	@Override
+	  
 	public long getQueueTimeout() {
 		return queueTimeout;
 	}
@@ -204,7 +204,7 @@ public class TcpServerConfig implements TcpServerConfigMBean  {
 	/* (non-Javadoc)
 	 * @see lava.rt.aio.tcp.TcpServerConfigMBean#setQueueTimeout(long)
 	 */
-	@Override
+	  
 	public void setQueueTimeout(long queueTimeout) {
 		this.queueTimeout = queueTimeout;
 	}
@@ -212,7 +212,7 @@ public class TcpServerConfig implements TcpServerConfigMBean  {
 	/* (non-Javadoc)
 	 * @see lava.rt.aio.tcp.TcpServerConfigMBean#getRobinTime()
 	 */
-	@Override
+	  
 	public long getRobinTime() {
 		return robinTime;
 	}
@@ -220,7 +220,7 @@ public class TcpServerConfig implements TcpServerConfigMBean  {
 	/* (non-Javadoc)
 	 * @see lava.rt.aio.tcp.TcpServerConfigMBean#setRobinTime(long)
 	 */
-	@Override
+	  
 	public void setRobinTime(long robinTime) {
 		this.robinTime = robinTime;
 	}
@@ -228,7 +228,7 @@ public class TcpServerConfig implements TcpServerConfigMBean  {
 	/* (non-Javadoc)
 	 * @see lava.rt.aio.tcp.TcpServerConfigMBean#getMaxResponseTime()
 	 */
-	@Override
+	  
 	public long getMaxResponseTime() {
 		return maxResponseTime;
 	}
@@ -236,7 +236,7 @@ public class TcpServerConfig implements TcpServerConfigMBean  {
 	/* (non-Javadoc)
 	 * @see lava.rt.aio.tcp.TcpServerConfigMBean#setMaxResponseTime(long)
 	 */
-	@Override
+	  
 	public void setMaxResponseTime(long maxResponseTime) {
 		this.maxResponseTime = maxResponseTime;
 	}
@@ -244,7 +244,7 @@ public class TcpServerConfig implements TcpServerConfigMBean  {
 	/* (non-Javadoc)
 	 * @see lava.rt.aio.tcp.TcpServerConfigMBean#getShortRetryTime()
 	 */
-	@Override
+	  
 	public long getShortRetryTime() {
 		return shortRetryTime;
 	}
@@ -252,7 +252,7 @@ public class TcpServerConfig implements TcpServerConfigMBean  {
 	/* (non-Javadoc)
 	 * @see lava.rt.aio.tcp.TcpServerConfigMBean#setShortRetryTime(long)
 	 */
-	@Override
+	  
 	public void setShortRetryTime(long shortRetryTime) {
 		this.shortRetryTime = shortRetryTime;
 	}
@@ -260,7 +260,7 @@ public class TcpServerConfig implements TcpServerConfigMBean  {
 	/* (non-Javadoc)
 	 * @see lava.rt.aio.tcp.TcpServerConfigMBean#getName()
 	 */
-	@Override
+	  
 	public String getName() {
 		return name;
 	}
@@ -268,7 +268,7 @@ public class TcpServerConfig implements TcpServerConfigMBean  {
 	/* (non-Javadoc)
 	 * @see lava.rt.aio.tcp.TcpServerConfigMBean#setName(java.lang.String)
 	 */
-	@Override
+	  
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -276,7 +276,7 @@ public class TcpServerConfig implements TcpServerConfigMBean  {
 	/* (non-Javadoc)
 	 * @see lava.rt.aio.tcp.TcpServerConfigMBean#getServers()
 	 */
-	@Override
+	  
 	public String[] getServers() {
 		return servers;
 	}
@@ -284,7 +284,7 @@ public class TcpServerConfig implements TcpServerConfigMBean  {
 	/* (non-Javadoc)
 	 * @see lava.rt.aio.tcp.TcpServerConfigMBean#setServers(java.lang.String[])
 	 */
-	@Override
+	  
 	public void setServers(String[] servers) {
 		this.servers = servers;
 	}

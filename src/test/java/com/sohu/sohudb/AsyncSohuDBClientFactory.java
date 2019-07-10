@@ -9,6 +9,7 @@ import java.util.Properties;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 import javax.management.ObjectName;
+import javax.management.modelmbean.RequiredModelMBean;
 import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
@@ -62,10 +63,11 @@ public class AsyncSohuDBClientFactory implements ClientFactory<TcpQueryClient> {
 		 MBeanServerAdapter mbs0=new MBeanServerAdapter();
 		 
 		           //create mbean and register mbean
-		 mbs0.registerMBean(new Hello());
+		 mbs0.registerMBean(new Hello(),"");
 		 mbs0.registerMBean(new Hello(),"sdfsdf");          
 
-		 mbs0.registerMBean(config);
+		 
+		 mbs0.registerMBean(config,"-fdsfs");
         
         System.out.println("start.....");
 		
@@ -75,7 +77,7 @@ public class AsyncSohuDBClientFactory implements ClientFactory<TcpQueryClient> {
         
         
         MBeanServerAdapter mbs=new MBeanServerAdapter(MBeanServerFactory.createMBeanServer(domainName));
-        mbs.registerMBean(new Hello());
+        mbs.registerMBean(new Hello(),"5");
         
         
         JMXServiceURL url =MBeanServerAdapter.getRmiUrl("localhost", rmiPort, domainName);

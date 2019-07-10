@@ -114,20 +114,20 @@ public class PropertiesAdapter extends BaseAdapter<Properties>{
 			 field.set(target, value); 
 		 }
 		 else if(int.class.equals(field.getType())||Integer.class.equals(field.getType())) {
-			 field.setInt(target, Integer.parseInt(value)); 
+			 field.set(target, Integer.parseInt(value)); 
 		 }
 		 else if(float.class.equals(field.getType())||Float.class.equals(field.getType())) {
-			 field.setFloat(target, Float.parseFloat(value)); 
+			 field.set(target, Float.parseFloat(value)); 
 		 }
 		 else if(double.class.equals(field.getType())||Double.class.equals(field.getType())) {
-			 field.setDouble(target, Double.parseDouble(value)); 
+			 field.set(target, Double.parseDouble(value)); 
 		 }
 		 else if(short.class.equals(field.getType())||Short.class.equals(field.getType())) {
-			 field.setDouble(target, Short.parseShort(value)); 
+			 field.set(target, Short.parseShort(value)); 
 		 }
 		 else if(boolean.class.equals(field.getType())||Boolean.class.equals(field.getType())) {
 			 
-			 field.setBoolean(target, Boolean.parseBoolean(value)); 
+			 field.set(target, Boolean.parseBoolean(value)); 
 		 }
 		 else if(ReflectCommon.isArray(field)) {
 		      String[] values=value.split(",");

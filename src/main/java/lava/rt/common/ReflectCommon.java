@@ -10,6 +10,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.JarURLConnection;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Enumeration;
@@ -33,12 +34,6 @@ public final class ReflectCommon {
 	
     
 	
-	
-    public static File getFile(String fileName) {
-    	String path=getClassPath()+fileName;
-    	File file=new File(path);
-    	return file;
-    }
 	
 
 	public static String getClassPath() {

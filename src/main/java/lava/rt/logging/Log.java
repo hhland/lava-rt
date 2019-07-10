@@ -3,6 +3,7 @@ package lava.rt.logging;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.logging.Level;
 
 public class Log {
 
@@ -27,7 +28,7 @@ public class Log {
 	public void warn(Object... vals) {
 		// TODO Auto-generated method stub
 		//factory.infoStream.forEach(s->{
-		if(factory.level<factory.LEVEL_WARN) return;
+		if(factory.level.intValue()>Level.WARNING.intValue()) return;
 		for(PrintStream s : factory.infoStreams) {  
 		       s.print(prefix("WARN"));
 		       if(vals.length==1) {
@@ -45,7 +46,7 @@ public class Log {
 	public void info(Object... vals) {
 		// TODO Auto-generated method stub
 		//factory.infoStream.forEach(s->{
-		if(factory.level<factory.LEVEL_INFO) return;
+		if(factory.level.intValue()>Level.INFO.intValue()) return;
 		for(PrintStream s : factory.infoStreams) {  	  
 		       s.print(prefix("INFO"));
 		       if(vals.length==1) {
@@ -61,7 +62,7 @@ public class Log {
 	public void error(Exception ex) {
 		// TODO Auto-generated method stub
 		//factory.errStream.forEach(s->{
-		if(factory.level<factory.LEVEL_ERROR) return;
+		if(factory.level.intValue()>=Level.OFF.intValue()) return;
 		for(PrintStream s : factory.infoStreams) {     
 	       ex.printStackTrace(s);
 		}
@@ -72,7 +73,7 @@ public class Log {
 	public void error(Object... vals) {
 		// TODO Auto-generated method stub
 		//factory.errStream.forEach(s->{
-		if(factory.level<factory.LEVEL_ERROR) return;
+		if(factory.level.intValue()>=Level.OFF.intValue()) return;
 		for(PrintStream s : factory.infoStreams) {  
 	       s.print(prefix("ERROR"));
 	       if(vals.length==1) {

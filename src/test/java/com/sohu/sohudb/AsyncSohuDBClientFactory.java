@@ -39,7 +39,7 @@ public class AsyncSohuDBClientFactory implements ClientFactory<TcpQueryClient> {
 		
 		TcpQueryClient client=factory.newInstance();
 		
-		LogFactory.SYSTEM.level=LogFactory.LEVEL_WARN;
+		
 		
 		TcpServerConfig config=new TcpServerConfig("test", "hhlin@localhost:8080");
 		
@@ -48,7 +48,7 @@ public class AsyncSohuDBClientFactory implements ClientFactory<TcpQueryClient> {
 		
 		System.out.println(template);
 		
-		File file=ReflectCommon.getFile("/aio.properties");
+		File file=new File(File.class.getResource("/aio.properties").toURI());
 		
 		PropertiesAdapter propertiesAdapter=new PropertiesAdapter(file);
 		

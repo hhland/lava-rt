@@ -4,6 +4,7 @@ import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Level;
 import java.util.stream.Stream;
 
 import lava.rt.aio.tcp.TcpServerStatus;
@@ -13,10 +14,7 @@ public class LogFactory {
 	protected PrintStream[] infoStreams,errStreams,debugStreams
 			;
 	
-	public static int LEVEL_ERROR=0
-			,LEVEL_WARN=1
-			,LEVEL_INFO=2
-			;
+	
 	
 	public static final LogFactory SYSTEM=new LogFactory();
 	
@@ -35,7 +33,7 @@ public class LogFactory {
 	
 	private  Map<Class,Log> logMap=new HashMap<>();
 
-	public int level=LEVEL_INFO;
+	public Level level=Level.WARNING;
 	
 
 	

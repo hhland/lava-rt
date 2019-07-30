@@ -4,6 +4,9 @@ package lava.rt.linq;
 import java.util.Collection;
 import java.util.List;
 
+import lava.rt.linq.execption.CommandExecuteExecption;
+import lava.rt.linq.execption.DuplicateKeyException;
+
 
 
 public interface  DataContext  {
@@ -30,7 +33,7 @@ public interface  DataContext  {
 
 	public int entityAdd(Entity entry) throws CommandExecuteExecption ;
 
-	public  int entityPut(Object pk,Entity entry) throws CommandExecuteExecption;
+	public  int entityPut(Object pk,Entity entry) throws CommandExecuteExecption,DuplicateKeyException;
 
 	public int entityUpdate(Entity entry) throws CommandExecuteExecption;
 

@@ -20,12 +20,12 @@ import java.util.*;
 
 import javax.sql.DataSource;
 
-
-
-import lava.rt.linq.CommandExecuteExecption;
 import lava.rt.linq.DataContext;
 import lava.rt.linq.Entity;
+import lava.rt.linq.execption.CommandExecuteExecption;
 import lava.rt.linq.sql.*;
+import lava.rt.logging.Log;
+import lava.rt.logging.LogFactory;
 
 
 
@@ -34,6 +34,8 @@ public abstract class DataContextSrcGener   {
 	public  long serialVersionUID=1L;
 	
 	protected abstract Class<? extends DataContextSrcGener> thisClass();
+	
+	protected Log log=LogFactory.SYSTEM.getLog(thisClass());
 	
 	protected Connection connection;
 	
@@ -60,6 +62,10 @@ public abstract class DataContextSrcGener   {
     	srcIntf.setWritable(true);
 		try(FileWriter fw=new FileWriter(srcIntf)){
 			fw.write(src);
+		}catch(IOException ioe) {
+			log.equals(srcIntf);
+			ioe.printStackTrace();
+			throw ioe;
 		}
 		
 		
@@ -73,6 +79,10 @@ public abstract class DataContextSrcGener   {
 		srcImpl.setWritable(true);
 		try(FileWriter fw=new FileWriter(srcImpl)){
 			fw.write(src);
+		}catch(IOException ioe) {
+			log.equals(srcImpl);
+			ioe.printStackTrace();
+			throw ioe;
 		}
 	}
 	
@@ -91,7 +101,7 @@ public abstract class DataContextSrcGener   {
 		
 		src
 		.append("import "+DataContext.class.getPackage().getName()+".*; \n")
-		
+		.append("import "+DataSourceContext.class.getPackage().getName()+".*; \n")
 		
 		.append("import "+ List.class.getPackage().getName()+".*; \n")
 		

@@ -23,11 +23,10 @@ import lava.rt.base.PoolList;
 import lava.rt.cache.CacheItem;
 import lava.rt.common.SqlCommon;
 import lava.rt.linq.Checkpoint;
-import lava.rt.linq.CommandExecuteExecption;
-
 import lava.rt.linq.Entity;
-import lava.rt.linq.CommandExecuteExecption.CmdType;
-
+import lava.rt.linq.execption.CommandExecuteExecption;
+import lava.rt.linq.execption.CommandExecuteExecption.CmdType;
+import lava.rt.linq.execption.DuplicateKeyException;
 import lava.rt.logging.LogFactory;
 
 public abstract class DataSourceContext  implements SqlDataContext,Closeable {
@@ -430,7 +429,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	}
 	
 	
-	public  int entityPut(Object pk,Entity entry) throws CommandExecuteExecption {
+	public  int entityPut(Object pk,Entity entry) throws CommandExecuteExecption,DuplicateKeyException {
 		int re = 0;
 		Class<? extends Entity> cls = entry.getClass();
 		Table table = this.tableGet(cls);

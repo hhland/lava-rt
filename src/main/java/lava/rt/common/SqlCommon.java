@@ -2,11 +2,13 @@ package lava.rt.common;
 
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Reader;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
@@ -155,10 +157,24 @@ public final class SqlCommon {
   	}
 	
       
-     
+      public static String readString(Clob clob) throws SQLException, IOException { 
+
+    	  StringBuffer sb = new StringBuffer();
+          Reader is = clob.getCharacterStream();// 得到流 
+          try(BufferedReader br = new BufferedReader(is);){ 
+          String s = br.readLine(); 
+           
+          while (s != null) {// 执行循环将字符串全部取出付值给StringBuffer由StringBuffer转成STRING 
+              sb.append(s); 
+              s = br.readLine(); 
+          } 
+          }
+          return sb.toString(); 
+      } 
      
       
       
+     
       
       
   

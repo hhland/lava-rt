@@ -7,7 +7,7 @@ package lava.rt.linq.sql;
 
 
 import java.io.Closeable;
-
+import java.lang.reflect.Field;
 import java.sql.*;
 
 import java.util.*;
@@ -57,9 +57,14 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	
 
 	protected <M extends Entity> Table<M> tableCreate(Class<M> cls, String tableName, String pkName) {
-		Table<M> table = new Table<M>(this, cls, tableName, pkName);
+		Table<M> table=null;
+		try {
+		table= new Table<M>(this, cls, tableName, pkName);
 		tableMap.put(cls, table);
 		viewMap.put(cls, table);
+		}catch(Exception ex) {
+			logError(cls,tableName);
+		}
 		return table;
 	}
 
@@ -147,10 +152,10 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 						if (columnIndex==null)
 							continue;
 						
-						//Field field = view.entryFieldMap.get(columnName);
+						Field field = view.entryFieldMap.get(columnName);
 						try {
-							m.val(columnName,resultSet.getObject(columnIndex));
-							//field.set(m, resultSet.getObject(columnIndex));
+							//m.val(columnName,resultSet.getObject(columnIndex));
+							field.set(m, resultSet.getObject(columnIndex));
 						} catch (Exception e) {
 							continue;
 						}

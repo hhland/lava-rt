@@ -22,11 +22,11 @@ import javax.sql.DataSource;
 import lava.rt.base.PoolList;
 import lava.rt.cache.CacheItem;
 import lava.rt.common.SqlCommon;
+import lava.rt.execption.CommandExecuteExecption;
+import lava.rt.execption.DuplicateKeyException;
+import lava.rt.execption.CommandExecuteExecption.CmdType;
 import lava.rt.linq.Checkpoint;
 import lava.rt.linq.Entity;
-import lava.rt.linq.execption.CommandExecuteExecption;
-import lava.rt.linq.execption.CommandExecuteExecption.CmdType;
-import lava.rt.linq.execption.DuplicateKeyException;
 import lava.rt.logging.LogFactory;
 
 public abstract class DataSourceContext  implements SqlDataContext,Closeable {
@@ -39,7 +39,9 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	
 	protected  final Map<String,String> columnMap = new HashMap<>();
 
-	private final ThreadLocal<PoolList<Connection>> localConnection = new ThreadLocal<>();
+	private final ThreadLocal<PoolList<Connection>> readConnection = new ThreadLocal<>()
+			,writeConnection = new ThreadLocal<>()
+			;
 
 	protected  <E extends Entity> E entityNew(Class<E> entryClass) throws Exception{
           E ret=Entity.newEntity(entryClass);
@@ -51,9 +53,11 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	
 	
 
-	protected abstract  DataSource[] getDataSources() ;
+	protected abstract  DataSource[] getReadDataSources() ;
 
-	
+
+	protected abstract  DataSource[] getWriteDataSources() ;
+
 	
 
 	protected <M extends Entity> Table<M> tableCreate(Class<M> cls, String tableName, String pkName) {
@@ -121,7 +125,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 
 	public <M extends Entity> List<M> entityList(Class<M> cls, String sql, Object... params) throws CommandExecuteExecption {
 		sql=View.formatEl(sql, viewMap);
-		Connection connection = getConnection();
+		Connection connection = getReadConnection();
 		
 		List<M> list = new ArrayList<M>();
 		try (PreparedStatement preparedStatement = connection.prepareStatement(sql);) {
@@ -179,7 +183,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 
 	public Object[][] executeQueryArray(String sql, Object... params) throws CommandExecuteExecption {
 		sql=formatEl(sql);
-		Connection connection= getConnection();
+		Connection connection= getReadConnection();
 		
 		Object[][] re =null;
 		try {
@@ -215,7 +219,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 		StringBuffer ret = new StringBuffer("[");
 		int size=0;
 		String[] columns=null;
-		try (PreparedStatement preparedStatement = getConnection().prepareStatement(sql);) {
+		try (PreparedStatement preparedStatement = getReadConnection().prepareStatement(sql);) {
 			for (int i = 0; i < params.length; i++) {
 				preparedStatement.setObject(i + 1, params[i]);
 			}
@@ -328,7 +332,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	public int executeUpdate(String sql0, Object... param) throws CommandExecuteExecption {
 		int re = 0;
 		final String sql=View.formatEl(sql0, viewMap);
-		PoolList<Connection> connections = getConnections();
+		PoolList<Connection> connections = getWriteConnections();
 		if (connections == null) {
 			//printErr("error:" + sql);
 		} else if (connections.size() == 1) {
@@ -369,7 +373,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	public int executeInsertReturnPk(String sql, Object... param) throws CommandExecuteExecption {
 		int pk = 0;
 		sql=formatEl(sql);
-		Connection connection = getConnection();
+		Connection connection = getWriteConnection();
 
 			try (PreparedStatement preparedStatement = connection.prepareStatement(sql,
 					Statement.RETURN_GENERATED_KEYS);) {
@@ -399,7 +403,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	public int executeBatch(String sql0, Object[]... params) throws CommandExecuteExecption {
 		int re = 0;
 		final String  sql=formatEl(sql0);
-		PoolList<Connection> connections = getConnections();
+		PoolList<Connection> connections = getWriteConnections();
 		if (connections.size() == 1) {
 			try {
 			re += SqlCommon.executeBatch(connections.get(0), sql, params);
@@ -535,7 +539,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 
 	public void executeSetAutoCommit(boolean b) throws CommandExecuteExecption {
         try {
-		for (Connection conn : localConnection.get()) {
+		for (Connection conn : writeConnection.get()) {
 			conn.setAutoCommit(b);
 
 		}
@@ -545,7 +549,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 
 	public void executeCommit() throws CommandExecuteExecption {
 		try {
-		for (Connection conn : localConnection.get()) {
+		for (Connection conn : writeConnection.get()) {
 			conn.commit();
 
 		}
@@ -554,7 +558,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	
 	public void executeRollback(Checkpoint...points) throws CommandExecuteExecption {
 		try {
-		for (Connection conn : localConnection.get()) {
+		for (Connection conn : writeConnection.get()) {
 			if(points.length==0) {
 			  conn.rollback();
 			}else {
@@ -595,7 +599,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	}
 	
 	public Checkpoint[] executeSetCheckpoint(String... points) throws CommandExecuteExecption {
-		PoolList<Connection> connections=localConnection.get();
+		PoolList<Connection> connections=writeConnection.get();
 		Savepoint[] ret0=new Savepoint[connections.size()];
 		Checkpoint[] ret=new Checkpoint[ret0.length];
 			
@@ -622,11 +626,11 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 		return ret;
 	}
 
-	private  PoolList<Connection> getConnections() throws CommandExecuteExecption{
-       PoolList<Connection> connections = localConnection.get();
+	private  PoolList<Connection> getReadConnections() throws CommandExecuteExecption{
+       PoolList<Connection> connections = readConnection.get();
 		
 		if(connections==null) {
-			 DataSource[] dss=getDataSources();
+			 DataSource[] dss=getReadDataSources();
 			 try {
 				connections = new PoolList<Connection>(dss.length) {
 
@@ -642,15 +646,15 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 				throw CommandExecuteExecption.forSql(e, "getConnections");
 			}
 
-			localConnection.set(connections);
+			readConnection.set(connections);
 			
 		}
 		return connections;
 	}
 	
 	@SuppressWarnings("resource")
-	protected final Connection getConnection() throws CommandExecuteExecption {
-		PoolList<Connection> connections = getConnections();
+	protected final Connection getReadConnection() throws CommandExecuteExecption {
+		PoolList<Connection> connections = getReadConnections();
 		
 		Connection ret = connections.getNext();
 		
@@ -658,7 +662,40 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	}
 
 	
-	
+	private  PoolList<Connection> getWriteConnections() throws CommandExecuteExecption{
+	       PoolList<Connection> connections = writeConnection.get();
+			
+			if(connections==null) {
+				 DataSource[] dss=getWriteDataSources();
+				 try {
+					connections = new PoolList<Connection>(dss.length) {
+
+						@Override
+						public Connection newSingle(int i) throws Exception {
+							// TODO Auto-generated method stub
+							return dss[i].getConnection();
+						}
+
+					};
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					throw CommandExecuteExecption.forSql(e, "getConnections");
+				}
+
+				writeConnection.set(connections);
+				
+			}
+			return connections;
+		}
+		
+		@SuppressWarnings("resource")
+		protected final Connection getWriteConnection() throws CommandExecuteExecption {
+			PoolList<Connection> connections = getWriteConnections();
+			
+			Connection ret = connections.getNext();
+			
+			return ret;
+		}
 	
 
 	
@@ -679,7 +716,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 
 		sql.append(")}");
 		int cc = 0;
-		try (CallableStatement call = getConnection().prepareCall(sql.toString());) {
+		try (CallableStatement call = getWriteConnection().prepareCall(sql.toString());) {
 			boolean isOutputParam = false;
 			for (int i = 0; i < params.length; i++) {
 				if (params[i] instanceof OutputParam) {
@@ -736,7 +773,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	@Override
 	public void close()  {
 		// TODO Auto-generated method stub
-		localConnection.get().parallelStream().forEach(conn-> {try {
+		writeConnection.get().parallelStream().forEach(conn-> {try {
 			conn.close();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block

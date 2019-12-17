@@ -20,9 +20,9 @@ import java.util.*;
 
 import javax.sql.DataSource;
 
+import lava.rt.execption.CommandExecuteExecption;
 import lava.rt.linq.DataContext;
 import lava.rt.linq.Entity;
-import lava.rt.linq.execption.CommandExecuteExecption;
 import lava.rt.linq.sql.*;
 import lava.rt.logging.Log;
 import lava.rt.logging.LogFactory;

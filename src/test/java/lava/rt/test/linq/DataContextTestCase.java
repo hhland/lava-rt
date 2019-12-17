@@ -8,8 +8,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import junit.framework.TestCase;
+import lava.rt.execption.CommandExecuteExecption;
 import lava.rt.linq.DataContext;
-import lava.rt.linq.execption.CommandExecuteExecption;
 import lava.rt.linq.sql.Table;
 import lava.rt.test.pojo.JC2010_ENTERPRISE_DB.Criteria;
 import lava.rt.test.pojo.JC2010_ENTERPRISE_DB.Test_;

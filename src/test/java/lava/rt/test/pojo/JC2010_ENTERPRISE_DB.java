@@ -5,8 +5,8 @@
 */ 
 package lava.rt.test.pojo; 
 
+import lava.rt.execption.CommandExecuteExecption;
 import lava.rt.linq.*;
-import lava.rt.linq.execption.CommandExecuteExecption;
 import lava.rt.linq.sql.Column;
 import lava.rt.linq.sql.OutputParam;
 import lava.rt.linq.sql.SqlDataContext;

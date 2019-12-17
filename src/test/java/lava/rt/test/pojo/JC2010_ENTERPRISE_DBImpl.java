@@ -23,11 +23,7 @@ public class JC2010_ENTERPRISE_DBImpl extends JC2010_ENTERPRISE_DBBase {
 
 
 
-	@Override
-	protected DataSource[] getDataSources() {
-		// TODO Auto-generated method stub
-		return dataSources;
-	}
+	
 
 	
 	static MemoryCacheContainer cacheContainer=new MemoryCacheContainer();
@@ -49,6 +45,22 @@ public class JC2010_ENTERPRISE_DBImpl extends JC2010_ENTERPRISE_DBBase {
 	protected <E extends Entity> void cachePut(E entity, Object pk) {
 		// TODO Auto-generated method stub
 		cacheContainer.put(entity, pk, 1000*60);
+	}
+
+
+
+	@Override
+	protected DataSource[] getReadDataSources() {
+		// TODO Auto-generated method stub
+		return dataSources;
+	}
+
+
+
+	@Override
+	protected DataSource[] getWriteDataSources() {
+		// TODO Auto-generated method stub
+		return dataSources;
 	}
 
 

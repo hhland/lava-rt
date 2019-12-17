@@ -2,8 +2,8 @@ package lava.rt.linq.sql;
 
 
 
+import lava.rt.execption.CommandExecuteExecption;
 import lava.rt.linq.DataContext;
-import lava.rt.linq.execption.CommandExecuteExecption;
 
 public interface SqlDataContext extends DataContext {
 

@@ -81,7 +81,7 @@ public   class  View<M extends Entity> {
 
 	@Override
 	public String toString() {
-		return "View [tableName=" + tableName + ", entryClass=" + entryClass + "]";
+		return tableName;
 	}
 
 

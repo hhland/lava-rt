@@ -141,6 +141,7 @@ public abstract class DataContextSrcGener   {
 		
 		src.append("\n\n");
 		
+		Set<String> objectSrcs=new HashSet<>();
 		//tables.addAll(views);
 		for(String table:tables) {
 			String pkName=null;
@@ -151,6 +152,7 @@ public abstract class DataContextSrcGener   {
 			TableSrc tableSrc=new TableSrc(tn,pkName);
 			srcEvent.onTableSrcAppend(src,tableSrc);
 			src.append(tableSrc.toSrc(cls));
+			objectSrcs.add(tableSrc.className+"=\""+tableSrc.tableName+"\"");
 		}
 		
 		for(String table:views) {
@@ -159,6 +161,7 @@ public abstract class DataContextSrcGener   {
 			TableSrc tableSrc=new TableSrc(tn,null);
 			srcEvent.onViewSrcAppend(src,tableSrc);
 			src.append(tableSrc.toSrc(cls));
+			objectSrcs.add(tableSrc.className+"=\""+tableSrc.tableName+"\"");
 		}
 		
         for(java.util.Map.Entry<String, List<ProcedureParamSrc>> ent : procs.entrySet() ) {
@@ -167,12 +170,17 @@ public abstract class DataContextSrcGener   {
 			ProcedureSrc tableSrc=new ProcedureSrc(tn,ent.getValue());
 			srcEvent.onProcedureIntfSrcAppend(src,tableSrc);
 			src.append(tableSrc.toIntfSrc()).append("\n\n");
+			objectSrcs.add(tableSrc.className+"=\""+tableSrc.procName+"\"");
 		}
 		
 		src
 		.append("\tpublic final static Criteria CRITERIA=new Criteria();\n\n")
 		.append("\tpublic  static class Criteria{ \n\n")
 		.append("\t\tprivate Criteria() {} \n\n")
+		
+		.append("\t\tpublic static final String  ")
+		.append(String.join(",\t\t\t\n", objectSrcs))
+		.append("\t\t; \n\n")
 		.append("\t\tpublic static final Column \n");
 		
 		for(String colName:columnNames) {

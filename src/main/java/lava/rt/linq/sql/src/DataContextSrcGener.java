@@ -37,6 +37,8 @@ public abstract class DataContextSrcGener   {
 	
 	protected Log log=LogFactory.SYSTEM.getLog(thisClass());
 	
+	protected static String CRITERIA="CRITERIA";
+	
 	protected Connection connection;
 	
 	protected Set<String> columnNames=new HashSet<>();
@@ -100,6 +102,7 @@ public abstract class DataContextSrcGener   {
 		}
 		
 		src
+		.append("import "+CommandExecuteExecption.class.getPackage().getName()+".*; \n")
 		.append("import "+DataContext.class.getPackage().getName()+".*; \n")
 		.append("import "+DataSourceContext.class.getPackage().getName()+".*; \n")
 		
@@ -174,12 +177,12 @@ public abstract class DataContextSrcGener   {
 		}
 		
 		src
-		.append("\tpublic final static Criteria CRITERIA=new Criteria();\n\n")
+		.append("\tpublic final static Criteria "+CRITERIA+"=new Criteria();\n\n")
 		.append("\tpublic  static class Criteria{ \n\n")
 		.append("\t\tprivate Criteria() {} \n\n")
 		
 		.append("\t\tpublic static final String  ")
-		.append(String.join(",\t\t\t\n", objectSrcs))
+		.append(String.join(",\n\t\t", objectSrcs))
 		.append("\t\t; \n\n")
 		.append("\t\tpublic static final Column \n");
 		
@@ -209,7 +212,7 @@ public abstract class DataContextSrcGener   {
 		
 		
 		src.append("import "+DataContext.class.getPackage().getName()+".*; \n")
-		
+		.append("import "+CommandExecuteExecption.class.getPackage().getName()+".*; \n")
 		.append("import "+DataSourceContext.class.getPackage().getName()+".*; \n")
 		.append("import "+ List.class.getPackage().getName()+".*; \n")
 		
@@ -263,7 +266,9 @@ public abstract class DataContextSrcGener   {
 			}
 			TableSrc tableSrc=new TableSrc(tn, pkName);
 			srcEvent.onTableSrcAppend(src, tableSrc);
-			src.append("\t public final Table<"+tableSrc.className+"> "+tableSrc.tableName+"=tableCreate("+tableSrc.className+".class,\""+tableSrc.tableName+"\",\""+tableSrc.pkName+"\");\n");
+			ColumnSrc columnSrc=new ColumnSrc(tableSrc.pkName, toPropName(tableSrc.pkName));
+			srcEvent.onColumnSrcAppend(src, columnSrc);
+			src.append("\t public final Table<"+tableSrc.className+"> "+tableSrc.tableName+"=tableCreate("+tableSrc.className+".class,"+CRITERIA+"."+tableSrc.className+","+CRITERIA+"."+columnSrc.className+".toString());\n");
 		}
 		
 		src.append("\n\n");
@@ -276,7 +281,7 @@ public abstract class DataContextSrcGener   {
 					;
 			TableSrc tableSrc=new TableSrc(tn,null);
 			srcEvent.onViewSrcAppend(src, tableSrc);
-			src.append("\t public final View<"+tableSrc.className+"> "+tableSrc.tableName+"=viewCreate("+tableSrc.className+".class,\""+tableSrc.tableName+"\");\n");
+			src.append("\t public final View<"+tableSrc.className+"> "+tableSrc.tableName+"=viewCreate("+tableSrc.className+".class,"+CRITERIA+"."+tableSrc.className+");\n");
 		}
 		
 		src.append("\n\n");

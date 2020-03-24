@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 import lava.rt.common.ReflectCommon;
 import lava.rt.execption.CommandExecuteExecption;
 import lava.rt.linq.Entity;
+import lava.rt.linq.sql.Criteria.Column;
 
 
 public   class  View<M extends Entity> {

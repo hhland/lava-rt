@@ -20,11 +20,13 @@ import java.util.*;
 
 import javax.sql.DataSource;
 
+import lava.rt.common.TextCommon;
 import lava.rt.execption.CommandExecuteExecption;
 import lava.rt.linq.DataContext;
 import lava.rt.linq.Entity;
 import lava.rt.linq.sql.*;
 import lava.rt.linq.sql.Criteria.Column;
+import lava.rt.linq.sql.SqlDataContext.ColumnMeta;
 import lava.rt.logging.Log;
 import lava.rt.logging.LogFactory;
 
@@ -98,6 +100,9 @@ public abstract class DataContextSrcGener   {
 
 	public String toIntfSrc(Class cls,String databaseName) throws SQLException {
 		StringBuffer src=new StringBuffer(getFileInfo(databaseName));
+		
+		Map<String, String[]> columnMates=loadColumnMetas(databaseName);
+		
 		if(cls.getPackage()!=null) {
 		 src.append("package "+cls.getPackage().getName()+"; \n\n");
 		}
@@ -154,6 +159,7 @@ public abstract class DataContextSrcGener   {
 				pkName=tablesPks.get(tn);
 			}
 			TableSrc tableSrc=new TableSrc(tn,pkName);
+			tableSrc.columnMetas=columnMates;
 			srcEvent.onTableSrcAppend(src,tableSrc);
 			src.append(tableSrc.toSrc(cls));
 			objectSrcs.add(tableSrc.className+"=\""+tableSrc.tableName+"\"");
@@ -163,6 +169,7 @@ public abstract class DataContextSrcGener   {
 			
 			String tn=table;
 			TableSrc tableSrc=new TableSrc(tn,null);
+			tableSrc.columnMetas=columnMates;
 			srcEvent.onViewSrcAppend(src,tableSrc);
 			src.append(tableSrc.toSrc(cls));
 			objectSrcs.add(tableSrc.className+"=\""+tableSrc.tableName+"\"");
@@ -326,6 +333,8 @@ public abstract class DataContextSrcGener   {
 	
 	public abstract Map<String,String> loadTablesPks(String databaseName) throws SQLException;
 	
+	public abstract Map<String,String[]> loadColumnMetas(String databaseName) throws SQLException;
+	
 	
 	protected class ProcedureParamSrc{
 		
@@ -467,7 +476,7 @@ public abstract class DataContextSrcGener   {
 		
 		public String tableName,pkName,className;
 		
-		
+		public Map<String,String[]> columnMetas=new HashMap<String, String[]>();
 		
 		public TableSrc(String tableName,String pkName) {
 			this.tableName=tableName;
@@ -550,6 +559,22 @@ public abstract class DataContextSrcGener   {
 		        String colClsName=colClass.getSimpleName();
 		        String propName0=DataContextSrcGener.toClassName(colName),
 				propName1=propName0.substring(0,1).toLowerCase()+propName0.substring(1);
+		        
+		        String metaKey=tableName+":"+colName;
+		        String[] columnMeta=columnMetas.get(metaKey);
+		        
+		        if(columnMeta!=null) {
+		        	try {
+		        	String datalenght=columnMeta[0]==null?"0":columnMeta[0];
+		        	boolean nullable="Y".equals(columnMeta[1]);
+		        	String comments=TextCommon.replaceBlank(columnMeta[2]);
+		        	comments=comments==null?"":comments.replace("\"", "'");
+		        	sbFields.append("\t\t @ColumnMeta(dataLength="+datalenght+",nullable="+nullable+",comments=\""+comments+"\") \n " );
+		        	}catch(Exception ex) {
+		        		ex.printStackTrace();
+		        		sbFields.append("\t\t err:"+ex.getMessage());
+		        	}
+		        }
 		        
 		        sbFields.append("\t\t private " +colClsName+ " "+colName+ " ; \n " );
 		        

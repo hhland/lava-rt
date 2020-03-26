@@ -3,6 +3,8 @@ package lava.rt.linq.sql.src;
 import java.sql.*;
 import java.util.*;
 
+import lava.rt.linq.sql.SqlDataContext.ColumnMeta;
+
 public class MSSQLServerDataContextSrcGener extends DataContextSrcGener {
 
 	public MSSQLServerDataContextSrcGener(Connection connection) {
@@ -120,5 +122,13 @@ public class MSSQLServerDataContextSrcGener extends DataContextSrcGener {
 		// TODO Auto-generated method stub
 		return this.getClass();
 	}
+
+	@Override
+	public Map<String, String[]> loadColumnMetas(String databaseName) throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	
 
 }

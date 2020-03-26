@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import lava.rt.linq.sql.SqlDataContext.ColumnMeta;
+
 public class MySQLDataContextSrcGener extends DataContextSrcGener {
 
 	public MySQLDataContextSrcGener(Connection connection) {
@@ -57,5 +59,13 @@ public class MySQLDataContextSrcGener extends DataContextSrcGener {
 		// TODO Auto-generated method stub
 		return this.getClass();
 	}
+
+	@Override
+	public Map<String, String[]> loadColumnMetas(String databaseName) throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	
 	
 }

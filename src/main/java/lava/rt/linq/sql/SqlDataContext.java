@@ -11,4 +11,15 @@ public interface SqlDataContext extends DataContext {
 	public String executeQueryJsonList(PagingParam pagingParam) throws CommandExecuteExecption ;
 
 	
+	
+	public @interface ColumnMeta {
+
+		int dataLength() default -1;
+
+		String comments();
+		
+		boolean nullable() default true;
+
+	}
+	
 }

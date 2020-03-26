@@ -3,10 +3,14 @@ package lava.rt.common;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public final class TextCommon {
 
+	private static final Pattern PATTERN_BLANK = Pattern.compile("\\s*|\t|\r|\n");
+	
 	public static boolean isBlank( String... strings) {
 		for (String string :strings) {
 			if(string!=null&&string.trim().length()>0)
@@ -106,4 +110,14 @@ public final class TextCommon {
 		return String.join(delimiter, strs);
     }
     
+    
+    public static String replaceBlank(String value) {
+    	String ret=null;
+    	if(value==null) return ret;
+        Matcher m = PATTERN_BLANK.matcher(value);
+        ret = m.replaceAll("");
+        
+        return ret;
+
+    }
 }

@@ -1,5 +1,6 @@
 package lava.rt.linq.sql.src;
 
+import java.lang.annotation.Annotation;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -14,6 +15,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Stream;
+
+import lava.rt.linq.sql.SqlDataContext.ColumnMeta;
 
 
 
@@ -166,6 +169,32 @@ public class OracleDataContextSrcGener extends DataContextSrcGener{
 		// TODO Auto-generated method stub
 		return this.getClass();
 	}
+
+	@Override
+	public Map<String, String[]> loadColumnMetas(String databaseName) throws SQLException {
+		// TODO Auto-generated method stub
+		String sql="select utc.*,UCC.comments  from user_tab_columns  utc\n" + 
+				"left join user_col_comments ucc  on  UCC.table_name=UTC.table_name and  UCC.column_name=UTC.column_name";
+		Map<String, String[]> ret=new HashMap<>();
+		 try(PreparedStatement preparedStatement= connection.prepareStatement(sql);
+	        		ResultSet resultSet=preparedStatement.executeQuery();){
+			while(resultSet.next()) {
+				String tableName=resultSet.getString("TABLE_NAME")
+						,columnName=resultSet.getString("COLUMN_NAME")
+						,dataLength=resultSet.getString("DATA_LENGTH")
+		                ,nullable=resultSet.getString("NULLABLE")
+		                ,comments=resultSet.getString("COMMENTS")
+						;
+				String key=tableName+":"+columnName;
+				ret.put(key, new String[] {dataLength,nullable,comments});
+				
+			}
+	    }
+		
+		return ret;
+	}
+
+	
 	
 	
 }

@@ -63,7 +63,24 @@ public class MySQLDataContextSrcGener extends DataContextSrcGener {
 	@Override
 	public Map<String, String[]> loadColumnMetas(String databaseName) throws SQLException {
 		// TODO Auto-generated method stub
-		return null;
+		String sql="select c.TABLE_NAME,c.COLUMN_NAME,c.CHARACTER_MAXIMUM_LENGTH,c.IS_NULLABLE,c.COLUMN_COMMENT from information_schema.columns c";
+		Map<String, String[]> ret=new HashMap<>();
+		 try(PreparedStatement preparedStatement= connection.prepareStatement(sql);
+	        		ResultSet resultSet=preparedStatement.executeQuery();){
+			while(resultSet.next()) {
+				String tableName=resultSet.getString("TABLE_NAME")
+						,columnName=resultSet.getString("COLUMN_NAME")
+						,dataLength=resultSet.getString("CHARACTER_MAXIMUM_LENGTH")
+		                ,nullable=resultSet.getString("IS_NULLABLE")
+		                ,comments=resultSet.getString("COLUMN_COMMENT")
+						;
+				String key=tableName+":"+columnName;
+				nullable="YES".equals(nullable)?"Y":"N";
+				ret.put(key, new String[] {dataLength,nullable,comments});
+				
+			}
+	    }
+		 return ret;
 	}
 
 	

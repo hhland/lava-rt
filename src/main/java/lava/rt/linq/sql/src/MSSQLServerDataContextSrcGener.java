@@ -126,7 +126,44 @@ public class MSSQLServerDataContextSrcGener extends DataContextSrcGener {
 	@Override
 	public Map<String, String[]> loadColumnMetas(String databaseName) throws SQLException {
 		// TODO Auto-generated method stub
-		return null;
+		String sql="SELECT [TableName] = [Tables].name ,[ColumnName] = [Columns].name ,\n" + 
+				"        [Description] = [Properties].value,\n" + 
+				"        [SystemTypeName] = [Types].name ,\n" + 
+				"        [Precision] = [Columns].precision ,\n" + 
+				"        [Scale] = [Columns].scale ,\n" + 
+				"        [MaxLength] = [Columns].max_length ,\n" + 
+				"        [IsNullable] = [Columns].is_nullable ,\n" + 
+				"        [IsRowGUIDCol] = [Columns].is_rowguidcol ,\n" + 
+				"        [IsIdentity] = [Columns].is_identity ,\n" + 
+				"        [IsComputed] = [Columns].is_computed ,\n" + 
+				"        [IsXmlDocument] = [Columns].is_xml_document \n" + 
+				"FROM sys.tables AS [Tables]\n" + 
+				"        INNER JOIN sys.columns AS [Columns] ON [Tables].object_id = [Columns].object_id\n" + 
+				"        INNER JOIN sys.types AS [Types] ON [Columns].system_type_id = [Types].system_type_id\n" + 
+				"                                           AND is_user_defined = 0\n" + 
+				"                                           AND [Types].name <> 'sysname'\n" + 
+				"        LEFT OUTER JOIN sys.extended_properties AS [Properties] ON [Properties].major_id = [Tables].object_id\n" + 
+				"                                                              AND [Properties].minor_id = [Columns].column_id\n" + 
+				"                                                              AND [Properties].name = 'MS_Description'\n" + 
+				"ORDER BY [Columns].column_id";
+				
+		Map<String, String[]> ret=new HashMap<>();
+		 try(PreparedStatement preparedStatement= connection.prepareStatement(sql);
+	        		ResultSet resultSet=preparedStatement.executeQuery();){
+			while(resultSet.next()) {
+				String tableName=resultSet.getString("TableName")
+						,columnName=resultSet.getString("ColumnName")
+						,dataLength=resultSet.getString("MaxLength")
+		                ,nullable=resultSet.getString("IsNullable")
+		                ,comments=resultSet.getString("Description")
+						;
+				String key=tableName+":"+columnName;
+				ret.put(key, new String[] {dataLength,nullable,comments});
+				
+			}
+	    }
+		
+		return ret;
 	}
 
 	

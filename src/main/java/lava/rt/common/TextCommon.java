@@ -120,4 +120,10 @@ public final class TextCommon {
         return ret;
 
     }
+
+
+	public static String createRandomEn(int dataLength) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

@@ -46,7 +46,7 @@ public class UnsafeAdapter extends BaseAdapter<Unsafe>{
     	Map<String,Long> ret=new HashMap<String,Long>();
     	
     	
-    	for(Entry<String, Field> ent:ReflectCommon.theDeclaredFieldMap(cls).entrySet()) {
+    	for(Entry<String, Field> ent:ReflectCommon.getTheDeclaredFieldMap(cls).entrySet()) {
     		ret.put(ent.getKey(), _this.objectFieldOffset(ent.getValue()));
     	}
     	
@@ -57,7 +57,7 @@ public class UnsafeAdapter extends BaseAdapter<Unsafe>{
     	Map<String,Long> ret=new HashMap<String,Long>();
     	
     	
-    	for(Entry<String, Field> ent:ReflectCommon.allDeclaredFieldMap(cls).entrySet()) {
+    	for(Entry<String, Field> ent:ReflectCommon.getAllDeclaredFieldMap(cls).entrySet()) {
     		ret.put(ent.getKey(), _this.objectFieldOffset(ent.getValue()));
     	}
     	

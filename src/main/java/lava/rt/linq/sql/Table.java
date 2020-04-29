@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import lava.rt.common.ReflectCommon;
-import lava.rt.common.TextCommon;
+import lava.rt.common.LangCommon;
 import lava.rt.execption.CommandExecuteExecption;
 import lava.rt.linq.Entity;
 
@@ -83,8 +83,8 @@ public class Table<M extends Entity> extends View<M> {
 			vals += " ?,";
 
 		}
-		cols = TextCommon.trim(cols, ",");
-		vals = TextCommon.trim(vals, ",");
+		cols = LangCommon.trim(cols, ",");
+		vals = LangCommon.trim(vals, ",");
 		sqlColumns=cols;
 		sqlInsert = MessageFormat.format(sqlPattern, tableName, pkName+","+cols, "?,"+vals);
 		sqlInsertWithoutPk = MessageFormat.format(sqlPattern, tableName, cols, vals);
@@ -100,8 +100,8 @@ public class Table<M extends Entity> extends View<M> {
 				key += MessageFormat.format(" {0} =? ,", fname);
 
 			}
-			key = TextCommon.trim(key, ",");
-			// key=TextCommon.repeat(" `{0}` =? ", ",", updateFields.length);
+			key = LangCommon.trim(key, ",");
+			// key=LangCommon.repeat(" `{0}` =? ", ",", updateFields.length);
 			sqlUpdate = MessageFormat.format(sqlPattern, this.tableName, key, this.pkName);
 
 			

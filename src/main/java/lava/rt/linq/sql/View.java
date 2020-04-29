@@ -41,7 +41,7 @@ public   class  View<M extends Entity> {
 		this.entryClass=entryClass;
 		//this.entryFieldMap=ReflectCommon.theDeclaredFieldMap(entryClass);
 		
-		for(Entry<String, Field> ent :ReflectCommon.theDeclaredFieldMap(entryClass).entrySet()){
+		for(Entry<String, Field> ent :ReflectCommon.getTheDeclaredFieldMap(entryClass).entrySet()){
 			Field field=ent.getValue();
 			boolean isStatic = ReflectCommon.isStatic(field);
 			if(isStatic)continue;
@@ -131,7 +131,7 @@ public   class  View<M extends Entity> {
 	    List<Column> ret=clsColumns.get(entityCls);
 	    if(ret==null) {
 	    ret=new ArrayList<>();
-		Map<String,Field> fieldMap= ReflectCommon.theDeclaredFieldMap(entityCls);
+		Map<String,Field> fieldMap= ReflectCommon.getTheDeclaredFieldMap(entityCls);
 		
 		for(Entry<String, Field> ent:fieldMap.entrySet()) {
 			boolean isStatic = ReflectCommon.isStatic(ent.getValue());

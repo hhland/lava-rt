@@ -4,6 +4,7 @@ package lava.rt.common;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -16,12 +17,13 @@ import java.net.URLDecoder;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-
+import java.util.Map.Entry;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Stream;
 
 import lava.rt.adapter.UnsafeAdapter;
+import lava.rt.linq.Entity;
 import sun.misc.Unsafe;
 
 @SuppressWarnings("restriction")
@@ -78,7 +80,7 @@ public final class ReflectCommon {
         return t;
     }
    
-    public static Map<String,Method> theMethodMap(Class cls){
+    public static Map<String,Method> getTheMethodMap(Class cls){
     	Map<String,Method> fieldMap=new HashMap<>();
     	
     	
@@ -89,25 +91,25 @@ public final class ReflectCommon {
     	return fieldMap;
     }
     
-    public static Map<String,Method> allMethodMap(Class cls){
+    public static Map<String,Method> getAllMethodMap(Class cls){
     	Map<String,Method> fieldMap=new HashMap<>();
     	
-    	for(Class cl :theClassMap(cls).values()) {
-    		fieldMap.putAll(theMethodMap(cl));   		
+    	for(Class cl :getTheClassMap(cls).values()) {
+    		fieldMap.putAll(getTheMethodMap(cl));   		
     	}
     	return fieldMap;
     }
     
-    public static Map<String,Method> allDeclaredMethodMap(Class cls){
+    public static Map<String,Method> getAllDeclaredMethodMap(Class cls){
     	Map<String,Method> fieldMap=new HashMap<>();
     	
-    	for(Class cl:theClassMap(cls).values()) {
-    		fieldMap.putAll(theDeclaredMethodMap(cl));   		
+    	for(Class cl:getTheClassMap(cls).values()) {
+    		fieldMap.putAll(getTheDeclaredMethodMap(cl));   		
     	}
     	return fieldMap;
     }
     
-    public static Map<String,Method> theDeclaredMethodMap(Class cls){
+    public static Map<String,Method> getTheDeclaredMethodMap(Class cls){
     	Map<String,Method> fieldMap=new HashMap<>();
     	
     	
@@ -122,7 +124,7 @@ public final class ReflectCommon {
     public static Map<String,Field> getFieldMap(Class cls){
     	Map<String,Field> fieldMap=new HashMap<String,Field>();
     	
-    	for(Class cl :theClassMap(cls).values()) {
+    	for(Class cl :getTheClassMap(cls).values()) {
     		Field[] fields=cl.getFields();
     		Stream.of(fields).filter(f-> !fieldMap.containsKey(f.getName()))
     		.forEach(f->fieldMap.put(f.getName(), f) );    		
@@ -131,16 +133,16 @@ public final class ReflectCommon {
     }
     
     
-    public static Map<String,Field> allDeclaredFieldMap(Class cls){
+    public static Map<String,Field> getAllDeclaredFieldMap(Class cls){
     	Map<String,Field> fieldMap=new HashMap<String,Field>();
     	
-    	for(Class cl:theClassMap(cls).values()) {
-    		fieldMap.putAll(theDeclaredFieldMap(cl));    		
+    	for(Class cl:getTheClassMap(cls).values()) {
+    		fieldMap.putAll(getTheDeclaredFieldMap(cl));    		
     	}
     	return fieldMap;
     }
     
-    public static Map<String,Field> theDeclaredFieldMap(Class cls){
+    public static Map<String,Field> getTheDeclaredFieldMap(Class cls){
     	Map<String,Field> fieldMap=new HashMap<String,Field>();
     	
     	
@@ -155,7 +157,7 @@ public final class ReflectCommon {
     
     
     
-    public static Map<String,Class> theClassMap(Class cls){
+    public static Map<String,Class> getTheClassMap(Class cls){
     	Map<String,Class> re=new HashMap<String,Class>();
     	
     	for(Class cl=cls;!Object.class.equals(cl);cl=cl.getSuperclass()) {
@@ -315,4 +317,49 @@ public final class ReflectCommon {
 		return Modifier.isStatic(field.getModifiers());
 	}
 
+	
+	public static <E extends Entity> E[] newEntitys(int size,Class<E> entryClass,Object ...objects) throws Exception {
+		E[] ret=(E[])Array.newInstance(entryClass,size);
+		for(int i=0;i<ret.length;i++){
+			ret[i]=newEntity(entryClass, objects);
+		}
+		return ret;
+	}
+	
+	
+	public static <E extends Entity> E newEntity(Class<E> entryClass,Object ...objects) throws Exception {
+		E ret = null;
+		if(objects.length==0){
+		   ret= entryClass.newInstance();
+		}else{
+		   ret = (E) entryClass.getConstructors()[0].newInstance(objects);
+		}
+		return ret;
+	}
+	
+	
+	public static String toString(Object obj) {
+		StringBuffer sbr=new StringBuffer(obj.getClass().getSimpleName());
+		sbr.append(" [");
+		
+		for(Entry<String, Field> ent: getAllDeclaredFieldMap(obj.getClass()).entrySet()) {
+			Object val="null";
+			try {
+				Field field=ent.getValue();
+				field.setAccessible(true);
+				val =field.get(obj); 
+				
+			} catch (Exception e) {}
+			sbr
+			.append(ent.getKey())
+			.append("=")
+			.append(val)
+			.append(",")
+			;
+		}
+		
+		sbr.append("]");
+		return sbr.toString();
+	}
+	
 }

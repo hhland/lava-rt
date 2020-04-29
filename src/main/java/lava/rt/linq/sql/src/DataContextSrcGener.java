@@ -20,7 +20,8 @@ import java.util.*;
 
 import javax.sql.DataSource;
 
-import lava.rt.common.TextCommon;
+import lava.rt.common.LangCommon;
+
 import lava.rt.execption.CommandExecuteExecption;
 import lava.rt.linq.DataContext;
 import lava.rt.linq.Entity;
@@ -499,9 +500,9 @@ public abstract class DataContextSrcGener   {
 	        
 	        context
 	       
-	    	.append("\t public  class "+className+" extends ")
-	    	.append(""+Entity.class.getSimpleName())
+	    	.append("\t public  class "+className)
 	    	.append(" implements "+Serializable.class.getSimpleName())
+	    	.append(" ,").append(Entity.class.getSimpleName())
 	    	.append(" {\n\n")
 	    	//.append("\t\t private static final long serialVersionUID = 1L; ")
 	    	//.append("\t public "+className+"(){ super(); }")
@@ -567,7 +568,7 @@ public abstract class DataContextSrcGener   {
 		        	try {
 		        	String datalenght=columnMeta[0]==null?"0":columnMeta[0];
 		        	boolean nullable="Y".equals(columnMeta[1]);
-		        	String comments=TextCommon.replaceBlank(columnMeta[2]);
+		        	String comments=LangCommon.replaceBlank(columnMeta[2]);
 		        	comments=comments==null?"":comments.replace("\"", "'");
 		        	sbFields.append("\t\t @ColumnMeta(dataLength="+datalenght+",nullable="+nullable+",comments=\""+comments+"\") \n " );
 		        	}catch(Exception ex) {

@@ -51,7 +51,7 @@ public class PropertiesAdapter extends BaseAdapter<Properties>{
 	protected  float injection(String prefix,Class cls,Object object) {
 		float re=0,total=_this.size();
 		
-		Map<String,Field> keyFields=ReflectCommon.allDeclaredFieldMap(cls);
+		Map<String,Field> keyFields=ReflectCommon.getAllDeclaredFieldMap(cls);
 		
 		for(Iterator<Object> it=_this.keySet().iterator();it.hasNext();) {
 			String _key=it.next().toString();
@@ -145,7 +145,7 @@ public class PropertiesAdapter extends BaseAdapter<Properties>{
     	StringBuffer ret=new StringBuffer("");
     	for(Class cls :clss) {
     	
-    		Map<String,Field> keyFields=ReflectCommon.allDeclaredFieldMap(cls);
+    		Map<String,Field> keyFields=ReflectCommon.getAllDeclaredFieldMap(cls);
     	    for(Entry<String, Field> ent: keyFields.entrySet()) {
     	    	ret
     	    	//.append(ent.getValue().getName())
@@ -161,7 +161,7 @@ public class PropertiesAdapter extends BaseAdapter<Properties>{
     	StringBuffer ret=new StringBuffer("");
     	for(Class cls :clss) {
     	
-    		Map<String,Field> keyFields=ReflectCommon.allDeclaredFieldMap(cls);
+    		Map<String,Field> keyFields=ReflectCommon.getAllDeclaredFieldMap(cls);
     	    for(Entry<String, Field> ent: keyFields.entrySet()) {
     	    	ret
     	    	.append(prefix)

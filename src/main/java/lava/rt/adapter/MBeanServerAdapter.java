@@ -102,8 +102,8 @@ public class MBeanServerAdapter extends BaseAdapter<MBeanServer> {
 
 		if (ret == null) {
 
-			Map<String, Field> fieldMap = ReflectCommon.theDeclaredFieldMap(beanCls);
-			Map<String, Method> methodMap = ReflectCommon.allMethodMap(beanCls);
+			Map<String, Field> fieldMap = ReflectCommon.getTheDeclaredFieldMap(beanCls);
+			Map<String, Method> methodMap = ReflectCommon.getAllMethodMap(beanCls);
 			Set<String> getSetNames=new HashSet<>();
 			List<ModelMBeanAttributeInfo> attrs = new ArrayList<>();
 			List<ModelMBeanOperationInfo> opers = new ArrayList<>();

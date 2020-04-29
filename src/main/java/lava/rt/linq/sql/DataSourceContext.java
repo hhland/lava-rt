@@ -21,6 +21,7 @@ import javax.sql.DataSource;
 
 import lava.rt.base.PoolList;
 import lava.rt.cache.CacheItem;
+import lava.rt.common.ReflectCommon;
 import lava.rt.common.SqlCommon;
 import lava.rt.execption.CommandExecuteExecption;
 import lava.rt.execption.DuplicateKeyException;
@@ -44,7 +45,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 			;
 
 	protected  <E extends Entity> E entityNew(Class<E> entryClass) throws Exception{
-          E ret=Entity.newEntity(entryClass);
+          E ret=ReflectCommon.newEntity(entryClass);
           return ret;
 	}
 	

@@ -16,7 +16,7 @@ import java.util.Random;
 import java.util.Map.Entry;
 
 import lava.rt.common.ReflectCommon;
-import lava.rt.common.TextCommon;
+import lava.rt.common.LangCommon;
 import lava.rt.execption.CommandExecuteExecption;
 import lava.rt.execption.VerifyExecption;
 import lava.rt.linq.DataContext;
@@ -69,7 +69,7 @@ public interface SqlDataContext extends DataContext {
 				ColumnMeta columnMeta = field.getAnnotation(ColumnMeta.class);
 				ret++;
 				if(field.getType().equals(String.class)) {
-					String val=TextCommon.createRandomEn(columnMeta.dataLength());
+					String val=LangCommon.createRandomEn(columnMeta.dataLength());
 					field.set(entity, val);
 				}else if(field.getType().equals(Integer.class)) {
 					field.set(entity, RANDOM.nextInt());

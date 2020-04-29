@@ -1,22 +1,27 @@
 package lava.rt.common;
 
+import java.lang.reflect.Field;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
-public final class TextCommon {
+public final class LangCommon {
 
 	private static final Pattern PATTERN_BLANK = Pattern.compile("\\s*|\t|\r|\n");
 	
-	public static boolean isBlank( String... strings) {
+	public static boolean isAnyBlank( String... strings) {
+		boolean ret=false;
 		for (String string :strings) {
-			if(string!=null&&string.trim().length()>0)
-				return false;
+			if(string==null||string.trim().length()==0)
+			{
+				ret=true;
+				break;
+			}
 		}
-	    return true;
+	    return ret;
 	  }
 	
 	
@@ -126,4 +131,7 @@ public final class TextCommon {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	
+	
 }

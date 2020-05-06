@@ -33,6 +33,8 @@ import lava.rt.logging.LogFactory;
 
 
 
+
+
 public abstract class DataContextSrcGener   {
 
 	public  long serialVersionUID=1L;
@@ -526,6 +528,9 @@ public abstract class DataContextSrcGener   {
 			//.append("\t\tpublic boolean equals(Object obj) {return this.toString().equals(obj.toString());} \n\n")
 			.append("\n\n")
 			.append("\t\t@"+Override.class.getSimpleName()+"\n")
+			.append("\t\tpublic Object thisPk() {return this."+this.pkName+";}")
+			.append("\n\n")
+			.append("\t\t@"+Override.class.getSimpleName()+"\n")
 			.append("\t\tpublic Class<? extends "+Entity.class.getSimpleName()+"> thisClass() {return this.getClass() ;}")
 		    ;
 			if(pkName!=null) {
@@ -679,6 +684,27 @@ public abstract class DataContextSrcGener   {
 		ret=ret.replace(".", "/");
 		ret+=".java";
 		return ret;
+	}
+
+
+
+
+
+
+
+
+	public void saveAllTo(String projectDir, Class clsIntf,
+			Class clsImpl, String dataBaseName) throws SQLException, IOException {
+		// TODO Auto-generated method stub
+		    File srcIntf=new File(projectDir+refSrcPath(clsIntf))
+				,	srcImpl=new File(projectDir+refSrcPath(clsImpl))
+					;
+			
+			saveIntfSrcTo(srcIntf, clsIntf, dataBaseName);
+
+			
+			
+			saveImplSrcTo(clsIntf, srcImpl, clsImpl, dataBaseName);
 	}
 	
 }

@@ -74,7 +74,7 @@ public class MySQLDataContextSrcGener extends DataContextSrcGener {
 		                ,nullable=resultSet.getString("IS_NULLABLE")
 		                ,comments=resultSet.getString("COLUMN_COMMENT")
 						;
-				String key=tableName+":"+columnName;
+				String key=tableName.toUpperCase()+":"+columnName.toUpperCase();
 				nullable="YES".equals(nullable)?"Y":"N";
 				ret.put(key, new String[] {dataLength,nullable,comments});
 				

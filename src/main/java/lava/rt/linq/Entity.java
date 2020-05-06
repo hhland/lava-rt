@@ -7,11 +7,11 @@ public interface Entity   {
 	
 	
 
-         Object getPk();
+         Object thisPk();
 	
 
 	     
-
+         Class<? extends Entity> thisClass();
 	
 	
 	

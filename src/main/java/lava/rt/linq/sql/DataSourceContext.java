@@ -44,8 +44,8 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 			,writeConnection = new ThreadLocal<>()
 			;
 
-	protected  <E extends Entity> E entityNew(Class<E> entryClass) throws Exception{
-          E ret=ReflectCommon.newEntity(entryClass);
+	protected  <E extends Entity> E newEntity(Class<E> entityClass) throws Exception{
+          E ret=ReflectCommon.newEntity(entityClass);
           return ret;
 	}
 	
@@ -61,7 +61,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 
 	
 
-	protected <M extends Entity> Table<M> tableCreate(Class<M> cls, String tableName, String pkName) {
+	protected <M extends Entity> Table<M> createTable(Class<M> cls, String tableName, String pkName) {
 		Table<M> table=null;
 		try {
 		table= new Table<M>(this, cls, tableName, pkName);
@@ -73,39 +73,39 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 		return table;
 	}
 
-	protected <M extends Entity> View<M> viewCreate(Class<M> cls, String tableName) {
+	protected <M extends Entity> View<M> createView(Class<M> cls, String tableName) {
 		View<M> view = new View<M>(this, cls, tableName);
 		viewMap.put(cls, view);
 		return view;
 	};
 
-	public <M extends Entity> Table<M> tableGet(Class<M> mcls) {
+	public <M extends Entity> Table<M> getTable(Class<M> mcls) {
 		Table<M> ret = tableMap.get(mcls);
 		return ret;
 	}
 
-	public <M extends Entity> View<M> viewGet(Class<M> mcls) {
+	public <M extends Entity> View<M> getView(Class<M> mcls) {
 		View<M> ret = viewMap.get(mcls);
 		return ret;
 	};
 	
-	protected <E extends Entity> CacheItem<E> cacheGet(Class<E> cls, Object pk){
+	protected <E extends Entity> CacheItem<E> getCache(Class<E> cls, Object pk){
 		return null;
 	}
 	
-	protected <E extends Entity> void cachePut(E ret, Object pk) {}
+	protected <E extends Entity> void putCache(E entits) {}
 
 	
-	public <E extends Entity> E entityGet(Class<E> cls, Object pk) throws CommandExecuteExecption {
+	public <E extends Entity> E getEntity(Class<E> cls, Object pk) throws CommandExecuteExecption {
 		// TODO Auto-generated method stub
-		CacheItem<E> cache=cacheGet(cls, pk);
+		CacheItem<E> cache=getCache(cls, pk);
 		E ret=null;
 		if(cache==null||cache.isTimeout()||!cache.isEnable()) {
-			Table<E> table=tableGet(cls);
+			Table<E> table=getTable(cls);
 			
 			ret=table.load(pk);
 			
-			cachePut(ret,pk);
+			putCache(ret);
 		}else {
 			ret=cache.get();
 		}
@@ -124,7 +124,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 
 
 
-	public <M extends Entity> List<M> entityList(Class<M> cls, String sql, Object... params) throws CommandExecuteExecption {
+	public <M extends Entity> List<M> listEntities(Class<M> cls, String sql, Object... params) throws CommandExecuteExecption {
 		sql=View.formatEl(sql, viewMap);
 		Connection connection = getReadConnection();
 		
@@ -143,21 +143,21 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 					meteDataMap.put(key, i);
 				}
 
-				View<M> view = viewGet(cls);
+				View<M> view = getView(cls);
 				
 				
 			
 				while (resultSet.next()) {
-					M m= entityNew(cls);
+					M m= newEntity(cls);
 					
 					int c = 0;
-					for (Iterator<String> it = view.entryFieldMap.keySet().iterator(); it.hasNext();) {
+					for (Iterator<String> it = view.entityFieldMap.keySet().iterator(); it.hasNext();) {
 						String columnName = it.next().toUpperCase();
 						Integer columnIndex = meteDataMap.get(columnName);
 						if (columnIndex==null)
 							continue;
 						
-						Field field = view.entryFieldMap.get(columnName);
+						Field field = view.entityFieldMap.get(columnName);
 						try {
 							//m.val(columnName,resultSet.getObject(columnIndex));
 							field.set(m, resultSet.getObject(columnIndex));
@@ -439,17 +439,12 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	}
 	
 	
-	public  int entityPut(Object pk,Entity entry) throws CommandExecuteExecption,DuplicateKeyException {
+	public  int putEntity(Entity entity) throws CommandExecuteExecption,DuplicateKeyException {
 		int re = 0;
-		Class<? extends Entity> cls = entry.getClass();
-		Table table = this.tableGet(cls);
-		try {
-			table.pkField.set(entry, pk);
-		} catch (IllegalArgumentException | IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			throw new CommandExecuteExecption(e,CmdType.reflect,"set",table.pkField,entry,pk);
-		}
-		re=table.insert(entry);
+		Class<? extends Entity> cls = entity.getClass();
+		Table table = this.getTable(cls);
+		
+		re=table.insert(entity);
 		return re;
 	}
 
@@ -457,82 +452,83 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 
 	
 	@SuppressWarnings("unchecked")
-	public int entityAdd(Entity entry) throws CommandExecuteExecption {
+	public int addEntity(Entity entity) throws CommandExecuteExecption {
 		int re = 0;
-		Class<? extends Entity> cls = entry.getClass();
-		Table table = this.tableGet(cls);
-		re += table.insertWithoutPk(entry);
-		
+		Class<? extends Entity> cls = entity.getClass();
+		Table table = this.getTable(cls);
+		if(entity.thisPk()==null) {
+		  re += table.insertWithoutPk(entity);
+		}else {
+		  re += table.insert(entity);	
+		}
+		putCache(entity);
 		return re;
 	}
 
-	public <E extends Entity> int entityAddAll(Collection<E> entrys) throws CommandExecuteExecption {
+	public <E extends Entity> int addEntities(Collection<E> entites) throws CommandExecuteExecption {
 		int re = 0;
-		Class cls = entrys.stream().findFirst().getClass();
-		Table table = this.tableGet(cls);
+		Class cls = entites.stream().findFirst().getClass();
+		Table table = this.getTable(cls);
 		
 		
-		re += table.insert(entrys);
+		re += table.insert(entites);
 		
-
-		
-		
-		//entry._updateTime = now();
-		return re;
-	}
-
-	
-
-	
-	
-
-	public int entityUpdate(Entity entry) throws CommandExecuteExecption {
-		int re = 0;
-
-		Class cls = entry.getClass();
-		Table table = this.tableGet(cls);
-		
-		re += table.update(entry);
-		
-		//entry._updateTime = now();
-
-		return re;
-	}
-
-
-	public <E extends Entity> int entityUpdateAll(Collection<E> entrys) throws CommandExecuteExecption {
-		int re = 0;
-		Class cls = entrys.stream().findFirst().getClass();
-		Table table = this.tableGet(cls);
-		
-		re += table.update(entrys);
-		
-
+		//entity._updateTime = now();
 		return re;
 	}
 
 	
 
-	public int entityRemove(Entity entry) throws CommandExecuteExecption {
+	
+	
+
+	public int updateEntity(Entity entity) throws CommandExecuteExecption {
 		int re = 0;
 
-		Class cls = entry.getClass();
-		Table table = this.tableGet(cls);
+		Class cls = entity.getClass();
+		Table table = this.getTable(cls);
 		
-	    re += table.delete(entry);
+		re += table.update(entity);
+		
+		//entity._updateTime = now();
+
+		return re;
+	}
+
+
+	public <E extends Entity> int updateEntities(Collection<E> entites) throws CommandExecuteExecption {
+		int re = 0;
+		Class cls = entites.stream().findFirst().getClass();
+		Table table = this.getTable(cls);
+		
+		re += table.update(entites);
 		
 
 		return re;
 	}
 
-	public <E extends Entity> int entityRemoveAll(Collection<E> entrys) throws CommandExecuteExecption {
+	
+
+	public int removeEntity(Entity entity) throws CommandExecuteExecption {
+		int re = 0;
+
+		Class cls = entity.getClass();
+		Table table = this.getTable(cls);
+		
+	    re += table.delete(entity);
+		
+
+		return re;
+	}
+
+	public <E extends Entity> int removeEntities(Collection<E> entites) throws CommandExecuteExecption {
 		int re = 0;
         
-		Class cls = entrys.stream().findFirst().getClass();
-		Table table = this.tableGet(cls);
+		Class cls = entites.stream().findFirst().getClass();
+		Table table = this.getTable(cls);
 		
 		
-	    re += table.delete(entrys);
+	    re += table.delete(entites);
 		
 
 		return re;

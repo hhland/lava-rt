@@ -280,7 +280,7 @@ public abstract class DataContextSrcGener   {
 			srcEvent.onTableSrcAppend(src, tableSrc);
 			ColumnSrc columnSrc=new ColumnSrc(tableSrc.pkName, toPropName(tableSrc.pkName));
 			srcEvent.onColumnSrcAppend(src, columnSrc);
-			src.append("\t public final Table<"+tableSrc.className+"> "+tableSrc.tableName+"=tableCreate("+tableSrc.className+".class,"+CRITERIA+"."+tableSrc.className+","+CRITERIA+"."+columnSrc.className+".toString());\n");
+			src.append("\t public final Table<"+tableSrc.className+"> "+tableSrc.tableName+"=createTable("+tableSrc.className+".class,"+CRITERIA+"."+tableSrc.className+","+CRITERIA+"."+columnSrc.className+".toString());\n");
 		}
 		
 		src.append("\n\n");
@@ -293,7 +293,7 @@ public abstract class DataContextSrcGener   {
 					;
 			TableSrc tableSrc=new TableSrc(tn,null);
 			srcEvent.onViewSrcAppend(src, tableSrc);
-			src.append("\t public final View<"+tableSrc.className+"> "+tableSrc.tableName+"=viewCreate("+tableSrc.className+".class,"+CRITERIA+"."+tableSrc.className+");\n");
+			src.append("\t public final View<"+tableSrc.className+"> "+tableSrc.tableName+"=createView("+tableSrc.className+".class,"+CRITERIA+"."+tableSrc.className+");\n");
 		}
 		
 		src.append("\n\n");
@@ -528,10 +528,10 @@ public abstract class DataContextSrcGener   {
 			//.append("\t\tpublic boolean equals(Object obj) {return this.toString().equals(obj.toString());} \n\n")
 			.append("\n\n")
 			.append("\t\t@"+Override.class.getSimpleName()+"\n")
-			.append("\t\tpublic Object thisPk() {return this."+this.pkName+";}")
+			.append("\t\tpublic Object thisPk() {return "+this.pkName+";}")
 			.append("\n\n")
 			.append("\t\t@"+Override.class.getSimpleName()+"\n")
-			.append("\t\tpublic Class<? extends "+Entity.class.getSimpleName()+"> thisClass() {return this.getClass() ;}")
+			.append("\t\tpublic Class<? extends "+Entity.class.getSimpleName()+"> thisClass() {return "+this.className+".class;}")
 		    ;
 			if(pkName!=null) {
 			//src.append("\n\n").append("\t\t@"+Override.class.getSimpleName()+"\n")
@@ -585,7 +585,7 @@ public abstract class DataContextSrcGener   {
 		        sbFields.append("\t\t private " +colClsName+ " "+colName+ " ; \n " );
 		        
 		        sbGetSeter.append("\t\t public "+colClsName+" get"+propName0+"(){ return this."+colName+"; } \n")
-		        .append("\t\t public void set"+propName0+"("+colClsName+" "+ propName1 +" ){  this."+colName+"="+propName1+"; } \n")
+		        .append("\t\t public "+this.className+" set"+propName0+"("+colClsName+" "+ propName1 +" ){  this."+colName+"="+propName1+"; return this; } \n")
 		        ;
 			}
 			}catch(Exception ex) {}

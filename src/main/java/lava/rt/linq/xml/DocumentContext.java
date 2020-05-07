@@ -38,7 +38,7 @@ public abstract class DocumentContext implements XmlDataContext{
 	
 	
 	@Override
-	public <M extends Entity> List<M> entityList(Class<M> cls, String cmd, Object... params)
+	public <M extends Entity> List<M> listEntities(Class<M> cls, String cmd, Object... params)
 			throws CommandExecuteExecption {
 		// TODO Auto-generated method stub
 		List<M> ret=new ArrayList<>();
@@ -72,49 +72,49 @@ public abstract class DocumentContext implements XmlDataContext{
 	}
 
 	@Override
-	public <E extends Entity> E entityGet(Class<E> cls, Object pk) throws CommandExecuteExecption {
+	public <E extends Entity> E getEntity(Class<E> cls, Object pk) throws CommandExecuteExecption {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public <E extends Entity> int entityAddAll(Collection<E> entrys) throws CommandExecuteExecption {
+	public <E extends Entity> int addEntities(Collection<E> entrys) throws CommandExecuteExecption {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	public int entityAdd(Entity entry) throws CommandExecuteExecption {
+	public int addEntity(Entity entry) throws CommandExecuteExecption {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	public int entityPut(Object pk, Entity entry) throws CommandExecuteExecption {
+	public int putEntity(Entity entry) throws CommandExecuteExecption {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	public int entityUpdate(Entity entry) throws CommandExecuteExecption {
+	public int updateEntity(Entity entry) throws CommandExecuteExecption {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	public <E extends Entity> int entityUpdateAll(Collection<E> entrys) throws CommandExecuteExecption {
+	public <E extends Entity> int updateEntities(Collection<E> entrys) throws CommandExecuteExecption {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	public int entityRemove(Entity entry) throws CommandExecuteExecption {
+	public int removeEntity(Entity entry) throws CommandExecuteExecption {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	public <E extends Entity> int entityRemoveAll(Collection<E> entrys) throws CommandExecuteExecption {
+	public <E extends Entity> int removeEntities(Collection<E> entrys) throws CommandExecuteExecption {
 		// TODO Auto-generated method stub
 		return 0;
 	}

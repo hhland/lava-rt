@@ -38,12 +38,12 @@ public class Table<M extends Entity> extends View<M> {
 		super(dataContext, entryClass, tableName);
 		this.pkName = pkName;
 
-		pkField = entryFieldMap.get(pkName);
+		pkField = entityFieldMap.get(pkName);
 		pkField.setAccessible(true);
 		
 		
 		List<Field> linsertFields = new ArrayList<Field>();
-		for (Field f : entryFieldMap.values()) {
+		for (Field f : entityFieldMap.values()) {
 			String fname = f.getName();
 			if (ReflectCommon.isThis0(f) || fname.equalsIgnoreCase(pkName)) {
 				continue;
@@ -59,7 +59,7 @@ public class Table<M extends Entity> extends View<M> {
 
 		List<Field> lupdateFields = new ArrayList<Field>();
 
-		for (Field f : entryFieldMap.values()) {
+		for (Field f : entityFieldMap.values()) {
 			String fname = f.getName();
 			if (ReflectCommon.isThis0(f) || fname.equalsIgnoreCase(pkName)) {
 				continue;
@@ -117,7 +117,7 @@ public class Table<M extends Entity> extends View<M> {
 
 		String sql = sqlLoad;
 		
-		List<M> entrys = dataContext.<M>entityList(entryClass,sql , pk);
+		List<M> entrys = dataContext.<M>listEntities(entryClass,sql , pk);
 		M ret = null;
 		if (entrys.size() == 1) {
 			ret = entrys.get(0);

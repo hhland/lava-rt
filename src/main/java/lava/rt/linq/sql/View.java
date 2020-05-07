@@ -23,7 +23,7 @@ public   class  View<M extends Entity> {
 	
 	public final String tableName;
 	protected final Class<M> entryClass;
-	protected final Map<String,Field> entryFieldMap=new HashMap<>();
+	protected final Map<String,Field> entityFieldMap=new HashMap<>();
 	
 	protected static Map<Class,List<Column>> clsColumns=new HashMap<>();
 	
@@ -39,19 +39,19 @@ public   class  View<M extends Entity> {
 		this.dataContext=dataContext;
 		this.tableName=tableName;
 		this.entryClass=entryClass;
-		//this.entryFieldMap=ReflectCommon.theDeclaredFieldMap(entryClass);
+		//this.entityFieldMap=ReflectCommon.theDeclaredFieldMap(entryClass);
 		
 		for(Entry<String, Field> ent :ReflectCommon.getTheDeclaredFieldMap(entryClass).entrySet()){
 			Field field=ent.getValue();
 			boolean isStatic = ReflectCommon.isStatic(field);
 			if(isStatic)continue;
-			this.entryFieldMap.put(ent.getKey(), ent.getValue());
+			this.entityFieldMap.put(ent.getKey(), ent.getValue());
 			//entryFieldOffsetMap.put(ent.getKey(), unsafeAdapter.objectFieldOffset(ent.getValue()));
 		}
 		
 		
 		
-		entryFieldMap.forEach((k,v)->v.setAccessible(true));
+		entityFieldMap.forEach((k,v)->v.setAccessible(true));
 		
 		sqlSelect="select * from "+tableName;
 	}
@@ -64,14 +64,14 @@ public   class  View<M extends Entity> {
     public List<M> select(String where,Object...params) throws CommandExecuteExecption{
     	
     	String sql=sqlSelect+" "+where;
-		return dataContext.entityList(entryClass,sql,params);
+		return dataContext.listEntities(entryClass,sql,params);
 	}
     
     public List<M> selectByPaging(Criterias criterias,int start,int limit,String where,Object...params) throws CommandExecuteExecption{
     	
     	String sql=sqlSelect+" "+where;
     	sql=criterias.toPaging(sql,start,limit);
-		return dataContext.entityList(entryClass,sql,params);
+		return dataContext.listEntities(entryClass,sql,params);
 	}
 	
 	

@@ -14,5 +14,5 @@ public interface Entity   {
          Class<? extends Entity> thisClass();
 	
 	
-	
+	     
 }

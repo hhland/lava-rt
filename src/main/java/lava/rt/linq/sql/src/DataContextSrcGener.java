@@ -35,6 +35,8 @@ import lava.rt.logging.LogFactory;
 
 
 
+
+
 public abstract class DataContextSrcGener   {
 
 	public  long serialVersionUID=1L;
@@ -526,22 +528,21 @@ public abstract class DataContextSrcGener   {
 			src
 			//.append("\t\t@"+Override.class.getSimpleName()+"\n")
 			//.append("\t\tpublic boolean equals(Object obj) {return this.toString().equals(obj.toString());} \n\n")
+			.append("\t\t@"+Override.class.getSimpleName()+"\n")
+			.append("\t\tpublic Object thisPk() {return "+(this.pkName==null?"null":this.pkName)+";}")
+			.append("\n\n")
 			.append("\n\n")
 			.append("\t\t@"+Override.class.getSimpleName()+"\n")
-			.append("\t\tpublic Object thisPk() {return "+this.pkName+";}")
+			.append("\t\tpublic String toString() {return  String.join(\"@\", "+this.className+".class.getName() , "+this.pkName+".toString()); }")
 			.append("\n\n")
 			.append("\t\t@"+Override.class.getSimpleName()+"\n")
 			.append("\t\tpublic Class<? extends "+Entity.class.getSimpleName()+"> thisClass() {return "+this.className+".class;}")
 		    ;
-			if(pkName!=null) {
-			//src.append("\n\n").append("\t\t@"+Override.class.getSimpleName()+"\n")
-			//.append("\t\tpublic String toString() {return this.getClass().getName()+\":"+tableName+":\"+this."+pkName+";}")
-			//.append("\n\n")
-			//.append("\t\t@"+Override.class.getSimpleName()+"\n")
-			//.append("\t\tpublic Object getPk() {return this."+pkName+";}")
 			
 			
-			;}
+			
+			
+			
 			return src.toString();
 		}
 

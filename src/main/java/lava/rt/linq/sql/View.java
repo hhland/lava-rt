@@ -144,4 +144,15 @@ public   class  View<M extends Entity> {
 	
 	return ret;
 }
+
+
+
+
+
+
+	public M newEntity() throws Exception {
+		// TODO Auto-generated method stub
+	    
+		return ReflectCommon.newEntity(entryClass);
+	}
 }

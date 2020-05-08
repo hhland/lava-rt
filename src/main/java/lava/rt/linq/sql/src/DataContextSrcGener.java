@@ -37,6 +37,7 @@ import lava.rt.logging.LogFactory;
 
 
 
+
 public abstract class DataContextSrcGener   {
 
 	public  long serialVersionUID=1L;
@@ -282,7 +283,7 @@ public abstract class DataContextSrcGener   {
 			srcEvent.onTableSrcAppend(src, tableSrc);
 			ColumnSrc columnSrc=new ColumnSrc(tableSrc.pkName, toPropName(tableSrc.pkName));
 			srcEvent.onColumnSrcAppend(src, columnSrc);
-			src.append("\t public final Table<"+tableSrc.className+"> "+tableSrc.tableName+"=createTable("+tableSrc.className+".class,"+CRITERIA+"."+tableSrc.className+","+CRITERIA+"."+columnSrc.className+".toString());\n");
+			src.append("\t public final Table<"+tableSrc.className+"> "+tableSrc.tableName+"=createTable("+tableSrc.className+".class,"+CRITERIA+"."+tableSrc.className+","+CRITERIA+"."+columnSrc.className+".toString(),()->new "+tableSrc.className+"());\n");
 		}
 		
 		src.append("\n\n");
@@ -295,7 +296,7 @@ public abstract class DataContextSrcGener   {
 					;
 			TableSrc tableSrc=new TableSrc(tn,null);
 			srcEvent.onViewSrcAppend(src, tableSrc);
-			src.append("\t public final View<"+tableSrc.className+"> "+tableSrc.tableName+"=createView("+tableSrc.className+".class,"+CRITERIA+"."+tableSrc.className+");\n");
+			src.append("\t public final View<"+tableSrc.className+"> "+tableSrc.tableName+"=createView("+tableSrc.className+".class,"+CRITERIA+"."+tableSrc.className+",()->new "+tableSrc.className+"());\n");
 		}
 		
 		src.append("\n\n");

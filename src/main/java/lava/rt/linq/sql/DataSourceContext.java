@@ -15,7 +15,8 @@ import java.util.Date;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import javax.sql.DataSource;
 
@@ -44,10 +45,6 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 			,writeConnection = new ThreadLocal<>()
 			;
 
-	protected  <E extends Entity> E newEntity(Class<E> entityClass) throws Exception{
-          E ret=ReflectCommon.newEntity(entityClass);
-          return ret;
-	}
 	
 	
 	
@@ -61,10 +58,17 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 
 	
 
-	protected <M extends Entity> Table<M> createTable(Class<M> cls, String tableName, String pkName) {
+	protected <M extends Entity> Table<M> createTable(Class<M> cls, String tableName, String pkName,Supplier<M> entityNewer) {
 		Table<M> table=null;
 		try {
-		table= new Table<M>(this, cls, tableName, pkName);
+		table= new Table<M>(this, cls, tableName, pkName) {
+			@Override
+			public M newEntity() throws Exception {
+				// TODO Auto-generated method stub
+				return entityNewer.get();
+			}
+			
+		};
 		tableMap.put(cls, table);
 		viewMap.put(cls, table);
 		}catch(Exception ex) {
@@ -73,8 +77,16 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 		return table;
 	}
 
-	protected <M extends Entity> View<M> createView(Class<M> cls, String tableName) {
-		View<M> view = new View<M>(this, cls, tableName);
+	protected <M extends Entity> View<M> createView(Class<M> cls, String tableName,Supplier< M> entityNewer) {
+		View<M> view = new View<M>(this, cls, tableName) {
+
+			@Override
+			public M newEntity() throws Exception {
+				// TODO Auto-generated method stub
+				return entityNewer.get();
+			}
+			
+		};
 		viewMap.put(cls, view);
 		return view;
 	};
@@ -148,7 +160,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 				
 			
 				while (resultSet.next()) {
-					M m= newEntity(cls);
+					M m= view.newEntity();
 					
 					int c = 0;
 					for (Iterator<String> it = view.entityFieldMap.keySet().iterator(); it.hasNext();) {

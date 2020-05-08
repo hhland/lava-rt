@@ -5,11 +5,15 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class LangCommon {
 
+	
+	private static final String CHAR_EN="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+	
 	private static final Pattern PATTERN_BLANK = Pattern.compile("\\s*|\t|\r|\n");
 	
 	public static boolean isAnyBlank( String... strings) {
@@ -127,9 +131,14 @@ public final class LangCommon {
     }
 
 
-	public static String createRandomEn(int dataLength) {
+	public static String createRandomEn(Random random,int dataLength) {
 		// TODO Auto-generated method stub
-		return null;
+	     StringBuffer ret=new StringBuffer();
+	     for(int i=0;i<dataLength;i++){
+	       int number=random.nextInt(62);
+	       ret.append(CHAR_EN.charAt(number));
+	     }
+	     return ret.toString();
 	}
 	
 	

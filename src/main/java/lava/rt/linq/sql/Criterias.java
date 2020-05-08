@@ -69,7 +69,7 @@ public abstract class Criterias implements Serializable {
 		public String toPaging(String sql,int start,int size) {
 			// TODO Auto-generated method stub
 			StringBuffer ret=new StringBuffer(sql);
-			ret.append(start).append(",").append(size);
+			ret.append(" limit ").append(start).append(",").append(size);
 			return ret.toString();
 		}
 		
@@ -132,6 +132,31 @@ public abstract class Criterias implements Serializable {
 		}
 	};
 	
+	
+    public final static Criterias postgres=new Criterias() {
+		
+		@Override
+		public String toPaging(String sql,int start,int size) {
+			// TODO Auto-generated method stub
+			StringBuffer ret=new StringBuffer(sql);
+			ret.append(" limit ").append(start).append(" offset ").append(size);
+			return ret.toString();
+		}
+		
+		@Override
+		public String concat(Collection<String> columns) {
+			// TODO Auto-generated method stub
+			String ret=String.join("||", columns);
+			return ret;
+		}
+
+		@Override
+		public String format(Date date) {
+			// TODO Auto-generated method stub
+			String ret="to_date('"+SDF_YMD.format(date)+"','yyyy-mm-dd')";
+			return ret;
+		}
+	};
     
 	
 	public static String groupBy(Collection<Column> columns) {

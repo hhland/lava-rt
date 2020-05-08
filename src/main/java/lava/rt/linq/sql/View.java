@@ -54,6 +54,7 @@ public   class  View<M extends Entity> {
 		entityFieldMap.forEach((k,v)->v.setAccessible(true));
 		
 		sqlSelect="select * from "+tableName;
+		
 	}
 	
 	
@@ -61,17 +62,31 @@ public   class  View<M extends Entity> {
 	
     
     
-    public List<M> select(String where,Object...params) throws CommandExecuteExecption{
+     public List<M> select(String where,String orderBy,Object...params) throws CommandExecuteExecption{
     	
-    	String sql=sqlSelect+" "+where;
-		return dataContext.listEntities(entryClass,sql,params);
+    	StringBuffer sql=new StringBuffer(sqlSelect);
+    	if(where!=null) {
+    	   sql.append(" where ").append(where);
+    	}
+    	if(orderBy!=null) {
+     	   sql.append(" order by ").append(orderBy);
+     	}
+		return dataContext.listEntities(entryClass,sql.toString(),params);
 	}
     
-    public List<M> selectByPaging(Criterias criterias,int start,int limit,String where,Object...params) throws CommandExecuteExecption{
+    
+    public List<M> selectByPaging(Criterias criterias,int start,int limit,String where,String orderBy,Object...params) throws CommandExecuteExecption{
     	
-    	String sql=sqlSelect+" "+where;
-    	sql=criterias.toPaging(sql,start,limit);
-		return dataContext.listEntities(entryClass,sql,params);
+    	StringBuffer sql=new StringBuffer(sqlSelect);
+    	if(where!=null) {
+    	   sql.append(" where ").append(where);
+    	}
+    	if(orderBy!=null) {
+     	   sql.append(" order by ").append(orderBy);
+     	}
+    	
+    	String psql=criterias.toPaging(sql.toString(),start,limit);
+		return dataContext.listEntities(entryClass,psql,params);
 	}
 	
 	

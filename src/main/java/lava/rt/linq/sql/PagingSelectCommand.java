@@ -6,7 +6,7 @@ import java.util.List;
 import lava.rt.sqlparser.SelectSqlParser;
 import lava.rt.sqlparser.SqlSegment;
 
-public class PagingParam implements Serializable{
+public class PagingSelectCommand  implements Serializable{
 
 	
 	 
@@ -19,34 +19,33 @@ public class PagingParam implements Serializable{
 	
 	public  int start,limit;
 	
-	public  String sql,pagingSql;
+	private  SelectCommand command;
+	
+	private  String pagingSql;
 	
 	public  Object[] param;
 
-	public PagingParam(Criterias criterias, int start, int limit, String sql, Object... param) {
-		super();
+	public PagingSelectCommand(Criterias criterias, int start, int limit, SelectCommand command, Object... param) {
 		this.start = start;
 		this.limit = limit;
-		this.pagingSql =criterias.toPaging(sql, start, limit);
-		this.sql = sql;
+		this.pagingSql =criterias.toPaging(command.toString(), start, limit);
+		this.command=command;
 		this.param = param;
-		
 	}
+	
+	
 
 	
-	public PagingParam(String psql, int start, int limit, String sql, Object... param) {
-		super();
-		this.start = start;
-		this.limit = limit;
-		this.pagingSql =psql;
-		this.sql = sql;
-		this.param = param;
-	
+	protected SelectCommand createSelectCountCommand() {
+		SelectCommand ret=new SelectCommand("count(*)", command.getFrom(),command.getWhere(),command.getWhere());
+        return ret;
 	}
 	
 	
-    protected  String countSql() {
+	@Deprecated
+    protected  String createSelectCountSql() {
 		
+    	String sql=command.toString();
 		StringBuffer ret=new StringBuffer();
 			String csql="select count(*) "+sql.substring(sql.toLowerCase().indexOf("from"));
 			SelectSqlParser parser=new SelectSqlParser(csql);
@@ -59,6 +58,15 @@ public class PagingParam implements Serializable{
 		
 		
 		return ret.toString();
+	}
+
+
+
+
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return pagingSql;
 	}
 	
 	

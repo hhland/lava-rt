@@ -24,7 +24,11 @@ import lava.rt.linq.Entity;
 
 public interface SqlDataContext extends DataContext {
 
-	public String executeQueryJsonList(PagingParam pagingParam) throws CommandExecuteExecption;
+	public String executeQueryJsonList(PagingSelectCommand pagingParam) throws CommandExecuteExecption;
+	
+	public <M extends Entity> List<M> listEntities(Class<M> cls, SelectCommand command ) throws CommandExecuteExecption ;
+	
+	public Object[][] executeQueryArray(SelectCommand command) throws CommandExecuteExecption ;
 	
 	static final Random RANDOM = new Random();
 
@@ -69,7 +73,7 @@ public interface SqlDataContext extends DataContext {
 				ColumnMeta columnMeta = field.getAnnotation(ColumnMeta.class);
 				ret++;
 				if(field.getType().equals(String.class)) {
-					String val=LangCommon.createRandomEn(columnMeta.dataLength());
+					String val=LangCommon.createRandomEn(RANDOM,columnMeta.dataLength());
 					field.set(entity, val);
 				}else if(field.getType().equals(Integer.class)) {
 					field.set(entity, RANDOM.nextInt());

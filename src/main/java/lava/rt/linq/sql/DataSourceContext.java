@@ -130,7 +130,9 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 
 
 	
-
+	public <M extends Entity> List<M> listEntities(Class<M> cls, SelectCommand command) throws CommandExecuteExecption {
+		return listEntities(cls, command.toString(),command.param);
+	}
 
 
 
@@ -194,6 +196,10 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 		return list;
 	}
 
+	public Object[][] executeQueryArray(SelectCommand command) throws CommandExecuteExecption {
+		return executeQueryArray(command.toString(), command.param);
+	}
+	
 	public Object[][] executeQueryArray(String sql, Object... params) throws CommandExecuteExecption {
 		sql=formatEl(sql);
 		Connection connection= getReadConnection();
@@ -226,7 +232,6 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	}
 
 	
-
 	public String executeQueryJsonList(String sql, Object... params) throws CommandExecuteExecption {
 		sql=formatEl(sql);
 		StringBuffer ret = new StringBuffer("[");
@@ -314,18 +319,18 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 
 
 	@Override
-	public String executeQueryJsonList(PagingParam pagingParam)
+	public String executeQueryJsonList(PagingSelectCommand pagingParam)
 			throws CommandExecuteExecption {
-		pagingParam.sql=formatEl(pagingParam.sql);
-		pagingParam.pagingSql=formatEl(pagingParam.pagingSql);		
-       StringBuffer ret=new StringBuffer(executeQueryJsonList(pagingParam.pagingSql, pagingParam.param));
+			
+       StringBuffer ret=new StringBuffer(executeQueryJsonList(pagingParam.toString(), pagingParam.param));
 		
 		int size=Integer.parseInt(
 				  ret.substring(ret.lastIndexOf("size:")+5)
 				  ),total=pagingParam.start+size;
 		if(size==pagingParam.limit) {
-			String csql=pagingParam.countSql();
-			total=(int)executeQueryArray(csql, pagingParam.param)[0][0];
+			//String csql=pagingParam.countSql();
+			SelectCommand countCommand=pagingParam.createSelectCountCommand();
+			total=(int)executeQueryArray(countCommand.toString(), pagingParam.param)[0][0];
 		}
 		ret
 		.append(",total:")

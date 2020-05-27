@@ -38,6 +38,7 @@ import lava.rt.logging.LogFactory;
 
 
 
+
 public abstract class DataContextSrcGener   {
 
 	public  long serialVersionUID=1L;
@@ -82,16 +83,16 @@ public abstract class DataContextSrcGener   {
 		
 	}
     
-     public  void saveImplSrcTo(Class clsIntf,File srcImpl,Class clsImpl,String databaseName) throws SQLException, IOException {
+     public  void saveBaseSrcTo(Class clsIntf,File srcBase,Class clsBase,String databaseName) throws SQLException, IOException {
 		
-    	 String src=toImplSrc(clsImpl,clsIntf, databaseName);
-		srcImpl.delete();
-		srcImpl.createNewFile();
-		srcImpl.setWritable(true);
-		try(FileWriter fw=new FileWriter(srcImpl)){
+    	 String src=toImplSrc(clsBase,clsIntf, databaseName);
+    	 srcBase.delete();
+    	 srcBase.createNewFile();
+    	 srcBase.setWritable(true);
+		try(FileWriter fw=new FileWriter(srcBase)){
 			fw.write(src);
 		}catch(IOException ioe) {
-			log.equals(srcImpl);
+			log.equals(srcBase);
 			ioe.printStackTrace();
 			throw ioe;
 		}
@@ -695,18 +696,31 @@ public abstract class DataContextSrcGener   {
 
 
 
-	public void saveAllTo(String projectDir, Class clsIntf,
+	public void saveAllTo(String srcDir, Class clsIntf,
 			Class clsImpl, String dataBaseName) throws SQLException, IOException {
 		// TODO Auto-generated method stub
-		    File srcIntf=new File(projectDir+refSrcPath(clsIntf))
-				,	srcImpl=new File(projectDir+refSrcPath(clsImpl))
+		    File srcIntf=getFile(srcDir,clsIntf)
+				,	srcImpl=getFile(srcDir,clsImpl)
 					;
 			
 			saveIntfSrcTo(srcIntf, clsIntf, dataBaseName);
 
 			
 			
-			saveImplSrcTo(clsIntf, srcImpl, clsImpl, dataBaseName);
+			saveBaseSrcTo(clsIntf, srcImpl, clsImpl, dataBaseName);
+	}
+
+
+
+
+
+
+
+
+	public static File getFile(String srcDir, Class cls) {
+		// TODO Auto-generated method stub
+		File ret=new File(srcDir,refSrcPath(cls));
+		return ret;
 	}
 	
 }

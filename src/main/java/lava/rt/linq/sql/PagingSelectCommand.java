@@ -37,7 +37,7 @@ public class PagingSelectCommand  implements Serializable{
 
 	
 	protected SelectCommand createSelectCountCommand() {
-		SelectCommand ret=new SelectCommand("count(*)", command.getFrom(),command.getWhere(),command.getWhere());
+		SelectCommand ret=new SelectCommand("count(*)", command.getFrom(),command.getWhere(),command.getOrderby());
         return ret;
 	}
 	

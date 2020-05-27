@@ -2,12 +2,14 @@ package lava.rt.common;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Reader;
+import java.io.Writer;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
@@ -165,7 +167,7 @@ public final class SqlCommon {
 		return ret.toString();
 	}
 
-	public static <E> E readObject(Blob blob) throws Exception {
+	public static <E> E read(Blob blob) throws Exception {
 		// TODO Auto-generated method stub
 		E ret = null;
 		try (ObjectInputStream stream = new ObjectInputStream(blob.getBinaryStream())) {
@@ -177,7 +179,7 @@ public final class SqlCommon {
 		return ret;
 	}
 
-	public static void writeObject(Blob blob, Object record) throws Exception {
+	public static void write(Blob blob, Object record) throws Exception {
 		// TODO Auto-generated method stub
 
 		try (ObjectOutputStream stream = new ObjectOutputStream(blob.setBinaryStream(0));) {
@@ -185,7 +187,7 @@ public final class SqlCommon {
 		}
 	}
 
-	public static String readString(Clob clob) throws SQLException, IOException {
+	public static String read(Clob clob) throws SQLException, IOException {
 
 		StringBuffer sb = new StringBuffer();
 		Reader is = clob.getCharacterStream();// 得到流
@@ -198,6 +200,14 @@ public final class SqlCommon {
 			}
 		}
 		return sb.toString();
+	}
+	
+	public static void write(Clob clob, String str) throws Exception {
+		// TODO Auto-generated method stub
+
+		try (BufferedWriter stream = new BufferedWriter(clob.setCharacterStream(0))) {
+			stream.write(str);
+		}
 	}
 
 }

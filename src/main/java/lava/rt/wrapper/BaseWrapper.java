@@ -1,12 +1,12 @@
-package lava.rt.adapter;
+package lava.rt.wrapper;
 
-public class BaseAdapter<E> {
+public class BaseWrapper<E> {
 
 	protected final E _this;
 
 	
 	
-	public BaseAdapter(E _this) {
+	public BaseWrapper(E _this) {
 		super();
 		this._this = _this;
 	}

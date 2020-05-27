@@ -22,8 +22,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Stream;
 
-import lava.rt.adapter.UnsafeAdapter;
 import lava.rt.linq.Entity;
+import lava.rt.wrapper.UnsafeWrapper;
 import sun.misc.Unsafe;
 
 @SuppressWarnings("restriction")

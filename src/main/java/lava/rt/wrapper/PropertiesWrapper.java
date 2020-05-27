@@ -1,4 +1,4 @@
-package lava.rt.adapter;
+package lava.rt.wrapper;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,13 +15,13 @@ import lava.rt.common.ReflectCommon;
 import lava.rt.logging.Log;
 import lava.rt.logging.LogFactory;
 
-public class PropertiesAdapter extends BaseAdapter<Properties>{
+public class PropertiesWrapper extends BaseWrapper<Properties>{
 
-	protected static Log log=LogFactory.SYSTEM.getLog(PropertiesAdapter.class);
+	protected static Log log=LogFactory.SYSTEM.getLog(PropertiesWrapper.class);
 	
 	
 	
-	public PropertiesAdapter(File... files) throws  IOException {
+	public PropertiesWrapper(File... files) throws  IOException {
 		super(new Properties());
 		
 		for(File file: files) {
@@ -34,7 +34,7 @@ public class PropertiesAdapter extends BaseAdapter<Properties>{
 		}
 	}
 
-	public PropertiesAdapter(Properties properties) {
+	public PropertiesWrapper(Properties properties) {
 		super(properties);
 	}
 	

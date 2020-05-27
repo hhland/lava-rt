@@ -1,4 +1,4 @@
-package lava.rt.adapter;
+package lava.rt.wrapper;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -16,17 +16,17 @@ import javax.management.remote.*;
 import lava.rt.common.ReflectCommon;
 
 
-public class MBeanServerAdapter extends BaseAdapter<MBeanServer> {
+public class MBeanServerWrapper extends BaseWrapper<MBeanServer> {
 
 	protected final static Map<Class, ModelMBeanInfo> clsMbeanInfoMap = new HashMap<>();
 
-	public MBeanServerAdapter() {
+	public MBeanServerWrapper() {
 		super(ManagementFactory.getPlatformMBeanServer());
 		// TODO Auto-generated constructor stub
 
 	}
 
-	public MBeanServerAdapter(MBeanServer _this) {
+	public MBeanServerWrapper(MBeanServer _this) {
 		super(_this);
 		// TODO Auto-generated constructor stub
     
@@ -179,7 +179,7 @@ public class MBeanServerAdapter extends BaseAdapter<MBeanServer> {
 			// 最后总合 //
 			//////////////////////////////////////////////////////////////////
 			// create ModelMBeanInfo
-			String desc="create MBeanInfo by "+MBeanServerAdapter.class.getName()+".createMBeanInfo";
+			String desc="create MBeanInfo by "+MBeanServerWrapper.class.getName()+".createMBeanInfo";
 			ret = new ModelMBeanInfoSupport(//
 					beanCls.getName(), // MBean类
 					desc, // 描述文字

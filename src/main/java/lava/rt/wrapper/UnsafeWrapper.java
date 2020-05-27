@@ -1,4 +1,4 @@
-package lava.rt.adapter;
+package lava.rt.wrapper;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -10,28 +10,28 @@ import lava.rt.common.ReflectCommon;
 import lava.rt.linq.sql.Table;
 import sun.misc.Unsafe;
 
-public class UnsafeAdapter extends BaseAdapter<Unsafe>{
+public class UnsafeWrapper extends BaseWrapper<Unsafe>{
 
-    protected  static UnsafeAdapter instance;
+    protected  static UnsafeWrapper instance;
     
     
     protected static final Map<String,Long> fieldOffsetMap=new HashMap<>();
   
 	
-	protected UnsafeAdapter(Unsafe unsafe) {
+	protected UnsafeWrapper(Unsafe unsafe) {
 		super(unsafe);
 		// TODO Auto-generated constructor stub
 	}
 	
 	
-	public static UnsafeAdapter getInstance(){
+	public static UnsafeWrapper getInstance(){
 		
 		if(instance==null){
 			try {
 				Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
 				theUnsafe.setAccessible(true);
 				Unsafe us= (Unsafe) theUnsafe.get(null);
-				instance=new UnsafeAdapter(us);
+				instance=new UnsafeWrapper(us);
 			} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

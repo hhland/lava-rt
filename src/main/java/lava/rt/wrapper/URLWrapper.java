@@ -1,4 +1,4 @@
-package lava.rt.adapter;
+package lava.rt.wrapper;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -9,9 +9,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class URLAdapter extends BaseAdapter<URL>{
+public class URLWrapper extends BaseWrapper<URL>{
 
-	public URLAdapter(URL url) {
+	public URLWrapper(URL url) {
 		super(url);
 		// TODO Auto-generated constructor stub
 		

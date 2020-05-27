@@ -1,23 +1,23 @@
-package lava.rt.adapter;
+package lava.rt.wrapper;
 
 import java.util.Calendar;
 import java.util.Date;
 
-public class CalendarAdapter extends BaseAdapter<Calendar> {
+public class CalendarWrapper extends BaseWrapper<Calendar> {
 
 	
-	public CalendarAdapter() {
+	public CalendarWrapper() {
    	 super( Calendar.getInstance());
 		
 	}
 	
 	
-	public CalendarAdapter(Calendar calendar) {
+	public CalendarWrapper(Calendar calendar) {
 		super(calendar);
 		// TODO Auto-generated constructor stub
 	}
 	
-     public CalendarAdapter(Date date) {
+     public CalendarWrapper(Date date) {
     	 super( Calendar.getInstance());
 		_this.setTime(date);
 	}
@@ -49,7 +49,7 @@ public class CalendarAdapter extends BaseAdapter<Calendar> {
 		int year0=getYear();
 		for(int i=0;i<dates.length;i++) {
 			Date datei=dates[i];
-			if(year0!=new CalendarAdapter(datei).getYear()) {
+			if(year0!=new CalendarWrapper(datei).getYear()) {
 				ret=false;
 				break;
 			}
@@ -66,7 +66,7 @@ public class CalendarAdapter extends BaseAdapter<Calendar> {
 		int month0=getMonth();
 		for(int i=0;i<dates.length;i++) {
 			Date datei=dates[i];
-			if(month0!=new CalendarAdapter(datei).getMonth()) {
+			if(month0!=new CalendarWrapper(datei).getMonth()) {
 				ret=false;
 				break;
 			}
@@ -84,7 +84,7 @@ public class CalendarAdapter extends BaseAdapter<Calendar> {
 		int yearOfDay0=getDayOfYear();
 		for(int i=0;i<dates.length;i++) {
 			Date datei=dates[i];
-			if(yearOfDay0!=new CalendarAdapter(datei).getDayOfYear()) {
+			if(yearOfDay0!=new CalendarWrapper(datei).getDayOfYear()) {
 				ret=false;
 				break;
 			}

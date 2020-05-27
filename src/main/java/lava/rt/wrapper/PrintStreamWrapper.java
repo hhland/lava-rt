@@ -1,15 +1,15 @@
-package lava.rt.adapter;
+package lava.rt.wrapper;
 
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Locale;
 
-public class PrintStreamAdapter extends BaseAdapter<PrintStream>{
+public class PrintStreamWrapper extends BaseWrapper<PrintStream>{
 
 	
 
 	
-	public PrintStreamAdapter(PrintStream printStream) {
+	public PrintStreamWrapper(PrintStream printStream) {
 		super(printStream);
 		// TODO Auto-generated constructor stub
 	}

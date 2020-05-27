@@ -1,8 +1,8 @@
-package lava.rt.adapter;
+package lava.rt.wrapper;
 
-public class IntegerAdapter extends BaseAdapter<Integer>{
+public class IntegerWrapper extends BaseWrapper<Integer>{
 
-	public IntegerAdapter(Integer _this) {
+	public IntegerWrapper(Integer _this) {
 		super(_this);
 		// TODO Auto-generated constructor stub
 	}

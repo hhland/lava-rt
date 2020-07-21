@@ -24,11 +24,11 @@ import lava.rt.base.PoolList;
 import lava.rt.cache.CacheItem;
 import lava.rt.common.ReflectCommon;
 import lava.rt.common.SqlCommon;
-import lava.rt.execption.CommandExecuteExecption;
-import lava.rt.execption.DuplicateKeyException;
-import lava.rt.execption.CommandExecuteExecption.CmdType;
 import lava.rt.linq.Checkpoint;
 import lava.rt.linq.Entity;
+import lava.rt.linq.execption.CommandExecuteExecption;
+import lava.rt.linq.execption.DuplicateKeyException;
+import lava.rt.linq.execption.CommandExecuteExecption.CmdType;
 import lava.rt.logging.LogFactory;
 
 public abstract class DataSourceContext  implements SqlDataContext,Closeable {

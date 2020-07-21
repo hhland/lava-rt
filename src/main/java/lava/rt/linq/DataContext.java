@@ -4,8 +4,8 @@ package lava.rt.linq;
 import java.util.Collection;
 import java.util.List;
 
-import lava.rt.execption.CommandExecuteExecption;
-import lava.rt.execption.DuplicateKeyException;
+import lava.rt.linq.execption.CommandExecuteExecption;
+import lava.rt.linq.execption.DuplicateKeyException;
 
 
 

@@ -13,7 +13,7 @@ import java.util.LinkedList;
 import java.util.Set;
 
 import lava.rt.aio.Receiver;
-import lava.rt.logging.Log;
+import lava.rt.logging.Logger;
 import lava.rt.logging.LogFactory;
 
 
@@ -21,7 +21,7 @@ import lava.rt.logging.LogFactory;
 
 class TcpReceiver extends Receiver<TcpQueryClient>{
 	
-	private static final Log logger = LogFactory.SYSTEM.getLog( TcpReceiver.class);
+	private static final Logger logger = LogFactory.SYSTEM.getLog( TcpReceiver.class);
 
 
 	

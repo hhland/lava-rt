@@ -1,12 +1,12 @@
 package lava.rt.aio.tcp;
 
 import lava.rt.aio.Sender;
-import lava.rt.logging.Log;
+import lava.rt.logging.Logger;
 import lava.rt.logging.LogFactory;
 
 class TcpSender extends Sender<TcpRequest>{
 
-	private static final Log log = LogFactory.SYSTEM.getLog(TcpSender.class);
+	private static final Logger log = LogFactory.SYSTEM.getLog(TcpSender.class);
 	
 
 	TcpConnectionPool pool;

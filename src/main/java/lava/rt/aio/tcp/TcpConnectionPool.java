@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 
 import lava.rt.aio.ClientFactory;
 import lava.rt.aio.ConnectionPool;
-import lava.rt.logging.Log;
+import lava.rt.logging.Logger;
 
 
 
@@ -339,7 +339,7 @@ public abstract class TcpConnectionPool extends ConnectionPool<TcpRequest> {
 
         boolean ret = ss.isServerAvaliable();
         if (!ret) {
-            Log logger = getLogger();
+            Logger logger = getLogger();
             if (logger != null )
                 logger.info("server is not avaliable:" + ss.getServerInfo());
         }

@@ -7,13 +7,13 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-import lava.rt.logging.Log;
+import lava.rt.logging.Logger;
 import lava.rt.logging.LogFactory;
 
 
 public class UdpServerStatus {
 	
-	private static Log logger = LogFactory.SYSTEM.getLog(UdpServerStatus.class);
+	private static Logger logger = LogFactory.SYSTEM.getLog(UdpServerStatus.class);
 
 	Object key;
 	

@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.DatagramChannel;
 
-import lava.rt.logging.Log;
+import lava.rt.logging.Logger;
 
 
 /**
@@ -64,7 +64,7 @@ public abstract class UdpQueryClient implements Closeable {
 			}
 	}
 	// ��¼��
-	private Log logger = getLogger();
+	private Logger logger = getLogger();
 
 	private Object channelLock = new Object();
 	private volatile DatagramChannel channel = null;
@@ -168,7 +168,7 @@ public abstract class UdpQueryClient implements Closeable {
 			this.channel = channel;
 		}
 	}
-	protected abstract Log getLogger();
+	protected abstract Logger getLogger();
 
 	public UdpRequest getRequest() {
 		return request;

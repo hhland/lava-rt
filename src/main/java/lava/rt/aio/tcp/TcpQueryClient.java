@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
 
-import lava.rt.logging.Log;
+import lava.rt.logging.Logger;
 
 
 
@@ -189,7 +189,7 @@ public abstract class TcpQueryClient implements Closeable {
 			this.channel = channel;
 		}
 	}
-	protected abstract Log getLogger();
+	protected abstract Logger getLogger();
 
 	public TcpRequest getRequest() {
 		return request;

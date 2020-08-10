@@ -31,20 +31,20 @@ public class LogFactory {
 		init(properties);
 	}
 	
-	private  Map<Class,Log> logMap=new HashMap<>();
+	private  Map<Class,Logger> logMap=new HashMap<>();
 
 	public Level level=Level.WARNING;
 	
 
 	
-	public  Log getLog(Class cls) {
+	public  Logger getLog(Class cls) {
 		// TODO Auto-generated method stub
-		Log ret=null;
+		Logger ret=null;
 		if(logMap.containsKey(cls)) {
 			ret=logMap.get(cls);
 			
 		}else {
-			ret=new Log(this,cls);
+			ret=new Logger(this,cls);
 			logMap.put(cls, ret);
 		}
 		

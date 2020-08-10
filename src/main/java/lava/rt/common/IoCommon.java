@@ -2,7 +2,10 @@ package lava.rt.common;
 
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
@@ -16,11 +19,31 @@ import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.nio.file.WatchEvent.Kind;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public final class IoCommon {
 
+	
+	public static List<String> readLines(File file ) throws FileNotFoundException, IOException{
+		 List<String> ret=new ArrayList<>();
+		   
+		   try(    
+				   FileReader fileReader=new FileReader(file);
+				   BufferedReader reader = new BufferedReader(fileReader);){//换成你的文件名 
+          
+         String line = null;  
+         while((line=reader.readLine())!=null){  
+        
+             ret.add(line);  
+             
+          }
+		   }
+		   
+		   return ret;
+	}
 	
 	public static Runnable runWatchingDir(DirWatcher dirWatcher) throws Exception {
 		Runnable ret=new Thread() {

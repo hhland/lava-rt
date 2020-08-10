@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.logging.Level;
 
-public class Log {
+public class Logger {
 
 	final Class cls;
 	final LogFactory factory;
@@ -17,7 +17,7 @@ public class Log {
 	final static SimpleDateFormat SDF_YMDHMS=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
 	
-	protected Log(LogFactory factory, Class cls) {
+	protected Logger(LogFactory factory, Class cls) {
 		// TODO Auto-generated constructor stub
 		this.cls=cls;
 		this.factory=factory;

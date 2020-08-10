@@ -27,7 +27,7 @@ import lava.rt.linq.execption.CommandExecuteExecption;
 import lava.rt.linq.sql.*;
 import lava.rt.linq.sql.Criteria.Column;
 import lava.rt.linq.sql.SqlDataContext.ColumnMeta;
-import lava.rt.logging.Log;
+import lava.rt.logging.Logger;
 import lava.rt.logging.LogFactory;
 
 
@@ -44,7 +44,7 @@ public abstract class DataContextSrcGener   {
 	
 	protected abstract Class<? extends DataContextSrcGener> thisClass();
 	
-	protected Log log=LogFactory.SYSTEM.getLog(thisClass());
+	protected Logger log=LogFactory.SYSTEM.getLog(thisClass());
 	
 	protected static String CRITERIA="CRITERIA";
 	

@@ -1,12 +1,12 @@
 package lava.rt.aio.udp;
 
 import lava.rt.aio.Sender;
-import lava.rt.logging.Log;
+import lava.rt.logging.Logger;
 import lava.rt.logging.LogFactory;
 
 public class UdpSender extends Sender<UdpRequest>{
 
-	private static final Log log = LogFactory.SYSTEM.getLog(UdpSender.class);
+	private static final Logger log = LogFactory.SYSTEM.getLog(UdpSender.class);
 	
 	
 	private volatile Thread _thread = null;

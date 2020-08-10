@@ -17,13 +17,13 @@ import java.util.LinkedList;
 import java.util.Set;
 
 import lava.rt.aio.Receiver;
-import lava.rt.logging.Log;
+import lava.rt.logging.Logger;
 import lava.rt.logging.LogFactory;
 
 
 class UdpReceiver extends Receiver<UdpQueryClient>{
 	
-	private static final Log logger = LogFactory.SYSTEM.getLog( UdpReceiver.class);
+	private static final Logger logger = LogFactory.SYSTEM.getLog( UdpReceiver.class);
 
 	
 	volatile Thread _thread;

@@ -15,7 +15,7 @@ import lava.rt.aio.ClientFactory;
 import lava.rt.aio.ConnectionPool;
 import lava.rt.aio.RequestFactory;
 
-import lava.rt.logging.Log;
+import lava.rt.logging.Logger;
 
 
 /**
@@ -271,7 +271,7 @@ public abstract class UdpConnectionPool extends ConnectionPool<UdpRequest> {
 		boolean ret = ( ss.recentErrorNumber <= this.serverConfig.maxErrorsBeforeSleep
 				|| (now - ss.downtime ) >= this.serverConfig.sleepMillisecondsAfterTimeOutError );
 		if( !ret ){
-			Log logger = getLogger();
+			Logger logger = getLogger();
 			
 				logger.info("server is not avaliable:" + ss.getServerInfo() );
 		}

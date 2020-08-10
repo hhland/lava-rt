@@ -12,12 +12,12 @@ import java.util.Properties;
 import java.util.Map.Entry;
 
 import lava.rt.common.ReflectCommon;
-import lava.rt.logging.Log;
+import lava.rt.logging.Logger;
 import lava.rt.logging.LogFactory;
 
 public class PropertiesWrapper extends BaseWrapper<Properties>{
 
-	protected static Log log=LogFactory.SYSTEM.getLog(PropertiesWrapper.class);
+	protected static Logger log=LogFactory.SYSTEM.getLog(PropertiesWrapper.class);
 	
 	
 	

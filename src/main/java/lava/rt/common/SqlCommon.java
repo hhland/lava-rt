@@ -24,6 +24,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.print.attribute.standard.PresentationDirection;
+
+
+
 public final class SqlCommon {
 
 	public static int executeBatch(Connection connection, String sql, Object[]... params) throws SQLException {
@@ -80,6 +84,43 @@ public final class SqlCommon {
 		return re;
 	}
 
+	
+	public static void executeQueryForeach(Connection connection,ResultHandler<Object[]> rowHandler, String sql, Object... params)
+			throws SQLException {
+		int cc = 0;
+		
+		try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+			for (int i = 0; i < params.length; i++) {
+				preparedStatement.setObject(i + 1, params[i]);
+				
+			}
+			
+			try (ResultSet resultSet = preparedStatement.executeQuery();) {
+				ResultSetMetaData metaData = resultSet.getMetaData();
+				cc = metaData.getColumnCount();
+				int rowIndex=0,hre=1;
+				
+				while (resultSet.next()) {
+					if(hre>1) {
+						hre--;
+						continue;
+					}else if(hre<=0) {
+						break;
+					}
+					Object[] row = new Object[cc];
+					for (int i = 0; i < cc; i++) {
+						row[i] = resultSet.getObject(i + 1);
+					}
+					hre=rowHandler.handleRow(rowIndex,row,metaData);
+					
+				}
+			}
+		}
+
+		
+	}
+	
+	
 	public static Object[][] executeQueryArray(Connection connection, String sql, Object... params)
 			throws SQLException {
 		int cc = 0;
@@ -210,4 +251,14 @@ public final class SqlCommon {
 		}
 	}
 
+	
+	public interface ResultHandler<R> {
+
+		int handleRow(int rowIndex, R row, ResultSetMetaData metaData);
+
+		
+		
+		
+	}
+	
 }

@@ -59,7 +59,17 @@ public   class  View<M extends Entity> {
 	
 	
 	
-	
+   public void foreach(ResultHandler<M> handler,String where,String orderBy,Object...params) throws CommandExecuteExecption{
+    	
+    	StringBuffer sql=new StringBuffer(sqlSelect);
+    	if(where!=null) {
+    	   sql.append(" where ").append(where);
+    	}
+    	if(orderBy!=null) {
+     	   sql.append(" order by ").append(orderBy);
+     	}
+		dataContext.foreachEntities(entryClass,handler,sql.toString(),params);
+	}
     
     
      public List<M> select(String where,String orderBy,Object...params) throws CommandExecuteExecption{
@@ -109,37 +119,8 @@ public   class  View<M extends Entity> {
 	}
 
 	
-	final static String elPrefix="{view:",elSubFix="}";
-	final static Pattern elPattern = Pattern.compile("\\"+elPrefix+"(.*?)\\"+elSubFix);
 	
-	public static String toEl(Class<? extends Entity> cls) {
-		String ret=elPrefix+cls.getName()+elSubFix;
-		return ret;
-	}
 	
-	protected static String formatEl(String sql,Map<Class,View> viewMap) {
-		String ret=sql;
-		
-	      
-	     Matcher matcher= elPattern.matcher(ret);
-		 
-	      
-	      if(!matcher.find())return ret;
-	      for(int i=0;i<matcher.groupCount();i++) {
-	    	  
-	    	  String groupi= matcher.group(i);
-	    	  String cn=groupi.substring(elPrefix.length(),groupi.length()-elSubFix.length());
-	    	  
-	    	  for(Entry<Class, View> ent :viewMap.entrySet()) {
-	    		  if(ent.getKey().getName().equals(cn)) {
-	    			  ret=ret.replace(groupi, ent.getValue().tableName);
-	    			  break;
-	    		  }
-	    	  }
-	    	  
-	      }
-		return ret;
-	}
 	
 	
 	public static List<Column> getColumns(Class<? extends Entity> entityCls) {

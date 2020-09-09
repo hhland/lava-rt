@@ -147,7 +147,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 			for (int i = 0; i < params.length; i++) {
 				preparedStatement.setObject(i + 1, params[i]);
 			}
-
+            preparedStatement.setFetchSize(Integer.MIN_VALUE);
 			try (ResultSet resultSet = preparedStatement.executeQuery();) {
 
 				ResultSetMetaData metaData = resultSet.getMetaData();

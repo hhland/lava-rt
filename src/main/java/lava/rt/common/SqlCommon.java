@@ -94,7 +94,7 @@ public final class SqlCommon {
 				preparedStatement.setObject(i + 1, params[i]);
 				
 			}
-			
+			preparedStatement.setFetchSize(Integer.MIN_VALUE);
 			try (ResultSet resultSet = preparedStatement.executeQuery();) {
 				ResultSetMetaData metaData = resultSet.getMetaData();
 				cc = metaData.getColumnCount();

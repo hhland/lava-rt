@@ -130,18 +130,16 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 
 
 	
-	public <M extends Entity> List<M> listEntities(Class<M> cls, SelectCommand command) throws CommandExecuteExecption {
-		return listEntities(cls, command.toString(),command.param);
+	public <M extends Entity> List<M> listEntities(Class<M> cls, SelectCommand command,Object...param) throws CommandExecuteExecption {
+		return listEntities(cls, command.getSql(),param);
 	}
 
-	public <M extends Entity> void foreachEntities(Class<M> cls,ResultHandler<M> handler, SelectCommand command) throws CommandExecuteExecption {
-		 foreachEntities(cls,handler, command.toString(),command.param);
-	}
+	
 
-	public <M extends Entity> void foreachEntities(Class<M> cls,ResultHandler<M> handler, String sql, Object... params) throws CommandExecuteExecption {
+	public <M extends Entity> void foreachEntities(Class<M> cls,ResultHandler<M> handler, SelectCommand command, Object... params) throws CommandExecuteExecption {
 		
 		Connection connection = getReadConnection();
-		
+		String sql=command.getSql();
 		
 		try (PreparedStatement preparedStatement = connection.prepareStatement(sql);) {
 			for (int i = 0; i < params.length; i++) {
@@ -255,15 +253,32 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 		return list;
 	}
 
-	public Object[][] executeQueryArray(SelectCommand command) throws CommandExecuteExecption {
-		return executeQueryArray(command.toString(), command.param);
+	@Override
+	public Object[][] executeQueryArray(String cmd, Object... params) throws CommandExecuteExecption {
+		// TODO Auto-generated method stub
+        Connection connection= getReadConnection();
+		
+		Object[][] re =null;
+		String sql=cmd;
+		try {
+		re=SqlCommon.executeQueryArray(connection, sql, params);
+		}
+		catch(SQLException seq) {
+			
+			logExecptioin(seq);
+			logError("sql:"+sql+"\nparams:");
+			logError(params);
+			throw CommandExecuteExecption.forSql(seq, sql, params);
+		}
+		return re;
 	}
 	
-	public Object[][] executeQueryArray(String sql, Object... params) throws CommandExecuteExecption {
+	public Object[][] executeQueryArray(SelectCommand command, Object... params) throws CommandExecuteExecption {
 		
 		Connection connection= getReadConnection();
 		
 		Object[][] re =null;
+		String sql=command.getSql();
 		try {
 		re=SqlCommon.executeQueryArray(connection, sql, params);
 		}
@@ -378,18 +393,18 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 
 
 	@Override
-	public String executeQueryJsonList(PagingSelectCommand pagingParam)
+	public String executeQueryJsonList(SelectCommand command,Object... param)
 			throws CommandExecuteExecption {
 			
-       StringBuffer ret=new StringBuffer(executeQueryJsonList(pagingParam.toString(), pagingParam.param));
+       StringBuffer ret=new StringBuffer(executeQueryJsonList(command.getSql(),param));
 		
-		int size=Integer.parseInt(
+		long size=Integer.parseInt(
 				  ret.substring(ret.lastIndexOf("size:")+5)
-				  ),total=pagingParam.start+size;
-		if(size==pagingParam.limit) {
+				  ),total=command.getStart()+size;
+		if(size==command.getLimit()) {
 			//String csql=pagingParam.countSql();
-			SelectCommand countCommand=pagingParam.createSelectCountCommand();
-			total=(int)executeQueryArray(countCommand.toString(), pagingParam.param)[0][0];
+			String countSql=command.getCountSql();
+			total=(long)executeQueryArray(countSql,param)[0][0];
 		}
 		ret
 		.append(",total:")

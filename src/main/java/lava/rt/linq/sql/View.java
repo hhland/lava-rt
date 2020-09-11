@@ -60,43 +60,25 @@ public abstract  class  View<M extends Entity> {
 	
 	
    public void foreach(ResultHandler<M> handler,String where,String orderBy,Object...params) throws CommandExecuteExecption{
+    	SelectCommand cmd=new SelectCommand(null, "*", tableName, where, orderBy);
     	
-    	StringBuffer sql=new StringBuffer(sqlSelect);
-    	if(where!=null) {
-    	   sql.append(" where ").append(where);
-    	}
-    	if(orderBy!=null) {
-     	   sql.append(" order by ").append(orderBy);
-     	}
-		dataContext.foreachEntities(entryClass,handler,sql.toString(),params);
+		dataContext.foreachEntities(entryClass,handler,cmd,params);
 	}
     
     
      public List<M> select(String where,String orderBy,Object...params) throws CommandExecuteExecption{
-    	
-    	StringBuffer sql=new StringBuffer(sqlSelect);
-    	if(where!=null) {
-    	   sql.append(" where ").append(where);
-    	}
-    	if(orderBy!=null) {
-     	   sql.append(" order by ").append(orderBy);
-     	}
-		return dataContext.listEntities(entryClass,sql.toString(),params);
+    	 SelectCommand cmd=new SelectCommand(null, "*", tableName, where, orderBy);
+    	 List<M> ret=dataContext.listEntities(entryClass,cmd,params);
+    	 return ret;
 	}
     
     
-    public List<M> selectByPaging(Criterias criterias,int start,int limit,String where,String orderBy,Object...params) throws CommandExecuteExecption{
+    public List<M> select(Criterias criterias,int start,int limit,String where,String orderBy,Object...params) throws CommandExecuteExecption{
     	
-    	StringBuffer sql=new StringBuffer(sqlSelect);
-    	if(where!=null) {
-    	   sql.append(" where ").append(where);
-    	}
-    	if(orderBy!=null) {
-     	   sql.append(" order by ").append(orderBy);
-     	}
-    	
-    	String psql=criterias.toPaging(sql.toString(),start,limit);
-		return dataContext.listEntities(entryClass,psql,params);
+    	SelectCommand cmd=new SelectCommand(criterias, "*", tableName, where, orderBy);
+    	cmd.setStart(start);
+    	cmd.setLimit(limit);
+		return dataContext.listEntities(entryClass,cmd,params);
 	}
 	
 	

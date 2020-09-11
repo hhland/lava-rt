@@ -25,11 +25,11 @@ import lava.rt.linq.execption.VerifyExecption;
 
 public interface SqlDataContext extends DataContext {
 
-	public String executeQueryJsonList(PagingSelectCommand pagingParam) throws CommandExecuteExecption;
+	public String executeQueryJsonList(SelectCommand command,Object... param) throws CommandExecuteExecption;
 	
-	public <M extends Entity> List<M> listEntities(Class<M> cls, SelectCommand command ) throws CommandExecuteExecption ;
+	public <M extends Entity> List<M> listEntities(Class<M> cls, SelectCommand command ,Object... param) throws CommandExecuteExecption ;
 	
-	public Object[][] executeQueryArray(SelectCommand command) throws CommandExecuteExecption ;
+	public Object[][] executeQueryArray(SelectCommand command,Object... param) throws CommandExecuteExecption ;
 	
 	static final Random RANDOM = new Random();
 

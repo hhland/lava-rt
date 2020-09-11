@@ -1,21 +1,29 @@
 package lava.rt.rpc;
 
 
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 
 
 
 public class SocketRpcClient extends RpcClient{
 
+	InetSocketAddress addr;
+	
+	protected final Map<Class, ProxyHandler> handlerMap = new HashMap<>();
 	
 	
-	
-	
-	
-	public SocketRpcClient(InetSocketAddress addr) {
-		super(addr);
+	public SocketRpcClient(InetAddress addr,int port) {
 		
+		this.addr=new InetSocketAddress(addr,port);
 	}   
 
 
@@ -34,5 +42,35 @@ public class SocketRpcClient extends RpcClient{
 
 	
 	
-	
+	protected class ProxyHandler implements InvocationHandler {
+
+		final Class serviceInterface;
+
+		public ProxyHandler(Class serviceInterface) {
+			super();
+			this.serviceInterface = serviceInterface;
+			
+		}
+
+		@Override
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			// TODO Auto-generated method stub
+			Object ret=null;
+			try (
+					Socket socket = new Socket(addr.getAddress(),addr.getPort());
+					ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+					ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
+					){
+				
+				output.writeUTF(serviceInterface.getName());
+				output.writeUTF(method.getName());
+				output.writeObject(method.getParameterTypes());
+				output.writeObject(args);
+
+				ret=input.readObject();
+			} 
+			return ret;
+		}
+
+	}
 }

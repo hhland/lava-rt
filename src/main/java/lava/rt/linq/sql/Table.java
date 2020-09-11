@@ -18,7 +18,7 @@ import lava.rt.linq.Entity;
 import lava.rt.linq.execption.CommandExecuteExecption;
 
 
-public class Table<M extends Entity> extends View<M> {
+public abstract class Table<M extends Entity> extends View<M> {
 
 	
 	
@@ -326,18 +326,7 @@ public class Table<M extends Entity> extends View<M> {
 		return ret;
 	}
 	
-	public Table<M> duplicate(String newTableName){
-		Table<M> ret=new Table<>(this.dataContext, this.entryClass, newTableName, pkName);
-		return ret;
-	}
-
-	public Table<M> selectInto(String newTableName,String where,Object...param) throws CommandExecuteExecption{
-		Table<M> ret=null;
-		String sql="select * into "+newTableName+" from "+tableName+" "+where;
-		dataContext.executeUpdate(sql, param);
-		ret=new Table<>(this.dataContext, this.entryClass, newTableName, pkName);
-		return ret;
-	}
+	
 	
 	public int insertInto(String newTableName,String where,Object...param) throws CommandExecuteExecption{
 		//Table<M> ret=null;

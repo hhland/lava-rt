@@ -17,7 +17,7 @@ import lava.rt.linq.execption.CommandExecuteExecption;
 import lava.rt.linq.sql.Criteria.Column;
 
 
-public   class  View<M extends Entity> {
+public abstract  class  View<M extends Entity> {
 
 	protected final DataSourceContext dataContext;
 	
@@ -105,50 +105,12 @@ public   class  View<M extends Entity> {
 
 
 
-	@Override
-	public String toString() {
-		return tableName;
-	}
-
-
-
-
-	public View<M> duplicate(String tableName){
-		View<M> ret=new View<>(this.dataContext, this.entryClass, tableName);
-		return ret;
-	}
-
 	
-	
-	
-	
-	
-	public static List<Column> getColumns(Class<? extends Entity> entityCls) {
-	    List<Column> ret=clsColumns.get(entityCls);
-	    if(ret==null) {
-	    ret=new ArrayList<>();
-		Map<String,Field> fieldMap= ReflectCommon.getTheDeclaredFieldMap(entityCls);
-		
-		for(Entry<String, Field> ent:fieldMap.entrySet()) {
-			boolean isStatic = ReflectCommon.isStatic(ent.getValue());
-			if(isStatic)continue;
-			String key=ent.getKey();
-			Column column=new Column(key);
-			ret.add( column);
-		 }
-	    }
-	
-	return ret;
-}
 
 
 
+    
 
 
-
-	public M newEntity() throws Exception {
-		// TODO Auto-generated method stub
-	    
-		return ReflectCommon.newEntity(entryClass);
-	}
+	public abstract M newEntity() throws Exception;
 }

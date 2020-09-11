@@ -7,6 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -64,7 +65,7 @@ public interface SqlDataContext extends DataContext {
 	}
 
 	public static int fillRandom(Entity entity) {
-		Map<String, Field> fieldMap = ReflectCommon.getFieldMap(entity.getClass());
+		Map<String, Field> fieldMap = ReflectCommon.getAllDeclaredFieldMap(entity.getClass());
 	    int ret = 0;
 		try {
 			for (Entry<String, Field> en : fieldMap.entrySet()) {
@@ -84,8 +85,11 @@ public interface SqlDataContext extends DataContext {
 				}else if(field.getType().equals(BigDecimal.class)) {
 					field.set(entity, new BigDecimal(RANDOM.nextGaussian()));
 				}else if(field.getType().equals(Date.class)) {
-					field.set(entity,Calendar.getInstance().getTime());
-				}else {
+					field.set(entity,new Date());
+				}else if(field.getType().equals(Timestamp.class)) {
+					field.set(entity,new Timestamp(System.currentTimeMillis()));
+				}
+				else {
 					ret--;
 				}
 				

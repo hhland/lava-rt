@@ -309,6 +309,36 @@ public abstract class Table<M extends Entity> extends View<M> {
 		
 		return re;
 	}
+	
+	
+	 public int delete(String where,Object...params) throws CommandExecuteExecption{
+		 StringBuffer sql = new StringBuffer("delete from ");
+		 sql
+		 .append(tableName);
+		 if(where!=null) {
+			 sql.append(" where ").append(where);
+		 }
+		 int ret = dataContext.executeUpdate(sql.toString(),params);
+    	 return ret;
+	}
+	 
+	
+	 public int update(String set,String where,Object...params) throws CommandExecuteExecption{
+		 
+		 StringBuffer sql = new StringBuffer("update ");
+		 sql
+		 .append(tableName)
+		 .append(" set ")
+		 .append(set)
+		 ;
+		 
+		 if(where!=null) {
+			 sql.append(" where ").append(where);
+		 }
+		 int ret = dataContext.executeUpdate(sql.toString(),params);
+    	 return ret;
+	}
+	 
 
 	public int truncate() throws CommandExecuteExecption {
 		String sql = "truncate table " + tableName;
@@ -316,6 +346,12 @@ public abstract class Table<M extends Entity> extends View<M> {
 		return re;
 	}
 
+	public int drop() throws CommandExecuteExecption {
+		String sql = "drop table " + tableName;
+		int re = dataContext.executeUpdate(sql);
+		return re;
+	}
+	
 	public <E extends M,R> R getPk(E entry) {
 		R ret = null;
 		try {
@@ -328,13 +364,7 @@ public abstract class Table<M extends Entity> extends View<M> {
 	
 	
 	
-	public int insertInto(String newTableName,String where,Object...param) throws CommandExecuteExecption{
-		//Table<M> ret=null;
-		String sql=" insert into "+newTableName+"("+sqlColumns+") select ("+sqlColumns+") from "+tableName+" "+where;
-		int ret= dataContext.executeUpdate(sql, param);
-		//ret=new Table<>(this.dataContext, this.entryClass, newTableName, pkName);
-		return ret;
-	}
+	
 	
 	
 	

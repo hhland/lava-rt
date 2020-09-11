@@ -2,19 +2,14 @@ package lava.rt.linq.sql;
 
 import java.lang.reflect.Field;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import lava.rt.common.ReflectCommon;
 import lava.rt.linq.Entity;
 import lava.rt.linq.execption.CommandExecuteExecption;
-import lava.rt.linq.sql.Criteria.Column;
+
 
 
 public abstract  class  View<M extends Entity> {
@@ -82,10 +77,35 @@ public abstract  class  View<M extends Entity> {
 	}
 	
 	
+    public int createTable(String newTableName,String where,Object... param) throws CommandExecuteExecption{
+		StringBuffer sql=new StringBuffer(" CREATE TABLE ");
+		sql
+		.append(newTableName)
+		.append(" SELECT * FROM ")
+		.append(this.tableName)
+		;
+		if(where!=null) {
+			sql.append(" where ").append(where);
+		}
+		int ret=dataContext.executeUpdate(sql.toString(), param);
+		return ret;
+	}
 
 
-
-
+    public int insertInto(String newTableName,String where,Object...param) throws CommandExecuteExecption{
+		//Table<M> ret=null;
+		StringBuffer sql=new StringBuffer(" insert into ");
+		sql.append(newTableName)
+		
+		.append(" select * from ")
+		.append(tableName);
+		if(where!=null) {
+			sql.append(" where ").append(where);
+		}
+		int ret= dataContext.executeUpdate(sql.toString(), param);
+		//ret=new Table<>(this.dataContext, this.entryClass, newTableName, pkName);
+		return ret;
+	}
 
 	
 

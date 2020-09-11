@@ -10,7 +10,7 @@ public class SelectCommand implements Serializable{
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private String columns, from,where, orderby;
+	private final String columns, from,where, orderby;
 	
 	
 	

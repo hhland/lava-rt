@@ -25,7 +25,7 @@ import lava.rt.linq.DataContext;
 import lava.rt.linq.Entity;
 import lava.rt.linq.execption.CommandExecuteExecption;
 import lava.rt.linq.sql.*;
-import lava.rt.linq.sql.Criteria.Column;
+
 import lava.rt.linq.sql.SqlDataContext.ColumnMeta;
 import lava.rt.logging.Logger;
 import lava.rt.logging.LogFactory;
@@ -117,7 +117,7 @@ public abstract class DataContextSrcGener   {
 		.append("import "+CommandExecuteExecption.class.getPackage().getName()+".*; \n")
 		.append("import "+DataContext.class.getPackage().getName()+".*; \n")
 		.append("import "+DataSourceContext.class.getPackage().getName()+".*; \n")
-		.append("import "+DataSourceContext.class.getPackage().getName()+"."+Criteria.class.getSimpleName()+".*; \n")
+		
 		.append("import "+ List.class.getPackage().getName()+".*; \n")
 		
 		.append("import "+ SQLException.class.getPackage().getName()+".*; \n")

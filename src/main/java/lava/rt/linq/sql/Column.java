@@ -6,40 +6,69 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public interface Criteria {
+public class Column {
 
 	
+	public final String column,asc ,desc,propName,groupBy,orderBy,distinct,count,max,min,sum ;
 	
 	
 	
-	final static String elPrefix="{criteria:",elSubFix="}";
-	final static Pattern elPattern = Pattern.compile("\\"+elPrefix+"(.*?)\\"+elSubFix);
-	
-	
-	public static String formatEl(String command, Map<String, String> columnMap) {
-		// TODO Auto-generated method stub
-		String ret=command;
-		
-	      
-	     Matcher matcher= elPattern.matcher(ret);
-		 
-	      
-	      if(!matcher.find())return ret;
-	      for(int i=0;i<matcher.groupCount();i++) {
-	    	  
-	    	  String groupi= matcher.group(i);
-	    	  String cn=groupi.substring(elPrefix.length(),groupi.length()-elSubFix.length());
-	    	  
-	    	  for(Entry<String, String> ent :columnMap.entrySet()) {
-	    		  if(ent.getKey().equals(cn)) {
-	    			  ret=ret.replace(groupi, ent.getValue());
-	    			  break;
-	    		  }
-	    	  }
-	    	  
-	      }
-		return ret;
+	public Column(String column) {
+		this.column=column;
+		asc = column + " asc";
+		desc =column + " desc";
+		groupBy= "group by "+column;
+		orderBy= "order by "+column;
+		distinct="distinct "+column;
+		count="count("+column+")";
+		max="max("+column+")";
+		min="min("+column+")";
+		sum="sum("+column+")";
+		propName=toPropName(column);
 	}
+	
+	public Column(String column,String propName) {
+		this.column=column;
+		asc = column + " asc";
+		desc =column + " desc";
+		groupBy= "group by "+column;
+		orderBy= "order by "+column;
+		distinct="distinct "+column;
+		count="count("+column+")";
+		max="max("+column+")";
+		min="min("+column+")";
+		sum="sum("+column+")";
+		this.propName=propName;
+	}
+	
+	public String eq(Object val) {return sql_eq(true,column,val);}
+	public String notEq(Object val) {return sql_eq(false,column,val);}
+	public String lt(Object val) {return sql_lt(true,column,val);}
+	public String notLt(Object val) {return sql_lt(false,column,val);}
+	public String gt(Object val) {return sql_gt(true,column,val);}
+	public String notGt(Object val) {return sql_gt(false,column,val);}
+	public String isNull() {return sql_isnull(true,column);}
+	public String isNotNull() {return sql_isnull(false,column);}
+	public <T> String in(T... vals) {return sql_in(true,column,vals);}
+	public <T> String notIn(T...vals) {return sql_in(false,column,vals);}
+	public <T> String between(T from,T to) {return sql_between(true,column,from,to);}
+	public <T> String notBetween(T from,T to) {return sql_between(false,column,from,to);}
+	public String like(String val) {return sql_like(true, column,val);}
+	public String notLike(String val) {return sql_like(false, column,val);}	
+	
+	
+	public String as(String name) {
+		return this.column+" as "+name;
+	}
+
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return this.column;
+	}
+	
+	
+	
 	
 	
 	 static String sql_eq(boolean bl,String column,Object val) {
@@ -171,67 +200,11 @@ public interface Criteria {
 	
 	
 	
-	public class Column implements Criteria{
+	
 
 		
 		
-		public final String column,asc ,desc,propName,groupBy,orderBy,distinct,count,max,min,sum ;
 		
-		
-		
-		public Column(String column) {
-			this.column=column;
-			asc = column + " asc";
-			desc =column + " desc";
-			groupBy= "group by "+column;
-			orderBy= "order by "+column;
-			distinct="distinct "+column;
-			count="count("+column+")";
-			max="max("+column+")";
-			min="min("+column+")";
-			sum="sum("+column+")";
-			propName=toPropName(column);
-		}
-		
-		public Column(String column,String propName) {
-			this.column=column;
-			asc = column + " asc";
-			desc =column + " desc";
-			groupBy= "group by "+column;
-			orderBy= "order by "+column;
-			distinct="distinct "+column;
-			count="count("+column+")";
-			max="max("+column+")";
-			min="min("+column+")";
-			sum="sum("+column+")";
-			this.propName=propName;
-		}
-		
-		public String eq(Object val) {return sql_eq(true,column,val);}
-		public String notEq(Object val) {return sql_eq(false,column,val);}
-		public String lt(Object val) {return sql_lt(true,column,val);}
-		public String notLt(Object val) {return sql_lt(false,column,val);}
-		public String gt(Object val) {return sql_gt(true,column,val);}
-		public String notGt(Object val) {return sql_gt(false,column,val);}
-		public String isNull() {return sql_isnull(true,column);}
-		public String isNotNull() {return sql_isnull(false,column);}
-		public <T> String in(T... vals) {return sql_in(true,column,vals);}
-		public <T> String notIn(T...vals) {return sql_in(false,column,vals);}
-		public <T> String between(T from,T to) {return sql_between(true,column,from,to);}
-		public <T> String notBetween(T from,T to) {return sql_between(false,column,from,to);}
-		public String like(String val) {return sql_like(true, column,val);}
-		public String notLike(String val) {return sql_like(false, column,val);}	
-		
-		
-		public String as(String name) {
-			return this.column+" as "+name;
-		}
-
-		@Override
-		public String toString() {
-			// TODO Auto-generated method stub
-			return this.column;
-		}
 		
 		
 		
@@ -245,6 +218,6 @@ public interface Criteria {
 	
 	
 	
+
 	
-	
-}
+

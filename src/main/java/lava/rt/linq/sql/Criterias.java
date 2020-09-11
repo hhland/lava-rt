@@ -10,7 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 
-import lava.rt.linq.sql.Criteria.Column;
+import lava.rt.linq.sql.Column;
 
 
 public abstract class Criterias implements Serializable {

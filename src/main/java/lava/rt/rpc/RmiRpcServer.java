@@ -11,12 +11,12 @@ import java.rmi.server.RMIClientSocketFactory;
 import java.rmi.server.RMIServerSocketFactory;
 import java.rmi.server.UnicastRemoteObject;
 
-public class RmiRpcServer {
+public class RmiRpcServer extends RpcServer{
 
 	
     Registry registry = null;
     
-    public RmiRpcServer(InetAddress addr,int port) throws RemoteException {
+    public RmiRpcServer(int port) throws RemoteException {
 		registry=LocateRegistry.createRegistry(port);
     }
 
@@ -25,6 +25,14 @@ public class RmiRpcServer {
     public <T extends UnicastRemoteObject> void  registerService (T serviceImpl) throws AccessException, RemoteException, AlreadyBoundException {
         registry.bind(serviceImpl.getClass().getName(), serviceImpl);
     }
+
+
+
+	@Override
+	public void start() throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
 	
     
     

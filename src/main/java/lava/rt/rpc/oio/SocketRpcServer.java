@@ -1,4 +1,4 @@
-package lava.rt.rpc;
+package lava.rt.rpc.oio;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import lava.rt.rpc.RpcServer;
+
 public class SocketRpcServer extends RpcServer{
 
 	private final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -24,6 +26,12 @@ public class SocketRpcServer extends RpcServer{
     protected final SocketAddress address;
     
     protected final ServerSocket  server  ;
+
+
+
+
+
+	public Map<String,Object> serviceMap=new HashMap<>();
  
     public SocketRpcServer(SocketAddress address) throws IOException {
         this.address = address;
@@ -85,7 +93,7 @@ public class SocketRpcServer extends RpcServer{
                 String methodName = input.readUTF();
                 Class<?>[] parameterTypes = (Class<?>[]) input.readObject();
                 Object[] arguments = (Object[]) input.readObject();
-                Object service = serviceRegistry.get(serviceName);
+                Object service = serviceMap.get(serviceName);
                
                 Method method = service.getClass().getMethod(methodName, parameterTypes);
                 synchronized(service) {
@@ -111,6 +119,18 @@ public class SocketRpcServer extends RpcServer{
  
         }
     }
+
+
+
+
+
+
+
+	@Override
+	public <T, I extends T> void registerService(Class<T> serviceInterface, I impl) {
+		// TODO Auto-generated method stub
+		serviceMap.put(serviceInterface.getName(), impl);
+	}
 
 	
 	

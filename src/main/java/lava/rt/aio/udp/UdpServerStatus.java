@@ -8,12 +8,12 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 import lava.rt.logging.Logger;
-import lava.rt.logging.LogFactory;
+import lava.rt.logging.LoggerFactory;
 
 
 public class UdpServerStatus {
 	
-	private static Logger logger = LogFactory.SYSTEM.getLog(UdpServerStatus.class);
+	private static Logger logger = LoggerFactory.SYSTEM.getLogger(UdpServerStatus.class);
 
 	Object key;
 	

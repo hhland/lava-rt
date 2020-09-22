@@ -11,7 +11,7 @@ import java.util.Set;
 import lava.rt.aio.tcp.TcpQueryClient;
 import lava.rt.aio.udp.UdpRequest;
 import lava.rt.logging.Logger;
-import lava.rt.logging.LogFactory;
+import lava.rt.logging.LoggerFactory;
 
 public abstract class ConnectionPool<R>  {
 
@@ -49,7 +49,7 @@ public abstract class ConnectionPool<R>  {
      * @return
      */
     protected  Logger getLogger() {
-    	return LogFactory.SYSTEM.getLog(ConnectionPool.class);
+    	return LoggerFactory.SYSTEM.getLogger(ConnectionPool.class);
     }
     
     

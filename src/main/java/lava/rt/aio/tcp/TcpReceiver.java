@@ -14,14 +14,14 @@ import java.util.Set;
 
 import lava.rt.aio.Receiver;
 import lava.rt.logging.Logger;
-import lava.rt.logging.LogFactory;
+import lava.rt.logging.LoggerFactory;
 
 
 
 
 class TcpReceiver extends Receiver<TcpQueryClient>{
 	
-	private static final Logger logger = LogFactory.SYSTEM.getLog( TcpReceiver.class);
+	private static final Logger logger = LoggerFactory.SYSTEM.getLogger( TcpReceiver.class);
 
 
 	

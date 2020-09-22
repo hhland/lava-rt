@@ -9,25 +9,25 @@ import java.util.stream.Stream;
 
 import lava.rt.aio.tcp.TcpServerStatus;
 
-public class LogFactory {
+public class LoggerFactory {
 
 	protected PrintStream[] infoStreams,errStreams,debugStreams
 			;
 	
 	
 	
-	public static final LogFactory SYSTEM=new LogFactory();
+	public static final LoggerFactory SYSTEM=new LoggerFactory();
 	
 	
 	
-	private LogFactory(){
+	private LoggerFactory(){
 		infoStreams=new PrintStream[] {System.out};
 		debugStreams=new PrintStream[] {System.out};
 				errStreams=new PrintStream[] {System.err}
 				;
 	}
 	
-	LogFactory(Properties properties){
+	LoggerFactory(Properties properties){
 		init(properties);
 	}
 	
@@ -37,7 +37,7 @@ public class LogFactory {
 	
 
 	
-	public  Logger getLog(Class cls) {
+	public  Logger getLogger(Class cls) {
 		// TODO Auto-generated method stub
 		Logger ret=null;
 		if(logMap.containsKey(cls)) {

@@ -7,7 +7,7 @@ import java.util.Map;
 public abstract class RpcServer {
 
 	
-	    protected  final Map<String, Object> serviceRegistry = new HashMap<>();
+	    
 	
 	    protected  boolean isRunning = true;
 	
@@ -21,9 +21,7 @@ public abstract class RpcServer {
 	 
 	    public abstract void start() throws IOException;
 	 
-	    public <T> void  registerService (Class<T> serviceInterface, T impl) {
-	        serviceRegistry.put(serviceInterface.getName(), impl);
-	    }
+	    public abstract <T,I extends T> void  registerService (Class<T> serviceInterface, I impl) throws Exception;
 	    
 	    
 	 

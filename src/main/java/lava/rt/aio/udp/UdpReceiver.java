@@ -18,12 +18,12 @@ import java.util.Set;
 
 import lava.rt.aio.Receiver;
 import lava.rt.logging.Logger;
-import lava.rt.logging.LogFactory;
+import lava.rt.logging.LoggerFactory;
 
 
 class UdpReceiver extends Receiver<UdpQueryClient>{
 	
-	private static final Logger logger = LogFactory.SYSTEM.getLog( UdpReceiver.class);
+	private static final Logger logger = LoggerFactory.SYSTEM.getLogger( UdpReceiver.class);
 
 	
 	volatile Thread _thread;

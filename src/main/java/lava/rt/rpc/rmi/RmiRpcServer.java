@@ -1,4 +1,4 @@
-package lava.rt.rpc;
+package lava.rt.rpc.rmi;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -11,6 +11,8 @@ import java.rmi.server.RMIClientSocketFactory;
 import java.rmi.server.RMIServerSocketFactory;
 import java.rmi.server.UnicastRemoteObject;
 
+import lava.rt.rpc.RpcServer;
+
 public class RmiRpcServer extends RpcServer{
 
 	
@@ -20,11 +22,17 @@ public class RmiRpcServer extends RpcServer{
 		registry=LocateRegistry.createRegistry(port);
     }
 
-    
-    
-    public <T extends UnicastRemoteObject> void  registerService (T serviceImpl) throws AccessException, RemoteException, AlreadyBoundException {
-        registry.bind(serviceImpl.getClass().getName(), serviceImpl);
-    }
+
+	@Override
+	public <T, I extends T> void registerService(Class<T> serviceInterface, I impl) throws Exception {
+		// TODO Auto-generated method stub
+		
+		if(!(impl instanceof UnicastRemoteObject)) {
+			throw new Exception("impl 必须实现 "+UnicastRemoteObject.class.getName());
+		}
+		UnicastRemoteObject uro=(UnicastRemoteObject)impl;
+		registry.bind(serviceInterface.getName(), uro);
+	}
 
 
 

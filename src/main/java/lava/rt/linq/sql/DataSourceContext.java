@@ -29,7 +29,7 @@ import lava.rt.linq.Entity;
 import lava.rt.linq.execption.CommandExecuteExecption;
 import lava.rt.linq.execption.DuplicateKeyException;
 import lava.rt.linq.execption.CommandExecuteExecption.CmdType;
-import lava.rt.logging.LogFactory;
+import lava.rt.logging.LoggerFactory;
 
 public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 
@@ -297,12 +297,12 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	}
 	
 	protected void logError(Object... vals) {
-		LogFactory.SYSTEM.getLog(this.getClass()).error(vals);
+		LoggerFactory.SYSTEM.getLogger(this.getClass()).error(vals);
 	}
 
 
 	protected void logExecptioin(Exception exception) {
-		LogFactory.SYSTEM.getLog(this.getClass()).error(exception);
+		LoggerFactory.SYSTEM.getLogger(this.getClass()).error(exception);
 	}
 
 	

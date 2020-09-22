@@ -1,6 +1,7 @@
 package lava.rt.logging;
 
 import java.io.PrintStream;
+import java.net.SocketAddress;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.logging.Level;
@@ -8,7 +9,7 @@ import java.util.logging.Level;
 public class Logger {
 
 	final Class cls;
-	final LogFactory factory;
+	final LoggerFactory factory;
 	
 	
 	
@@ -17,7 +18,7 @@ public class Logger {
 	final static SimpleDateFormat SDF_YMDHMS=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
 	
-	protected Logger(LogFactory factory, Class cls) {
+	protected Logger(LoggerFactory factory, Class cls) {
 		// TODO Auto-generated constructor stub
 		this.cls=cls;
 		this.factory=factory;
@@ -111,6 +112,12 @@ public class Logger {
 		.append(":")
 		;
 		return ret.toString();
+	}
+
+
+	public void debug(Object... vals) {
+		// TODO Auto-generated method stub
+		info(vals);
 	}
 	
 }

@@ -13,11 +13,11 @@ import java.util.Map.Entry;
 
 import lava.rt.common.ReflectCommon;
 import lava.rt.logging.Logger;
-import lava.rt.logging.LogFactory;
+import lava.rt.logging.LoggerFactory;
 
 public class PropertiesWrapper extends BaseWrapper<Properties>{
 
-	protected static Logger log=LogFactory.SYSTEM.getLog(PropertiesWrapper.class);
+	protected static Logger log=LoggerFactory.SYSTEM.getLogger(PropertiesWrapper.class);
 	
 	
 	

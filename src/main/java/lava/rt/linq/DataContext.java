@@ -4,9 +4,6 @@ package lava.rt.linq;
 import java.util.Collection;
 import java.util.List;
 
-import lava.rt.linq.execption.CommandExecuteExecption;
-import lava.rt.linq.execption.DuplicateKeyException;
-
 
 
 public interface  DataContext  {

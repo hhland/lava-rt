@@ -7,8 +7,8 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import lava.rt.common.ReflectCommon;
+import lava.rt.linq.CommandExecuteExecption;
 import lava.rt.linq.Entity;
-import lava.rt.linq.execption.CommandExecuteExecption;
 
 
 

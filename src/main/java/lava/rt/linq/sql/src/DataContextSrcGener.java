@@ -22,10 +22,9 @@ import java.util.logging.Logger;
 import javax.sql.DataSource;
 
 import lava.rt.common.LangCommon;
-
+import lava.rt.linq.CommandExecuteExecption;
 import lava.rt.linq.DataContext;
 import lava.rt.linq.Entity;
-import lava.rt.linq.execption.CommandExecuteExecption;
 import lava.rt.linq.sql.*;
 
 import lava.rt.linq.sql.SqlDataContext.ColumnMeta;

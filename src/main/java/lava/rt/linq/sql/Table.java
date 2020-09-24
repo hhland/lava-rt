@@ -14,8 +14,8 @@ import java.util.stream.Stream;
 
 import lava.rt.common.ReflectCommon;
 import lava.rt.common.LangCommon;
+import lava.rt.linq.CommandExecuteExecption;
 import lava.rt.linq.Entity;
-import lava.rt.linq.execption.CommandExecuteExecption;
 
 
 public abstract class Table<M extends Entity> extends View<M> {

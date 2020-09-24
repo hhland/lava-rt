@@ -1,4 +1,4 @@
-package lava.rt.linq.execption;
+package lava.rt.linq;
 
 import java.util.List;
 

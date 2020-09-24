@@ -18,10 +18,10 @@ import java.util.Map.Entry;
 
 import lava.rt.common.ReflectCommon;
 import lava.rt.common.LangCommon;
+import lava.rt.linq.CommandExecuteExecption;
 import lava.rt.linq.DataContext;
 import lava.rt.linq.Entity;
-import lava.rt.linq.execption.CommandExecuteExecption;
-import lava.rt.linq.execption.VerifyExecption;
+import lava.rt.linq.VerifyExecption;
 
 public interface SqlDataContext extends DataContext {
 

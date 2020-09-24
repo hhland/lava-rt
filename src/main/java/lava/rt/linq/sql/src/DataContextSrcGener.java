@@ -22,13 +22,14 @@ import java.util.logging.Logger;
 import javax.sql.DataSource;
 
 import lava.rt.common.LangCommon;
-import lava.rt.common.LoggingCommon;
+
 import lava.rt.linq.DataContext;
 import lava.rt.linq.Entity;
 import lava.rt.linq.execption.CommandExecuteExecption;
 import lava.rt.linq.sql.*;
 
 import lava.rt.linq.sql.SqlDataContext.ColumnMeta;
+import lava.rt.wrapper.LoggerWrapper;
 
 
 
@@ -46,7 +47,7 @@ public abstract class DataContextSrcGener   {
 	
 	protected abstract Class<? extends DataContextSrcGener> thisClass();
 	
-	protected Logger log=LoggingCommon.CONSOLE;
+	protected LoggerWrapper log=LoggerWrapper.CONSOLE;
 	
 	protected static String CRITERIA="CRITERIA";
 	

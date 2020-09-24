@@ -14,18 +14,19 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
-import lava.rt.common.LoggingCommon;
+
 import lava.rt.rpc.RpcException;
 import lava.rt.rpc.aio.IMessage.RequestMessage;
 import lava.rt.rpc.aio.IMessage.ResponseMessage;
 import lava.rt.rpc.aio.IMessage.ResultCode;
 
 import lava.rt.rpc.aio.ISerializer.JdkSerializer;
+import lava.rt.wrapper.LoggerWrapper;
 import lava.rt.rpc.aio.IChannel.FastChannel; 
 
 public final class AioRpcClient implements IClient {
 
-    private final Logger      log        =LoggingCommon.CONSOLE;
+    private final LoggerWrapper      log        =LoggerWrapper.CONSOLE;
     private       int         threadSize = Runtime.getRuntime().availableProcessors() * 2;
     private       ISerializer serializer = new JdkSerializer();
     private       long        timeout    = 5000;
@@ -53,10 +54,10 @@ public final class AioRpcClient implements IClient {
         try {
             asynchronousSocketChannel.connect(address).get(5, TimeUnit.SECONDS);
         } catch (final InterruptedException | TimeoutException e) {
-            //log.error("", e);
+            log.warn("", e);
         } catch (final ExecutionException e) {
-           // log.error("连接失败");
-            //log.warn("是否重试:{}", this.retry);
+            log.warn("连接失败");
+            log.warn("是否重试:{}", this.retry);
             if (this.retry) {
                 retry();
             }
@@ -113,7 +114,7 @@ public final class AioRpcClient implements IClient {
             }
             final ResponseMessage responseMessage = this.invoke(requestMessage);
             if (null == responseMessage) {
-               // log.warn("RPC调用返回null....");
+                log.warn("RPC调用返回null....");
                 return null;
             }
             if (responseMessage.getResultCode() != ResultCode.SUCCESS) {

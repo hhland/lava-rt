@@ -16,7 +16,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
-import lava.rt.common.LoggingCommon;
+
 import lava.rt.rpc.RpcException;
 import lava.rt.rpc.RpcServer;
 import lava.rt.rpc.aio.IMessage.RequestMessage;
@@ -25,11 +25,12 @@ import lava.rt.rpc.aio.IMessage.ResultCode;
 
 
 import lava.rt.rpc.aio.ISerializer.JdkSerializer;
+import lava.rt.wrapper.LoggerWrapper;
 import lava.rt.rpc.aio.IChannel.FastChannel;;
 
 public final class AioRpcServer extends RpcServer implements IServer {
 
-    private final Logger          log             = LoggingCommon.CONSOLE;
+    private final LoggerWrapper          log      = LoggerWrapper.CONSOLE;
     private       int             threadSize      = Runtime.getRuntime().availableProcessors() * 2;
     private       ISerializer     serializer      = new JdkSerializer();
     private       long            timeout         = 5000;
@@ -119,7 +120,7 @@ public final class AioRpcServer extends RpcServer implements IServer {
                 try {
                     localAddress = result.getLocalAddress().toString();
                     remoteAddress = result.getRemoteAddress().toString();
-                    //log.debug("创建连接 {} <-> {}", localAddress, remoteAddress);
+                    log.info("创建连接 {} <-> {}" + localAddress+ remoteAddress);
                 } catch (final IOException e) {
                     //log.error("", e);
                 }
@@ -132,11 +133,11 @@ public final class AioRpcServer extends RpcServer implements IServer {
 
             @Override
             public void failed(final Throwable exc, final Void attachment) {
-                //log.error("通信失败", exc);
+                log.info("通信失败"+ exc.getMessage());
                 try {
                     close();
                 } catch (final IOException e) {
-                    //log.error("关闭通道异常", e);
+                    log.info("关闭通道异常"+ e.getMessage());
                 }
             }
         });

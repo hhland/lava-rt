@@ -13,8 +13,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
-import lava.rt.common.LoggingCommon;
+
 import lava.rt.rpc.RpcException;
+import lava.rt.wrapper.LoggerWrapper;
 
 
 
@@ -63,7 +64,7 @@ public interface IChannel extends Closeable, Serializable {
     
     public class FastChannel implements IChannel {
 
-        private final Logger log =LoggingCommon.CONSOLE;
+        private final LoggerWrapper log =LoggerWrapper.CONSOLE;
 
         private       AsynchronousSocketChannel channel;
         private final String                    id;

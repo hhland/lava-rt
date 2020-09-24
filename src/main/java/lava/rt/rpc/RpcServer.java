@@ -4,10 +4,12 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import lava.rt.wrapper.LoggerWrapper;
+
 public abstract class RpcServer {
 
 	
-	    
+	    protected LoggerWrapper logger=LoggerWrapper.CONSOLE;
 	
 	    protected  boolean isRunning = true;
 	

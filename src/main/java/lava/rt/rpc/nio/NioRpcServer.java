@@ -45,7 +45,7 @@ public class NioRpcServer extends RpcServer {
 
 // 开发服务等待连接
 	public void start() throws IOException {
-		System.out.println("-----服务器已经启动了------");
+		logger.info("-----服务器已经启动了------");
 		ByteBuffer buff = ByteBuffer.allocate(1024);
 		try {
 			while (selector.select() > 0) {

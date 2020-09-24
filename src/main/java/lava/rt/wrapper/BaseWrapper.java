@@ -12,6 +12,12 @@ public class BaseWrapper<E> {
 	}
 
 
+
+	public E getSelf() {
+		return _this;
+	}
+
+
 	
 	
 	

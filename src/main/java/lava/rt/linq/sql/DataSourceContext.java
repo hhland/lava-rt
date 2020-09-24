@@ -20,7 +20,7 @@ import java.util.function.Supplier;
 
 import javax.sql.DataSource;
 
-import lava.rt.base.PoolList;
+
 import lava.rt.cache.CacheItem;
 
 import lava.rt.common.ReflectCommon;
@@ -29,6 +29,7 @@ import lava.rt.linq.Checkpoint;
 import lava.rt.linq.Entity;
 import lava.rt.linq.execption.CommandExecuteExecption;
 import lava.rt.linq.execption.DuplicateKeyException;
+import lava.rt.wrapper.ArrayListWrapper;
 import lava.rt.wrapper.LoggerWrapper;
 import lava.rt.linq.execption.CommandExecuteExecption.CmdType;
 
@@ -44,7 +45,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	
 	protected  final Map<String,String> columnMap = new HashMap<>();
 
-	private final ThreadLocal<PoolList<Connection>> readConnection = new ThreadLocal<>()
+	private final ThreadLocal<ArrayListWrapper<Connection>> readConnection = new ThreadLocal<>()
 			,writeConnection = new ThreadLocal<>()
 			;
 
@@ -427,12 +428,12 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	public int executeUpdate(String sql, Object... param) throws CommandExecuteExecption {
 		int re = 0;
 		
-		PoolList<Connection> connections = getWriteConnections();
+		ArrayListWrapper<Connection> connections = getWriteConnections();
 		if (connections == null) {
 			//printErr("error:" + sql);
-		} else if (connections.size() == 1) {
+		} else if (connections.getSelf().size() == 1) {
 			try {
-			re += SqlCommon.executeUpdate(connections.get(0), sql, param);
+			re += SqlCommon.executeUpdate(connections.getSelf().get(0), sql, param);
 			}catch(SQLException seq) {
 				
 				logExecptioin(seq);
@@ -441,10 +442,10 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 				throw CommandExecuteExecption.forSql(seq, sql, param);
 				//throw seq;
 			}
-		} else if (connections.size() > 1) {
+		} else if (connections.getSelf().size() > 1) {
 			AtomicInteger are = new AtomicInteger(0);
 			AtomicReference<CommandExecuteExecption> sex = new AtomicReference<>();
-			connections.parallelStream().forEach(conn -> {
+			connections.getSelf().parallelStream().forEach(conn -> {
 
 				try {
 					are.getAndAdd(SqlCommon.executeUpdate(conn, sql, param));
@@ -498,10 +499,10 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	public int executeBatch(String sql, Object[]... params) throws CommandExecuteExecption {
 		int re = 0;
 		
-		PoolList<Connection> connections = getWriteConnections();
-		if (connections.size() == 1) {
+		ArrayListWrapper<Connection> connections = getWriteConnections();
+		if (connections.getSelf().size() == 1) {
 			try {
-			re += SqlCommon.executeBatch(connections.get(0), sql, params);
+			re += SqlCommon.executeBatch(connections.getSelf().get(0), sql, params);
 			} catch(SQLException seq) {
 				
 				logExecptioin(seq);
@@ -509,10 +510,10 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 				logError(params);
 				throw CommandExecuteExecption.forSql(seq, sql, params);
 			}
-		} else if (connections.size() > 1) {
+		} else if (connections.getSelf().size() > 1) {
 			AtomicInteger are = new AtomicInteger(0);
 			AtomicReference<CommandExecuteExecption> sex = new AtomicReference<>();
-			connections.parallelStream().forEach(conn -> {
+			connections.getSelf().parallelStream().forEach(conn -> {
 
 				try {
 					are.getAndAdd(SqlCommon.executeBatch(conn, sql, params));
@@ -630,7 +631,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 
 	public void executeSetAutoCommit(boolean b) throws CommandExecuteExecption {
         try {
-		for (Connection conn : writeConnection.get()) {
+		for (Connection conn : writeConnection.get().getSelf()) {
 			conn.setAutoCommit(b);
 
 		}
@@ -640,7 +641,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 
 	public void executeCommit() throws CommandExecuteExecption {
 		try {
-		for (Connection conn : writeConnection.get()) {
+		for (Connection conn : writeConnection.get().getSelf()) {
 			conn.commit();
 
 		}
@@ -649,7 +650,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	
 	public void executeRollback(Checkpoint...points) throws CommandExecuteExecption {
 		try {
-		for (Connection conn : writeConnection.get()) {
+		for (Connection conn : writeConnection.get().getSelf()) {
 			if(points.length==0) {
 			  conn.rollback();
 			}else {
@@ -690,14 +691,14 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	}
 	
 	public Checkpoint[] executeSetCheckpoint(String... points) throws CommandExecuteExecption {
-		PoolList<Connection> connections=writeConnection.get();
-		Savepoint[] ret0=new Savepoint[connections.size()];
+		ArrayListWrapper<Connection> connections=writeConnection.get();
+		Savepoint[] ret0=new Savepoint[connections.getSelf().size()];
 		Checkpoint[] ret=new Checkpoint[ret0.length];
 			
 				try {
 			      
-				  for(int i=0;i<connections.size();i++) {
-					  Connection conn=connections.get(i);
+				  for(int i=0;i<connections.getSelf().size();i++) {
+					  Connection conn=connections.getSelf().get(i);
 				   if(points.length==0) {
 					
 						ret0[i]= conn.setSavepoint();
@@ -717,21 +718,15 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 		return ret;
 	}
 
-	private  PoolList<Connection> getReadConnections() throws CommandExecuteExecption{
-       PoolList<Connection> connections = readConnection.get();
+	private  ArrayListWrapper<Connection> getReadConnections() throws CommandExecuteExecption{
+       ArrayListWrapper<Connection> connections = readConnection.get();
 		
 		if(connections==null) {
 			 DataSource[] dss=getReadDataSources();
 			 try {
-				connections = new PoolList<Connection>(dss.length) {
-
-					@Override
-					public Connection newSingle(int i) throws Exception {
-						// TODO Auto-generated method stub
-						return dss[i].getConnection();
-					}
-
-				};
+				for(DataSource ds:dss) {
+					connections.getSelf().add(ds.getConnection());
+				}
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				throw CommandExecuteExecption.forSql(e, "getConnections");
@@ -745,7 +740,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	
 	@SuppressWarnings("resource")
 	protected final Connection getReadConnection() throws CommandExecuteExecption {
-		PoolList<Connection> connections = getReadConnections();
+		ArrayListWrapper<Connection> connections = getReadConnections();
 		
 		Connection ret = connections.getNext();
 		
@@ -753,21 +748,15 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	}
 
 	
-	private  PoolList<Connection> getWriteConnections() throws CommandExecuteExecption{
-	       PoolList<Connection> connections = writeConnection.get();
+	private  ArrayListWrapper<Connection> getWriteConnections() throws CommandExecuteExecption{
+	       ArrayListWrapper<Connection> connections = writeConnection.get();
 			
 			if(connections==null) {
 				 DataSource[] dss=getWriteDataSources();
 				 try {
-					connections = new PoolList<Connection>(dss.length) {
-
-						@Override
-						public Connection newSingle(int i) throws Exception {
-							// TODO Auto-generated method stub
-							return dss[i].getConnection();
+					 for(DataSource ds:dss) {
+							connections.getSelf().add(ds.getConnection());
 						}
-
-					};
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					throw CommandExecuteExecption.forSql(e, "getConnections");
@@ -781,7 +770,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 		
 		@SuppressWarnings("resource")
 		protected final Connection getWriteConnection() throws CommandExecuteExecption {
-			PoolList<Connection> connections = getWriteConnections();
+			ArrayListWrapper<Connection> connections = getWriteConnections();
 			
 			Connection ret = connections.getNext();
 			
@@ -864,7 +853,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	@Override
 	public void close()  {
 		// TODO Auto-generated method stub
-		writeConnection.get().parallelStream().forEach(conn-> {try {
+		writeConnection.get().getSelf().parallelStream().forEach(conn-> {try {
 			conn.close();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block

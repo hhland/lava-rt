@@ -1,6 +1,8 @@
 package lava.rt.rpc.nio;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
@@ -124,15 +126,30 @@ public class NioRpcServer extends RpcServer {
 			Method method = clazz.getDeclaredMethod(methodName, types);
 			result = method.invoke(object, values);
 		}
-		if (result == null) {
-			result = "Void:null";
-		} else {
-			result = result.getClass().getName() + ":" + result;
-		}
+//		if (result == null) {
+//			result = "Void:null";
+//		} else {
+//			result = result.getClass().getName() + ":" + result;
+//		}
 // 发送结果回去
-		sc.write(ByteBuffer.wrap(result.toString().getBytes()));
+		sc.write(ByteBuffer.wrap(getBytes(result)));
 		sk.interestOps(SelectionKey.OP_READ);
 	}
+
+private byte[] getBytes(Object value) throws IOException {
+		// TODO Auto-generated method stub
+	final byte[] bytes;
+    try (
+    final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    final ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);){
+    objectOutputStream.writeObject(value);
+    bytes = outputStream.toByteArray();
+    }
+    
+    return bytes;
+	}
+
+
 
 // 它返回的格式是 参数类型：参数值
 	private String[] decodeParamsTypeAndValue(String params) {

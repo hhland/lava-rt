@@ -1,6 +1,8 @@
 package lava.rt.rpc.nio;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -56,6 +58,7 @@ public class NioRpcClient extends RpcClient {
 			@Override
 			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 // TODO 自动生成的方法存根
+				
 				String methodName = method.getName();
 				String clazzName = clazz.getName();
 				Object result = null;
@@ -76,7 +79,7 @@ public class NioRpcClient extends RpcClient {
 					channel.write(ByteBuffer.wrap(content.toString().getBytes()));
 				}
 // 获取结果
-				result = getresult();
+				result = getresult(method.getReturnType());
 
 				return result;
 			}
@@ -85,7 +88,7 @@ public class NioRpcClient extends RpcClient {
 		return ret;
 	}
 
-	private Object getresult() {
+	private Object getresult(Class returnCls) {
 // 解析结果 如果结尾为null或NULL则忽略
 		try {
 			while (selector.select() > 0) {
@@ -95,26 +98,28 @@ public class NioRpcClient extends RpcClient {
 						SocketChannel sc = (SocketChannel) sk.channel();
 						buffer.clear();
 						sc.read(buffer);
-						int postion = buffer.position();
+						//int postion = buffer.position();
 
-						String result = new String(buffer.array(), 0, postion);
-						result = result.trim();
-						buffer.clear();
-
-						if (result.endsWith("null") || result.endsWith("NULL"))
-							return null;
-
-						String[] typeValue = result.split(":");
-						String type = typeValue[0];
-						String value = result.substring(type.length()+1);
-						if (type.contains("Integer") || type.contains("int"))
-							return Integer.parseInt(value);
-						else if (type.contains("Float") || type.contains("float"))
-							return Float.parseFloat(value);
-						else if (type.contains("Long") || type.contains("long"))
-							return Long.parseLong(value);
-						else
-							return value;
+						Object ret=fromByte(buffer.array(),returnCls);
+						return ret;
+//						String result = new String(buffer.array(), 0, postion);
+//						result = result.trim();
+//						buffer.clear();
+//
+//						if (result.endsWith("null") || result.endsWith("NULL"))
+//							return null;
+//
+//						String[] typeValue = result.split(":");
+//						String type = typeValue[0];
+//						String value = result.substring(type.length()+1);
+//						if (type.contains("Integer") || type.contains("int"))
+//							return Integer.parseInt(value);
+//						else if (type.contains("Float") || type.contains("float"))
+//							return Float.parseFloat(value);
+//						else if (type.contains("Long") || type.contains("long"))
+//							return Long.parseLong(value);
+//						else
+//							return value;
 					}
 				}
 			}
@@ -122,6 +127,23 @@ public class NioRpcClient extends RpcClient {
 			throw new RuntimeException(e);
 		}
 		return null;
+	}
+
+	private Object fromByte(byte[] bytes, Class returnCls) throws IOException {
+		// TODO Auto-generated method stub
+		Object ret=null;
+        
+        try(final ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
+        final ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);){
+            try {
+				ret = objectInputStream.readObject();
+			} catch (ClassNotFoundException | IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        }
+       
+        return ret;
 	}
 
 	@Override

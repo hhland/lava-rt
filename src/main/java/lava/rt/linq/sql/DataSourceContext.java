@@ -22,6 +22,7 @@ import javax.sql.DataSource;
 
 import lava.rt.base.PoolList;
 import lava.rt.cache.CacheItem;
+import lava.rt.common.LoggingCommon;
 import lava.rt.common.ReflectCommon;
 import lava.rt.common.SqlCommon;
 import lava.rt.linq.Checkpoint;
@@ -29,7 +30,8 @@ import lava.rt.linq.Entity;
 import lava.rt.linq.execption.CommandExecuteExecption;
 import lava.rt.linq.execption.DuplicateKeyException;
 import lava.rt.linq.execption.CommandExecuteExecption.CmdType;
-import lava.rt.logging.LoggerFactory;
+
+
 
 public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 
@@ -297,12 +299,12 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	}
 	
 	protected void logError(Object... vals) {
-		LoggerFactory.SYSTEM.getLogger(this.getClass()).error(vals);
+		//LogingCommon.getConsoleLogger(this.getClass()).info(vals);
 	}
 
 
 	protected void logExecptioin(Exception exception) {
-		LoggerFactory.SYSTEM.getLogger(this.getClass()).error(exception);
+		LoggingCommon.CONSOLE.info(exception.getMessage());
 	}
 
 	

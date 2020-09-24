@@ -11,9 +11,9 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.logging.Logger;
 
-import lava.rt.logging.Logger;
-import lava.rt.logging.LoggerFactory;
+import lava.rt.common.LoggingCommon;
 import lava.rt.rpc.RpcException;
 
 
@@ -63,7 +63,7 @@ public interface IChannel extends Closeable, Serializable {
     
     public class FastChannel implements IChannel {
 
-        private final Logger log = LoggerFactory.SYSTEM.getLogger(getClass());
+        private final Logger log =LoggingCommon.CONSOLE;
 
         private       AsynchronousSocketChannel channel;
         private final String                    id;
@@ -95,7 +95,7 @@ public interface IChannel extends Closeable, Serializable {
                 try {
                     final Integer integer = this.channel.read(messageLength).get(timeout, TimeUnit.MILLISECONDS);
                     if (-1 == integer) {
-                        log.debug("关闭连接 {} <-> {}", this.channel.getLocalAddress(), this.channel.getRemoteAddress());
+                        //log.debug("关闭连接 {} <-> {}", this.channel.getLocalAddress(), this.channel.getRemoteAddress());
                         close();
                         return null;
                     }
@@ -108,7 +108,7 @@ public interface IChannel extends Closeable, Serializable {
                 } catch (final TimeoutException | ExecutionException e) {
                     throw new RpcException(e);
                 } catch (final Exception e) {
-                    log.error("读取数据异常", e);
+                    //log.error("读取数据异常", e);
                 }
             }
             return null;
@@ -125,16 +125,16 @@ public interface IChannel extends Closeable, Serializable {
                     byteBuffer.flip();
                     final Integer integer = this.channel.write(byteBuffer).get(timeout, TimeUnit.MILLISECONDS);
                     if (-1 == integer) {
-                        log.warn("连接断了....");
-                        log.warn("open:{}", this.isOpen());
+                        //log.warn("连接断了....");
+                        //log.warn("open:{}", this.isOpen());
                     }
                 }
             } catch (final ExecutionException e) {
-                log.warn("连接断了....");
+                //log.warn("连接断了....");
                 throw new RpcException(e);
             } catch (final Exception e) {
-                log.error("写出数据异常", e);
-                log.warn("open:{}", this.isOpen());
+                //log.error("写出数据异常", e);
+                //log.warn("open:{}", this.isOpen());
             }
         }
 

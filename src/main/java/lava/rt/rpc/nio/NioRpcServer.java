@@ -10,6 +10,10 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import lava.rt.rpc.RpcServer;
 
 /**
  * 它接受的内容是class/方法名(参数类型:参数,参数类型:参数)
@@ -17,13 +21,13 @@ import java.util.HashMap;
  * @author Administrator
  * 
  */
-public class NioRpcServer {
-	
-	private HashMap<String, Object> str_obj = new HashMap<>();
+public class NioRpcServer extends RpcServer {
+
+	private final Map<String, Object> serviceMap = new ConcurrentHashMap<>();
 	private Selector selector;
 	private ServerSocketChannel ssc;
 
-	private NioRpcServer(int port) {
+	public NioRpcServer(int port) {
 		try {
 			ssc = ServerSocketChannel.open();
 			InetSocketAddress address = new InetSocketAddress(port);
@@ -39,14 +43,8 @@ public class NioRpcServer {
 
 	
 
-	public NioRpcServer addClass(Object obj) {
-		String name = obj.getClass().getInterfaces()[0].getSimpleName();
-		str_obj.put(name, obj);
-		return this;
-	}
-
 // 开发服务等待连接
-	public void start() {
+	public void start() throws IOException {
 		System.out.println("-----服务器已经启动了------");
 		ByteBuffer buff = ByteBuffer.allocate(1024);
 		try {
@@ -98,7 +96,7 @@ public class NioRpcServer {
 // 上一步的格式如下 1 ""，"string:nice"
 		String[] typeValues = decodeParamsTypeAndValue(temp);
 
-		Object object = str_obj.get(className);
+		Object object = serviceMap.get(className);
 		Class clazz = object.getClass();
 		Object result = null;
 		if (typeValues == null) {
@@ -129,7 +127,7 @@ public class NioRpcServer {
 		if (result == null) {
 			result = "Void:null";
 		} else {
-			result = result.getClass().getSimpleName() + ":" + result;
+			result = result.getClass().getName() + ":" + result;
 		}
 // 发送结果回去
 		sc.write(ByteBuffer.wrap(result.toString().getBytes()));
@@ -144,5 +142,12 @@ public class NioRpcServer {
 			return new String[] { params };
 		return params.split(",");
 
+	}
+
+	@Override
+	public <T, I extends T> void registerService(Class<T> serviceInterface, I impl) throws Exception {
+		// TODO Auto-generated method stub
+		String name = serviceInterface.getName();
+		serviceMap.put(name, impl);
 	}
 }

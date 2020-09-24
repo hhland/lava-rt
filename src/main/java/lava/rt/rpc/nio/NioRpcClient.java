@@ -1,5 +1,6 @@
 package lava.rt.rpc.nio;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -9,55 +10,54 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
+import lava.rt.rpc.RpcClient;
+
 /**
  * 它所做的工作是利用代理封装方法
  * 
  * @author Administrator 问题是如何获取SocketChannel进行发送和接收
  */
-public class NioRpcClient {
-	private SocketChannel channel;
+public class NioRpcClient extends RpcClient {
+	private final SocketChannel channel;
 	private ByteBuffer buffer = ByteBuffer.allocate(1024);
-	private static NioRpcClient client = new NioRpcClient();
+	
 	private Selector selector = null;
+	
+	private final InetSocketAddress addr;
 
-	private NioRpcClient() {
+	public NioRpcClient(String hostname ,int port) throws IOException {
+		this.addr=new InetSocketAddress(hostname, port);
+		selector = Selector.open();
+		channel = SocketChannel.open(addr);
+        channel.configureBlocking(false);
+        channel.register(selector, SelectionKey.OP_READ);
 	}
-
-	public static NioRpcClient getInstance() {
-		return client;
+	
+	public NioRpcClient(InetSocketAddress addr) throws IOException {
+		this.addr=addr;
+		selector = Selector.open();
+		channel = SocketChannel.open(addr);
+        channel.configureBlocking(false);
+        channel.register(selector, SelectionKey.OP_READ);
 	}
+	
 
-	public NioRpcClient init(String serverIp) {
-		try {
-			System.out.println("------客户端要启动了--------");
-			selector = Selector.open();
-			InetSocketAddress isa = new InetSocketAddress(serverIp, 3003);
+	
 
-// 获取socket通道
-			channel = SocketChannel.open(isa);
+	
 
-// 连接服务器
-			channel.configureBlocking(false);
-
-			channel.register(selector, SelectionKey.OP_READ);
-
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-		return this;
-	}
-
-// 获取代理
-	public Object getRemoteProxy(final Class clazz) {
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getService(Class<T> clazz) throws Exception {
 //动态产生实现类
 
-		return Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[] { clazz }, new InvocationHandler() {
+		T ret=(T)Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[] { clazz }, new InvocationHandler() {
 
 			@Override
 			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 // TODO 自动生成的方法存根
 				String methodName = method.getName();
-				String clazzName = clazz.getSimpleName();
+				String clazzName = clazz.getName();
 				Object result = null;
 				if (args == null || args.length == 0) {// 表示没有参数 它传递的类型
 // 接口名/方法名()
@@ -82,6 +82,7 @@ public class NioRpcClient {
 			}
 		});
 
+		return ret;
 	}
 
 	private Object getresult() {
@@ -105,7 +106,7 @@ public class NioRpcClient {
 
 						String[] typeValue = result.split(":");
 						String type = typeValue[0];
-						String value = typeValue[1];
+						String value = result.substring(type.length()+1);
 						if (type.contains("Integer") || type.contains("int"))
 							return Integer.parseInt(value);
 						else if (type.contains("Float") || type.contains("float"))
@@ -122,5 +123,14 @@ public class NioRpcClient {
 		}
 		return null;
 	}
+
+	@Override
+	public void close() throws IOException {
+		// TODO Auto-generated method stub
+		selector.close();
+		channel.close();
+	}
+
+	
 
 }

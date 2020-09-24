@@ -11,12 +11,14 @@ import java.nio.channels.CompletionHandler;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Logger;
 
-import lava.rt.logging.Logger;
-import lava.rt.logging.LoggerFactory;
+import lava.rt.common.LoggingCommon;
 import lava.rt.rpc.RpcException;
+import lava.rt.rpc.RpcServer;
 import lava.rt.rpc.aio.IMessage.RequestMessage;
 import lava.rt.rpc.aio.IMessage.ResponseMessage;
 import lava.rt.rpc.aio.IMessage.ResultCode;
@@ -25,35 +27,32 @@ import lava.rt.rpc.aio.IMessage.ResultCode;
 import lava.rt.rpc.aio.ISerializer.JdkSerializer;
 import lava.rt.rpc.aio.IChannel.FastChannel;;
 
-public final class AioRpcServer implements IServer {
+public final class AioRpcServer extends RpcServer implements IServer {
 
-    private final Logger          log             = LoggerFactory.SYSTEM.getLogger(getClass());
+    private final Logger          log             = LoggingCommon.CONSOLE;
     private       int             threadSize      = Runtime.getRuntime().availableProcessors() * 2;
     private       ISerializer     serializer      = new JdkSerializer();
     private       long            timeout         = 5000;
     private final ExecutorService executorService = Executors.newFixedThreadPool(10000);
 
-    private       int                             port;
+    private   final    int                             port;
     private       AsynchronousChannelGroup        group;
     private       AsynchronousServerSocketChannel channel;
     private final Map<String, Object>             serverMap;
 
-    public AioRpcServer() {
-        this.serverMap = new HashMap<>();
+    public AioRpcServer(final int port) {
+        this.serverMap = new ConcurrentHashMap<>();
+        this.port=port;
     }
 
-    @Override
-    public IServer bind(final int port) {
-        this.port = port;
-        return this;
-    }
+  
 
     @Override
     public IServer threadSize(final int threadSize) {
         if (0 < threadSize) {
             this.threadSize = threadSize;
         } else {
-            log.warn("threadSize must > 0!");
+            //log.warn("threadSize must > 0!");
         }
         return this;
     }
@@ -63,7 +62,7 @@ public final class AioRpcServer implements IServer {
         if (0 < timeout) {
             this.timeout = timeout;
         } else {
-            log.warn("timeout must > 0");
+            //log.warn("timeout must > 0");
         }
         return this;
     }
@@ -76,12 +75,18 @@ public final class AioRpcServer implements IServer {
         return this;
     }
 
+    
+    
+    
     @Override
-    public IServer register(final Object object) {
-        Objects.requireNonNull(object, "server is null");
-        this.serverMap.put(object.getClass().getSimpleName(), object);
+	public <I, T extends I> IServer register(Class<I> intfCls, T object) {
+		// TODO Auto-generated method stub
+    	Objects.requireNonNull(object, "server is null");
+        String key=intfCls.getName();
+        this.serverMap.put(key, object);
         return this;
-    }
+	}
+    
 
     @Override
     public IServer register(final Map<String, Object> serverMap) {
@@ -98,7 +103,7 @@ public final class AioRpcServer implements IServer {
 
     @Override
     public void start() throws IOException {
-        log.debug("开始启动RPC服务端......");
+        //log.debug("开始启动RPC服务端......");
         this.group = AsynchronousChannelGroup.withFixedThreadPool(this.threadSize, Executors.defaultThreadFactory());
         this.channel = AsynchronousServerSocketChannel
                 .open(this.group)
@@ -114,24 +119,24 @@ public final class AioRpcServer implements IServer {
                 try {
                     localAddress = result.getLocalAddress().toString();
                     remoteAddress = result.getRemoteAddress().toString();
-                    log.debug("创建连接 {} <-> {}", localAddress, remoteAddress);
+                    //log.debug("创建连接 {} <-> {}", localAddress, remoteAddress);
                 } catch (final IOException e) {
-                    log.error("", e);
+                    //log.error("", e);
                 }
                 final IChannel channel = new FastChannel(result, serializer, timeout);
                 while (channel.isOpen()) {
                     handler(channel);
                 }
-                log.debug("断开连接 {} <-> {}", localAddress, remoteAddress);
+                //log.debug("断开连接 {} <-> {}", localAddress, remoteAddress);
             }
 
             @Override
             public void failed(final Throwable exc, final Void attachment) {
-                log.error("通信失败", exc);
+                //log.error("通信失败", exc);
                 try {
                     close();
                 } catch (final IOException e) {
-                    log.error("关闭通道异常", e);
+                    //log.error("关闭通道异常", e);
                 }
             }
         });
@@ -174,6 +179,14 @@ public final class AioRpcServer implements IServer {
             }
         }
     }
+
+	@Override
+	public <T, I extends T> void registerService(Class<T> serviceInterface, I impl) throws Exception {
+		// TODO Auto-generated method stub
+		this.register(serviceInterface, impl);
+	}
+
+	
 
 
 

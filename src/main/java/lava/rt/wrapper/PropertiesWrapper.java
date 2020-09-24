@@ -9,15 +9,16 @@ import java.lang.reflect.Field;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Logger;
 import java.util.Map.Entry;
 
+import lava.rt.common.LoggingCommon;
 import lava.rt.common.ReflectCommon;
-import lava.rt.logging.Logger;
-import lava.rt.logging.LoggerFactory;
+
 
 public class PropertiesWrapper extends BaseWrapper<Properties>{
 
-	protected static Logger log=LoggerFactory.SYSTEM.getLogger(PropertiesWrapper.class);
+	protected static Logger log=LoggingCommon.CONSOLE;
 	
 	
 	
@@ -69,7 +70,7 @@ public class PropertiesWrapper extends BaseWrapper<Properties>{
 					re+=set(field,object, value);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
-					log.error(e);
+					log.info(e.getMessage());
 					continue;
 				}
 				

@@ -1,6 +1,7 @@
 package lava.rt.rpc.oio;
 
 
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationHandler;
@@ -30,7 +31,7 @@ public class SocketRpcClient extends RpcClient{
 
 
 	@SuppressWarnings("unchecked")
-	public  <T> T getProxy(final Class<T> serviceInterface) {
+	public  <T> T getService(final Class<T> serviceInterface) {
 		ProxyHandler proxyHandler=handlerMap.get(serviceInterface);
 		if(proxyHandler==null) {
 			proxyHandler=new ProxyHandler(serviceInterface);
@@ -74,5 +75,13 @@ public class SocketRpcClient extends RpcClient{
 			return ret;
 		}
 
+	}
+
+
+
+	@Override
+	public void close() throws IOException {
+		// TODO Auto-generated method stub
+		
 	}
 }

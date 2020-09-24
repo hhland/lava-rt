@@ -12,9 +12,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.logging.Logger;
 
-import lava.rt.logging.Logger;
-import lava.rt.logging.LoggerFactory;
+import lava.rt.common.LoggingCommon;
 import lava.rt.rpc.RpcException;
 import lava.rt.rpc.aio.IMessage.RequestMessage;
 import lava.rt.rpc.aio.IMessage.ResponseMessage;
@@ -25,7 +25,7 @@ import lava.rt.rpc.aio.IChannel.FastChannel;
 
 public final class AioRpcClient implements IClient {
 
-    private final Logger      log        = LoggerFactory.SYSTEM.getLogger(getClass());
+    private final Logger      log        =LoggingCommon.CONSOLE;
     private       int         threadSize = Runtime.getRuntime().availableProcessors() * 2;
     private       ISerializer serializer = new JdkSerializer();
     private       long        timeout    = 5000;
@@ -53,10 +53,10 @@ public final class AioRpcClient implements IClient {
         try {
             asynchronousSocketChannel.connect(address).get(5, TimeUnit.SECONDS);
         } catch (final InterruptedException | TimeoutException e) {
-            log.error("", e);
+            //log.error("", e);
         } catch (final ExecutionException e) {
-            log.error("连接失败");
-            log.warn("是否重试:{}", this.retry);
+           // log.error("连接失败");
+            //log.warn("是否重试:{}", this.retry);
             if (this.retry) {
                 retry();
             }
@@ -69,7 +69,7 @@ public final class AioRpcClient implements IClient {
         if (0 < threadSize) {
             this.threadSize = threadSize;
         } else {
-            log.warn("threadSize must > 0!");
+            //log.warn("threadSize must > 0!");
         }
         return this;
     }
@@ -85,17 +85,18 @@ public final class AioRpcClient implements IClient {
         if (0 < timeout) {
             this.timeout = timeout;
         } else {
-            log.warn("timeout must > 0!");
+            //log.warn("timeout must > 0!");
         }
         return this;
     }
 
     @Override
     public <T> T getService(final Class<T> clazz) {
-        return this.getService(clazz.getSimpleName(), clazz);
+        return this.getService(clazz.getName(), clazz);
     }
 
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public <T> T getService(final String name, final Class<T> clazz) {
         return (T) Proxy.newProxyInstance(clazz.getClassLoader(), new Class[]{clazz}, (proxy, method, args) -> {
             final RequestMessage requestMessage = new RequestMessage();
@@ -112,7 +113,7 @@ public final class AioRpcClient implements IClient {
             }
             final ResponseMessage responseMessage = this.invoke(requestMessage);
             if (null == responseMessage) {
-                log.warn("RPC调用返回null....");
+               // log.warn("RPC调用返回null....");
                 return null;
             }
             if (responseMessage.getResultCode() != ResultCode.SUCCESS) {
@@ -128,8 +129,8 @@ public final class AioRpcClient implements IClient {
             this.channel.write(requestMessage);
             return this.channel.read(ResponseMessage.class);
         } catch (final Exception e) {
-            log.error("Rpc调用异常:", e);
-            log.debug("是否重试:" + this.retry);
+            //log.error("Rpc调用异常:", e);
+            //log.debug("是否重试:" + this.retry);
             if (e instanceof RpcException) {
                 if (!this.retry) {
                     if (this.channel.isOpen()) {
@@ -163,7 +164,7 @@ public final class AioRpcClient implements IClient {
             if (null != this.channel && this.channel.isOpen()) {
                 this.channel.close();
             }
-            log.debug("连接:{}", this.socketAddress.toString());
+            //log.debug("连接:{}", this.socketAddress.toString());
             final AsynchronousSocketChannel asynchronousSocketChannel = AsynchronousSocketChannel.open(this.group);
             asynchronousSocketChannel.setOption(StandardSocketOptions.TCP_NODELAY, true);
             asynchronousSocketChannel.setOption(StandardSocketOptions.SO_REUSEADDR, true);

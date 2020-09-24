@@ -1,5 +1,6 @@
 package lava.rt.rpc.rmi;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
@@ -21,11 +22,17 @@ public class RmiRpcClient extends RpcClient{
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T getProxy(Class<T> serviceInterface) throws Exception {
+	public <T> T getService(Class<T> serviceInterface) throws Exception {
 		// TODO Auto-generated method stub
 		String url=urlRoot+serviceInterface.getName();
 		T ret =(T) Naming.lookup(url); 
 		return ret;
+	}
+
+	@Override
+	public void close() throws IOException {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

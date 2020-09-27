@@ -25,7 +25,7 @@ public class SocketRpcServer extends RpcServer{
  
     protected final SocketAddress address;
     
-    protected final ServerSocket  server  ;
+    protected  ServerSocket  server  ;
 
 
 
@@ -33,10 +33,15 @@ public class SocketRpcServer extends RpcServer{
 
 	public Map<String,Object> serviceMap=new HashMap<>();
  
-    public SocketRpcServer(SocketAddress address) throws IOException {
+	
+	public SocketRpcServer(int port)  {
+        this.address = new InetSocketAddress(port);
+       
+    }
+	
+    public SocketRpcServer(SocketAddress address) {
         this.address = address;
-        server = new ServerSocket();
-        server.bind(address);
+        
     }
     
     public void shutdown()  {
@@ -55,7 +60,8 @@ public class SocketRpcServer extends RpcServer{
     }
  
     public void start() throws IOException {
-        
+    	 server = new ServerSocket();
+         server.bind(address);
         
         System.out.println("start server: "+ address);
         
@@ -88,22 +94,7 @@ public class SocketRpcServer extends RpcServer{
                     ObjectOutputStream output = new ObjectOutputStream(clent.getOutputStream());
             		){
                 // 2.将客户端发送的码流反序列化成对象，反射调用服务实现者，获取执行结果
-                
-                String serviceName = input.readUTF();
-                String methodName = input.readUTF();
-                Class<?>[] parameterTypes = (Class<?>[]) input.readObject();
-                Object[] arguments = (Object[]) input.readObject();
-                Object service = serviceMap.get(serviceName);
-               
-                Method method = service.getClass().getMethod(methodName, parameterTypes);
-                synchronized(service) {
-                  
-                  Object result = method.invoke(service, arguments);
-                  // 3.将执行结果反序列化，通过socket发送给客户端
-                  
-                  output.writeObject(result);
-                }
-                
+                invoke(input, output);              
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {

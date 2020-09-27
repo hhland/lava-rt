@@ -34,7 +34,7 @@ public class MBeanServerWrapper extends BaseWrapper<MBeanServer> {
 
 	public JMXConnectorServer newJMXConnectorServer(JMXServiceURL serviceURL, Map<String, ?> environment)
 			throws IOException {
-		JMXConnectorServer ret = JMXConnectorServerFactory.newJMXConnectorServer(serviceURL, environment, _this);
+		JMXConnectorServer ret = JMXConnectorServerFactory.newJMXConnectorServer(serviceURL, environment, self);
 		return ret;
 	}
 
@@ -45,7 +45,7 @@ public class MBeanServerWrapper extends BaseWrapper<MBeanServer> {
 		if(isImplMBean(object)) {
 			ObjectName objectName = new ObjectName(
 					object.getClass().getPackage().getName() + ":name=" + object.getClass().getSimpleName() + subfix);
-			ret = _this.registerMBean(object, objectName);
+			ret = self.registerMBean(object, objectName);
 		}else {
 			RequiredModelMBean rmbean=createMBean(object);
 			ret = registerMBean(rmbean, subfix);
@@ -75,7 +75,7 @@ public class MBeanServerWrapper extends BaseWrapper<MBeanServer> {
 				;
 		ObjectName objectName = new ObjectName(
 				pname + ":name=" + sname + subfix);
-		ObjectInstance ret = _this.registerMBean(mbean, objectName);
+		ObjectInstance ret = self.registerMBean(mbean, objectName);
 
 		return ret;
 	}

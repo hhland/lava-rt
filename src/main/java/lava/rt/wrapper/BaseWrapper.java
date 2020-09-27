@@ -1,21 +1,19 @@
 package lava.rt.wrapper;
 
-public class BaseWrapper<E> {
+public abstract class BaseWrapper<E> {
 
-	protected final E _this;
+	public final E self;
 
 	
 	
-	public BaseWrapper(E _this) {
+	public BaseWrapper(E self) {
 		super();
-		this._this = _this;
+		this.self = self;
 	}
 
 
 
-	public E getSelf() {
-		return _this;
-	}
+	
 
 
 	

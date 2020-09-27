@@ -29,26 +29,26 @@ public class LoggerWrapper extends BaseWrapper<Logger>{
     public static final LoggerWrapper CONSOLE=new LoggerWrapper(Logger.getGlobal());
 	
 	static{
-		CONSOLE._this.addHandler(new ConsoleHandler());
-		CONSOLE._this.setLevel(Level.INFO);
+		CONSOLE.self.addHandler(new ConsoleHandler());
+		CONSOLE.self.setLevel(Level.INFO);
 	}
 
 	public void print(Object...values) {
 		// TODO Auto-generated method stub
-		_this.log(Level.ALL,join(values));	  
+		self.log(Level.ALL,join(values));	  
 	}
 	
 	public void info(Object...values) {
 		// TODO Auto-generated method stub
 		 //_this.log(Level.INFO,prefix("INFO"));
-	     _this.info(join(values));
+	     self.info(join(values));
 		
 	}
 
 	public void warn(Object...values) {
 		// TODO Auto-generated method stub
 		
-	     _this.log(Level.WARNING,join(values));
+	     self.log(Level.WARNING,join(values));
 	}
 	
 

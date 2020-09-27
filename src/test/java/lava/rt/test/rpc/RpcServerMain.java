@@ -6,6 +6,7 @@ import java.rmi.RemoteException;
 import lava.rt.rpc.RpcServer;
 import lava.rt.rpc.aio.AioRpcServer;
 import lava.rt.rpc.nio.NioRpcServer;
+import lava.rt.rpc.oio.SocketRpcServer;
 import lava.rt.rpc.rmi.RmiRpcServer;
 
 public class RpcServerMain {
@@ -14,7 +15,7 @@ public class RpcServerMain {
 	
 	public enum Server{
 		
-		nio(new NioRpcServer(port)),aio(new AioRpcServer(port));
+		nio(new NioRpcServer(port)),aio(new AioRpcServer(port)),oio(new SocketRpcServer(port) );
 		
 		final RpcServer server;
 
@@ -36,7 +37,7 @@ public class RpcServerMain {
 	public static void main(String[] args) throws RemoteException, Exception {
 		// TODO Auto-generated method stub
 
-		startNioServer();
+		startOioServer();
 		//startAioServer();
 		
 		
@@ -57,4 +58,13 @@ public class RpcServerMain {
 		Server.aio.getServer().start();
 	}
 
+	
+	private static void startOioServer() throws Exception {
+		// TODO Auto-generated method stub
+        SampleService impl=new SampleServiceImpl();
+		
+		Server.oio.getServer().registerService(SampleService.class,impl);
+		Server.oio.getServer().start();
+	}
+	
 }

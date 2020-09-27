@@ -25,10 +25,10 @@ public class NioRpcClient extends RpcClient {
 	
 	private Selector selector = null;
 	
-	private final InetSocketAddress addr;
+	
 
 	public NioRpcClient(String hostname ,int port) throws IOException {
-		this.addr=new InetSocketAddress(hostname, port);
+		super(new InetSocketAddress(hostname, port));
 		selector = Selector.open();
 		channel = SocketChannel.open(addr);
         channel.configureBlocking(false);
@@ -36,7 +36,7 @@ public class NioRpcClient extends RpcClient {
 	}
 	
 	public NioRpcClient(InetSocketAddress addr) throws IOException {
-		this.addr=addr;
+		super(addr);
 		selector = Selector.open();
 		channel = SocketChannel.open(addr);
         channel.configureBlocking(false);
@@ -53,98 +53,16 @@ public class NioRpcClient extends RpcClient {
 	public <T> T getService(Class<T> clazz) throws Exception {
 //动态产生实现类
 
-		T ret=(T)Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[] { clazz }, new InvocationHandler() {
-
-			@Override
-			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-// TODO 自动生成的方法存根
-				
-				String methodName = method.getName();
-				String clazzName = clazz.getName();
-				Object result = null;
-				if (args == null || args.length == 0) {// 表示没有参数 它传递的类型
-// 接口名/方法名()
-					channel.write(ByteBuffer.wrap((clazzName + "/" + methodName + "()").getBytes()));
-				} else {
-					int size = args.length;
-					String[] types = new String[size];
-					StringBuffer content = new StringBuffer(clazzName).append("/").append(methodName).append("(");
-					for (int i = 0; i < size; i++) {
-						types[i] = args[i].getClass().getName();
-						content.append(types[i]).append(":").append(args[i]);
-						if (i != size - 1)
-							content.append(",");
-					}
-					content.append(")");
-					channel.write(ByteBuffer.wrap(content.toString().getBytes()));
-				}
-// 获取结果
-				result = getresult(method.getReturnType());
-
-				return result;
-			}
-		});
+		T ret=(T)Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[] { clazz }, 
+				 new ProxyHandler(clazz)
+				);
 
 		return ret;
 	}
 
-	private Object getresult(Class returnCls) {
-// 解析结果 如果结尾为null或NULL则忽略
-		try {
-			while (selector.select() > 0) {
-				for (SelectionKey sk : selector.selectedKeys()) {
-					selector.selectedKeys().remove(sk);
-					if (sk.isReadable()) {
-						SocketChannel sc = (SocketChannel) sk.channel();
-						buffer.clear();
-						sc.read(buffer);
-						//int postion = buffer.position();
+	
 
-						Object ret=fromByte(buffer.array(),returnCls);
-						return ret;
-//						String result = new String(buffer.array(), 0, postion);
-//						result = result.trim();
-//						buffer.clear();
-//
-//						if (result.endsWith("null") || result.endsWith("NULL"))
-//							return null;
-//
-//						String[] typeValue = result.split(":");
-//						String type = typeValue[0];
-//						String value = result.substring(type.length()+1);
-//						if (type.contains("Integer") || type.contains("int"))
-//							return Integer.parseInt(value);
-//						else if (type.contains("Float") || type.contains("float"))
-//							return Float.parseFloat(value);
-//						else if (type.contains("Long") || type.contains("long"))
-//							return Long.parseLong(value);
-//						else
-//							return value;
-					}
-				}
-			}
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-		return null;
-	}
-
-	private Object fromByte(byte[] bytes, Class returnCls) throws IOException {
-		// TODO Auto-generated method stub
-		Object ret=null;
-        
-        try(final ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
-        final ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);){
-            try {
-				ret = objectInputStream.readObject();
-			} catch (ClassNotFoundException | IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-        }
-       
-        return ret;
-	}
+	
 
 	@Override
 	public void close() throws IOException {

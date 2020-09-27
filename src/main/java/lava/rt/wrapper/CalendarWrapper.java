@@ -19,27 +19,27 @@ public class CalendarWrapper extends BaseWrapper<Calendar> {
 	
      public CalendarWrapper(Date date) {
     	 super( Calendar.getInstance());
-		_this.setTime(date);
+		self.setTime(date);
 	}
 
 	protected  int getYear() {
 		int ret=0;
 		
-		ret=_this.get(Calendar.YEAR);
+		ret=self.get(Calendar.YEAR);
 		return ret;
 	}
 	
 	protected  int getMonth() {
 		int ret=0;
 		
-		ret=_this.get(Calendar.MONTH);
+		ret=self.get(Calendar.MONTH);
 		return ret;
 	}
 	
 	protected  int getDayOfYear() {
 		int ret=0;
 		
-		ret=_this.get(Calendar.DAY_OF_YEAR);
+		ret=self.get(Calendar.DAY_OF_YEAR);
 		return ret;
 	}
 	

@@ -19,14 +19,18 @@ import lava.rt.rpc.RpcClient;
 
 public class SocketRpcClient extends RpcClient{
 
-	InetSocketAddress addr;
+	
 	
 	protected final Map<Class, ProxyHandler> handlerMap = new HashMap<>();
 	
 	
-	public SocketRpcClient(InetAddress addr,int port) {
+	public SocketRpcClient(InetSocketAddress addr) throws IOException {
+		super(addr);
+	}
+	
+	public SocketRpcClient(String hostname,int port) throws IOException {
+		super(new InetSocketAddress(hostname, port));
 		
-		this.addr=new InetSocketAddress(addr,port);
 	}   
 
 
@@ -45,37 +49,7 @@ public class SocketRpcClient extends RpcClient{
 
 	
 	
-	protected class ProxyHandler implements InvocationHandler {
-
-		final Class serviceInterface;
-
-		public ProxyHandler(Class serviceInterface) {
-			super();
-			this.serviceInterface = serviceInterface;
-			
-		}
-
-		@Override
-		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			// TODO Auto-generated method stub
-			Object ret=null;
-			try (
-					Socket socket = new Socket(addr.getAddress(),addr.getPort());
-					ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
-					ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
-					){
-				
-				output.writeUTF(serviceInterface.getName());
-				output.writeUTF(method.getName());
-				output.writeObject(method.getParameterTypes());
-				output.writeObject(args);
-
-				ret=input.readObject();
-			} 
-			return ret;
-		}
-
-	}
+	
 
 
 

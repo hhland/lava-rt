@@ -47,7 +47,7 @@ public class UnsafeWrapper extends BaseWrapper<Unsafe>{
     	
     	
     	for(Entry<String, Field> ent:ReflectCommon.getTheDeclaredFieldMap(cls).entrySet()) {
-    		ret.put(ent.getKey(), _this.objectFieldOffset(ent.getValue()));
+    		ret.put(ent.getKey(), self.objectFieldOffset(ent.getValue()));
     	}
     	
     	return ret;
@@ -58,7 +58,7 @@ public class UnsafeWrapper extends BaseWrapper<Unsafe>{
     	
     	
     	for(Entry<String, Field> ent:ReflectCommon.getAllDeclaredFieldMap(cls).entrySet()) {
-    		ret.put(ent.getKey(), _this.objectFieldOffset(ent.getValue()));
+    		ret.put(ent.getKey(), self.objectFieldOffset(ent.getValue()));
     	}
     	
     	return ret;
@@ -68,26 +68,26 @@ public class UnsafeWrapper extends BaseWrapper<Unsafe>{
 	public Long objectFieldOffset(Field field) {
 		// TODO Auto-generated method stub
 		
-		return _this.objectFieldOffset(field);
+		return self.objectFieldOffset(field);
 	}
 
 
 	public <T> T getObject(Object object, Long fieldOffset) {
 		// TODO Auto-generated method stub
-		return (T)_this.getObject(object, fieldOffset);
+		return (T)self.getObject(object, fieldOffset);
 	}
 
 
 	public void putObject(Object object, Long offset, Object value) {
 		// TODO Auto-generated method stub
 	
-		_this.putObject(object,offset,value);
+		self.putObject(object,offset,value);
 	}
 
 
 	public <E> E allocateInstance(Class<E> entryClass) throws InstantiationException {
 		// TODO Auto-generated method stub
-		return (E)_this.allocateInstance(entryClass);
+		return (E)self.allocateInstance(entryClass);
 	    
 	}
 	

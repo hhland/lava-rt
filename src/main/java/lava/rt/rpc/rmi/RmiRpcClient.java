@@ -14,10 +14,10 @@ public class RmiRpcClient extends RpcClient{
 
 	String urlRoot;
 	
-	public RmiRpcClient(InetAddress addr,int port) {
-		
+	public RmiRpcClient(String hostname,int port) throws IOException {
+		super(new InetSocketAddress(hostname, port));
 		// TODO Auto-generated constructor stub
-		urlRoot="rmi://"+addr.getHostAddress()+":"+port+"/";
+		urlRoot="rmi://"+addr.getHostName()+":"+port+"/";
 	}
 
 	@SuppressWarnings("unchecked")

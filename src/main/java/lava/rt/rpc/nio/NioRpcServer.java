@@ -2,10 +2,12 @@ package lava.rt.rpc.nio;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -64,9 +66,12 @@ public class NioRpcServer extends RpcServer {
 					} else if (sk.isReadable()) {
 // 获取该SelectionKey对应的Channel，该Channel中有可读的数据
 						SocketChannel sc = (SocketChannel) sk.channel();
-						try {
-// 执行方法
-							remoteHandMethod(buff, sk, sc);
+						Socket clent=sc.socket();
+						try (ObjectInputStream input = new ObjectInputStream(clent.getInputStream());
+			                    ObjectOutputStream output = new ObjectOutputStream(clent.getOutputStream());){
+// 执行方法                 
+							invoke(input, output);
+							//remoteHandMethod(buff, sk, sc);
 						} catch (Exception e) {
 							// 从Selector中删除指定的SelectionKey
 							sk.cancel();
@@ -85,6 +90,7 @@ public class NioRpcServer extends RpcServer {
 	private void remoteHandMethod(ByteBuffer buff, SelectionKey sk, SocketChannel sc) throws IOException,
 			NoSuchMethodException, IllegalAccessException, InvocationTargetException, ClassNotFoundException {
 		buff.clear();
+		
 		int read = sc.read(buff);
 		int postion = buff.position();// 这里获取它真正的大小
 		byte[] data = buff.array();
@@ -132,22 +138,11 @@ public class NioRpcServer extends RpcServer {
 //			result = result.getClass().getName() + ":" + result;
 //		}
 // 发送结果回去
-		sc.write(ByteBuffer.wrap(getBytes(result)));
+		sc.write(ByteBuffer.wrap(toBytes(result)));
 		sk.interestOps(SelectionKey.OP_READ);
 	}
 
-private byte[] getBytes(Object value) throws IOException {
-		// TODO Auto-generated method stub
-	final byte[] bytes;
-    try (
-    final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    final ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);){
-    objectOutputStream.writeObject(value);
-    bytes = outputStream.toByteArray();
-    }
-    
-    return bytes;
-	}
+
 
 
 

@@ -29,7 +29,7 @@ public class PropertiesWrapper extends BaseWrapper<Properties>{
 			try(
 					InputStream is=new FileInputStream(file);
 				){
-				_this.load(is);
+				self.load(is);
 				
 			}
 		}
@@ -50,18 +50,18 @@ public class PropertiesWrapper extends BaseWrapper<Properties>{
 	}
 	
 	protected  float injection(String prefix,Class cls,Object object) {
-		float re=0,total=_this.size();
+		float re=0,total=self.size();
 		
 		Map<String,Field> keyFields=ReflectCommon.getAllDeclaredFieldMap(cls);
 		
-		for(Iterator<Object> it=_this.keySet().iterator();it.hasNext();) {
+		for(Iterator<Object> it=self.keySet().iterator();it.hasNext();) {
 			String _key=it.next().toString();
 			
 			if(!_key.startsWith(prefix))continue;
 			
 			String key=_key.substring(prefix.length());
 			
-			String value=_this.getProperty(key);
+			String value=self.getProperty(key);
 			
 			if(keyFields.containsKey(key)) {
 				Field field=keyFields.get(key);
@@ -84,11 +84,11 @@ public class PropertiesWrapper extends BaseWrapper<Properties>{
 	
 	
 	public  int injection(String prefix) {
-        int re=0,total=_this.size();
+        int re=0,total=self.size();
         
-        for(Iterator<Object> it=_this.keySet().iterator();it.hasNext();) {
+        for(Iterator<Object> it=self.keySet().iterator();it.hasNext();) {
         	String key=it.next().toString();
-        	String value= _this.get(key).toString();
+        	String value= self.get(key).toString();
         	
         	String fieldName=key.substring(key.lastIndexOf(".")+1)
         			,className=key.substring(0,key.length()-fieldName.length()-1)

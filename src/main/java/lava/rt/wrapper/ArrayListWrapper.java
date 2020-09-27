@@ -25,14 +25,14 @@ public class ArrayListWrapper<E> extends BaseWrapper<ArrayList<E>>{
 	
 	public E getNext() {
 		synchronized(index) {
-			return _this.get(index++%_this.size());
+			return self.get(index++%self.size());
 		}
 	}
 	
 	
 	public E getRandom() {
 		synchronized(random) {
-			return _this.get(random.nextInt(_this.size()));
+			return self.get(random.nextInt(self.size()));
 		}
 	}
 	

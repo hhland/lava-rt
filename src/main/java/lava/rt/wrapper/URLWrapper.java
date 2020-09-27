@@ -37,7 +37,7 @@ public class URLWrapper extends BaseWrapper<URL>{
 	    BufferedReader in = null;
 	    
 	      
-	      URL realUrl = _this;
+	      URL realUrl = self;
 	      
 	      URLConnection connection = realUrl.openConnection();
 	  
@@ -64,7 +64,7 @@ public class URLWrapper extends BaseWrapper<URL>{
 	    BufferedReader in = null;
 	    String result = "";
 	    
-	      URL realUrl = _this;
+	      URL realUrl = self;
 	    
 	      URLConnection conn = realUrl.openConnection();
 	     
@@ -95,7 +95,7 @@ public class URLWrapper extends BaseWrapper<URL>{
 	  
 	  public Map<String,String> getParamMap(){
 		  Map<String,String> ret=new HashMap<>();
-		  for(String query :_this.getQuery().split("&")) {
+		  for(String query :self.getQuery().split("&")) {
 			  String[] kv=query.split("=");
 			  ret.put(kv[0], kv[1]);
 		  }

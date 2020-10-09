@@ -27,28 +27,24 @@ import lava.rt.rpc.RpcServer;
  */
 public class NioRpcServer extends RpcServer {
 
-	private final Map<String, Object> serviceMap = new ConcurrentHashMap<>();
+	
 	private Selector selector;
 	private ServerSocketChannel ssc;
 
 	public NioRpcServer(int port) {
-		try {
-			ssc = ServerSocketChannel.open();
-			InetSocketAddress address = new InetSocketAddress(port);
-			ssc.configureBlocking(false);
-			ssc.bind(address);
-			selector = Selector.open();
-			ssc.register(selector, SelectionKey.OP_ACCEPT);
-
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+		super(port);
+		
 	}
 
 	
 
 // 开发服务等待连接
 	public void start() throws IOException {
+		ssc = ServerSocketChannel.open();
+		ssc.configureBlocking(false);
+		ssc.bind(addr);
+		selector = Selector.open();
+		ssc.register(selector, SelectionKey.OP_ACCEPT);
 		logger.info("-----服务器已经启动了------");
 		ByteBuffer buff = ByteBuffer.allocate(1024);
 		try {
@@ -66,12 +62,12 @@ public class NioRpcServer extends RpcServer {
 					} else if (sk.isReadable()) {
 // 获取该SelectionKey对应的Channel，该Channel中有可读的数据
 						SocketChannel sc = (SocketChannel) sk.channel();
-						Socket clent=sc.socket();
-						try (ObjectInputStream input = new ObjectInputStream(clent.getInputStream());
-			                    ObjectOutputStream output = new ObjectOutputStream(clent.getOutputStream());){
+						
+						
+						try {
 // 执行方法                 
-							invoke(input, output);
-							//remoteHandMethod(buff, sk, sc);
+							//invoke(input, output);
+							remoteHandMethod(buff, sk, sc);
 						} catch (Exception e) {
 							// 从Selector中删除指定的SelectionKey
 							sk.cancel();
@@ -156,10 +152,5 @@ public class NioRpcServer extends RpcServer {
 
 	}
 
-	@Override
-	public <T, I extends T> void registerService(Class<T> serviceInterface, I impl) throws Exception {
-		// TODO Auto-generated method stub
-		String name = serviceInterface.getName();
-		serviceMap.put(name, impl);
-	}
+	
 }

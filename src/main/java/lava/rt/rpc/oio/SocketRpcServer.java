@@ -23,7 +23,7 @@ public class SocketRpcServer extends RpcServer{
  
     
  
-    protected final SocketAddress address;
+   
     
     protected  ServerSocket  server  ;
 
@@ -31,18 +31,15 @@ public class SocketRpcServer extends RpcServer{
 
 
 
-	public Map<String,Object> serviceMap=new HashMap<>();
+	
  
 	
 	public SocketRpcServer(int port)  {
-        this.address = new InetSocketAddress(port);
+		super(port);
        
     }
 	
-    public SocketRpcServer(SocketAddress address) {
-        this.address = address;
-        
-    }
+    
     
     public void shutdown()  {
     	try {
@@ -61,9 +58,9 @@ public class SocketRpcServer extends RpcServer{
  
     public void start() throws IOException {
     	 server = new ServerSocket();
-         server.bind(address);
+         server.bind(addr);
         
-        System.out.println("start server: "+ address);
+        System.out.println("start server: "+ addr);
         
             while (!executor.isShutdown()) {
                 // 1.监听客户端的TCP连接，接到TCP连接后将其封装成task，由线程池执行
@@ -117,11 +114,7 @@ public class SocketRpcServer extends RpcServer{
 
 
 
-	@Override
-	public <T, I extends T> void registerService(Class<T> serviceInterface, I impl) {
-		// TODO Auto-generated method stub
-		serviceMap.put(serviceInterface.getName(), impl);
-	}
+	
 
 	
 	

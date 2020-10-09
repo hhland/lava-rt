@@ -36,14 +36,15 @@ public final class AioRpcServer extends RpcServer implements IServer {
     private       long            timeout         = 5000;
     private final ExecutorService executorService = Executors.newFixedThreadPool(10000);
 
-    private   final    int                             port;
+    
     private       AsynchronousChannelGroup        group;
     private       AsynchronousServerSocketChannel channel;
     private final Map<String, Object>             serverMap;
 
     public AioRpcServer(final int port) {
+    	super(port);
         this.serverMap = new ConcurrentHashMap<>();
-        this.port=port;
+       
     }
 
   
@@ -109,7 +110,7 @@ public final class AioRpcServer extends RpcServer implements IServer {
         this.channel = AsynchronousServerSocketChannel
                 .open(this.group)
                 .setOption(StandardSocketOptions.SO_REUSEADDR, true)
-                .bind(new InetSocketAddress("localhost", this.port));
+                .bind(addr);
 
         this.channel.accept(null, new CompletionHandler<AsynchronousSocketChannel, Void>() {
             @Override

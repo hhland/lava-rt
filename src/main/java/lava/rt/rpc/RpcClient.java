@@ -78,7 +78,7 @@ public abstract class RpcClient implements Closeable {
 				output.writeObject(method.getParameterTypes());
 				output.writeObject(args);
 
-				ret=input.readObject();
+				//ret=input.readObject();
 			} 
 			return ret;
 		}

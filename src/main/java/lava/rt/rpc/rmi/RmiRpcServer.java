@@ -22,6 +22,7 @@ public class RmiRpcServer extends RpcServer{
     Registry registry = null;
     
     public RmiRpcServer(int port) throws RemoteException {
+    	super(port);
 		registry=LocateRegistry.createRegistry(port);
     }
 

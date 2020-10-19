@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.function.BiFunction;
 
 import lava.rt.common.ReflectCommon;
 import lava.rt.linq.CommandExecuteExecption;
@@ -54,7 +55,7 @@ public abstract  class  View<M extends Entity> {
 	
 	
 	
-   public void foreach(ResultHandler<M> handler,String where,String orderBy,Object...params) throws CommandExecuteExecption{
+   public void foreach(BiFunction<Integer,M,Integer> handler,String where,String orderBy,Object...params) throws CommandExecuteExecption{
     	SelectCommand cmd=new SelectCommand(null, "*", tableName, where, orderBy);
     	
 		dataContext.foreachEntities(entryClass,handler,cmd,params);

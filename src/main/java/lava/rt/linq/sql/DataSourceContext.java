@@ -15,6 +15,7 @@ import java.util.Date;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -140,7 +141,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 
 	
 
-	public <M extends Entity> void foreachEntities(Class<M> cls,ResultHandler<M> handler, SelectCommand command, Object... params) throws CommandExecuteExecption {
+	public <M extends Entity> void foreachEntities(Class<M> cls,BiFunction<Integer,M,Integer> handler, SelectCommand command, Object... params) throws CommandExecuteExecption {
 		
 		Connection connection = getReadConnection();
 		String sql=command.getSql();
@@ -186,7 +187,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 						
 					}
 
-					hre=handler.handleRow(rowIndex, m);
+					hre=handler.apply(rowIndex, m);
 				}
 			}
 		}catch(Exception ex) {

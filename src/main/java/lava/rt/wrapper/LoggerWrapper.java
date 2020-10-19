@@ -29,7 +29,7 @@ public class LoggerWrapper extends BaseWrapper<Logger>{
     public static final LoggerWrapper CONSOLE=new LoggerWrapper(Logger.getGlobal());
 	
 	static{
-		CONSOLE.self.addHandler(new ConsoleHandler());
+		//CONSOLE.self.addHandler(new ConsoleHandler());
 		CONSOLE.self.setLevel(Level.INFO);
 	}
 

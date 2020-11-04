@@ -52,7 +52,7 @@ public class LoggerWrapper extends BaseWrapper<Logger>{
 	}
 	
 
-	private  static String join(Object... vals) {
+	public  static String join(Object... vals) {
 		String[] ret=new String[vals.length];
 		for(int i=0;i<vals.length;i++) {
 			Object vali=vals[i];

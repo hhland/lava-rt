@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.function.BiConsumer;
 import java.util.Map.Entry;
 
 import lava.rt.common.ReflectCommon;
@@ -22,12 +23,18 @@ import lava.rt.linq.CommandExecuteExecption;
 import lava.rt.linq.DataContext;
 import lava.rt.linq.Entity;
 import lava.rt.linq.VerifyExecption;
+import lava.rt.linq.sql.SelectCommand.PagingSelectCommand;
+
+import lava.rt.wrapper.ListWrapper;
 
 public interface SqlDataContext extends DataContext {
 
-	public String executeQueryJsonList(SelectCommand command,Object... param) throws CommandExecuteExecption;
+	public String executeQueryJsonList(PagingSelectCommand command,Object... param) throws CommandExecuteExecption;
+	
+	public <M extends Entity> ListWrapper<M> listEntities(Class<M> cls, PagingSelectCommand command ,Object... param) throws CommandExecuteExecption ;
 	
 	public <M extends Entity> List<M> listEntities(Class<M> cls, SelectCommand command ,Object... param) throws CommandExecuteExecption ;
+	
 	
 	public Object[][] executeQueryArray(SelectCommand command,Object... param) throws CommandExecuteExecption ;
 	

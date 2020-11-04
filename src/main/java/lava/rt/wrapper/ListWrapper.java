@@ -1,18 +1,20 @@
 package lava.rt.wrapper;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
-public class ArrayListWrapper<E> extends BaseWrapper<ArrayList<E>>{
+public class ListWrapper<E> extends BaseWrapper<List<E>>{
 
-	public ArrayListWrapper(ArrayList<E> _this) {
+	public ListWrapper(List<E> _this) {
 		super(_this);
 		// TODO Auto-generated constructor stub
+		this.total=self.size();
 	}
 
 	
 	
-	
+	private int total=0;
 	
     private Integer index=0;
 	
@@ -35,6 +37,18 @@ public class ArrayListWrapper<E> extends BaseWrapper<ArrayList<E>>{
 			return self.get(random.nextInt(self.size()));
 		}
 	}
+
+
+	public int getTotal() {
+		return total;
+	}
+
+
+	public void setTotal(int total) {
+		this.total = total;
+	}
+	
+	
 	
 	
 }

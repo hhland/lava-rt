@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.logging.Level;
 
 import javax.sql.DataSource;
 
@@ -30,8 +31,10 @@ import lava.rt.linq.Checkpoint;
 import lava.rt.linq.CommandExecuteExecption;
 import lava.rt.linq.DuplicateKeyException;
 import lava.rt.linq.Entity;
+import lava.rt.linq.sql.SelectCommand.PagingSelectCommand;
 import lava.rt.linq.CommandExecuteExecption.CmdType;
-import lava.rt.wrapper.ArrayListWrapper;
+
+import lava.rt.wrapper.ListWrapper;
 import lava.rt.wrapper.LoggerWrapper;
 
 
@@ -40,13 +43,13 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 
 	
 
-	private final Map<Class, Table> tableMap = new HashMap<>();
+	private final Map<Class, TableTemplate> tableMap = new HashMap<>();
 
-	private final Map<Class,View> viewMap = new HashMap<>();
+	private final Map<Class,ViewTemplate> viewMap = new HashMap<>();
 	
 	protected  final Map<String,String> columnMap = new HashMap<>();
 
-	private final ThreadLocal<ArrayListWrapper<Connection>> readConnection = new ThreadLocal<>()
+	private final ThreadLocal<ListWrapper<Connection>> readConnection = new ThreadLocal<>()
 			,writeConnection = new ThreadLocal<>()
 			;
 
@@ -63,10 +66,10 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 
 	
 
-	protected <M extends Entity> Table<M> createTable(Class<M> cls, String tableName, String pkName,Supplier<M> entityNewer) {
-		Table<M> table=null;
+	protected <M extends Entity> TableTemplate<M> createTable(Class<M> cls, String tableName, String pkName,Supplier<M> entityNewer) {
+		TableTemplate<M> table=null;
 		try {
-		table= new Table<M>(this, cls, tableName, pkName) {
+		table= new TableTemplate<M>(this, cls, tableName, pkName) {
 			@Override
 			public M newEntity() throws Exception {
 				// TODO Auto-generated method stub
@@ -82,8 +85,8 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 		return table;
 	}
 
-	protected <M extends Entity> View<M> createView(Class<M> cls, String tableName,Supplier< M> entityNewer) {
-		View<M> view = new View<M>(this, cls, tableName) {
+	protected <M extends Entity> ViewTemplate<M> createView(Class<M> cls, String tableName,Supplier< M> entityNewer) {
+		ViewTemplate<M> view = new ViewTemplate<M>(this, cls, tableName) {
 
 			@Override
 			public M newEntity() throws Exception {
@@ -96,13 +99,13 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 		return view;
 	};
 
-	public <M extends Entity> Table<M> getTable(Class<M> mcls) {
-		Table<M> ret = tableMap.get(mcls);
+	public <M extends Entity> TableTemplate<M> getTable(Class<M> mcls) {
+		TableTemplate<M> ret = tableMap.get(mcls);
 		return ret;
 	}
 
-	public <M extends Entity> View<M> getView(Class<M> mcls) {
-		View<M> ret = viewMap.get(mcls);
+	public <M extends Entity> ViewTemplate<M> getView(Class<M> mcls) {
+		ViewTemplate<M> ret = viewMap.get(mcls);
 		return ret;
 	};
 	
@@ -118,7 +121,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 		CacheItem<E> cache=getCache(cls, pk);
 		E ret=null;
 		if(cache==null||cache.isTimeout()||!cache.isEnable()) {
-			Table<E> table=getTable(cls);
+			TableTemplate<E> table=getTable(cls);
 			
 			ret=table.load(pk);
 			
@@ -131,20 +134,29 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	}
 
 
-
+	public <M extends Entity> ListWrapper<M> listEntities(Class<M> cls, PagingSelectCommand command,Object...param) throws CommandExecuteExecption {
+		List<M> rows=listEntities(cls, command.toSql(),param);
+		ListWrapper<M> ret=new ListWrapper(rows);
+		if(ret.self.size()==command.getLimit()) {
+			String countSql=command.getCountSql();
+			int total=(int)executeQueryArray(countSql,param)[0][0];
+			ret.setTotal(total);
+		}
+		return ret;
+	}
 
 
 	
 	public <M extends Entity> List<M> listEntities(Class<M> cls, SelectCommand command,Object...param) throws CommandExecuteExecption {
-		return listEntities(cls, command.getSql(),param);
+		return listEntities(cls, command.toSql(),param);
 	}
 
 	
 
-	public <M extends Entity> void foreachEntities(Class<M> cls,BiFunction<Integer,M,Integer> handler, SelectCommand command, Object... params) throws CommandExecuteExecption {
+	public <M extends Entity> void listEntities(BiFunction<Integer,M,Integer> handler,Class<M> cls, SelectCommand command, Object... params) throws CommandExecuteExecption {
 		
 		Connection connection = getReadConnection();
-		String sql=command.getSql();
+		String sql=command.toSql();
 		
 		try (PreparedStatement preparedStatement = connection.prepareStatement(sql);) {
 			for (int i = 0; i < params.length; i++) {
@@ -160,10 +172,10 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 					meteDataMap.put(key, i);
 				}
 
-				View<M> view = getView(cls);
+				ViewTemplate<M> view = getView(cls);
 				
 				int hre=1,rowIndex=0;
-			
+				M m= view.newEntity();
 				while (resultSet.next()) {
 					rowIndex++;
 					if(hre>1) {
@@ -173,7 +185,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 						break;
 					}
 					
-					M m= view.newEntity();
+					
 					for (Iterator<String> it = view.entityFieldMap.keySet().iterator(); it.hasNext();) {
 						String columnName = it.next().toUpperCase();
 						Integer columnIndex = meteDataMap.get(columnName);
@@ -222,7 +234,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 					meteDataMap.put(key, i);
 				}
 
-				View<M> view = getView(cls);
+				ViewTemplate<M> view = getView(cls);
 				
 				
 			
@@ -298,16 +310,18 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	}
 	
 	protected void logSql(String method,String sql,Object param) {
-		
+		LoggerWrapper.CONSOLE.info(method,sql,param);
 	}
 	
 	protected void logError(Object... vals) {
 		//LogingCommon.getConsoleLogger(this.getClass()).info(vals);
+		LoggerWrapper.CONSOLE.self.log(Level.WARNING, LoggerWrapper.join(vals));
 	}
 
 
 	protected void logExecptioin(Exception exception) {
-		LoggerWrapper.CONSOLE.info(exception.getMessage());
+		LoggerWrapper.CONSOLE.self.log(Level.WARNING,exception.getMessage());
+		
 	}
 
 	
@@ -398,7 +412,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 
 
 	@Override
-	public String executeQueryJsonList(SelectCommand command,Object... param)
+	public String executeQueryJsonList(PagingSelectCommand command,Object... param)
 			throws CommandExecuteExecption {
 			
        StringBuffer ret=new StringBuffer(executeQueryJsonList(command.getSql(),param));
@@ -429,7 +443,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	public int executeUpdate(String sql, Object... param) throws CommandExecuteExecption {
 		int re = 0;
 		
-		ArrayListWrapper<Connection> connections = getWriteConnections();
+		ListWrapper<Connection> connections = getWriteConnections();
 		if (connections == null) {
 			//printErr("error:" + sql);
 		} else if (connections.self.size() == 1) {
@@ -500,7 +514,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	public int executeBatch(String sql, Object[]... params) throws CommandExecuteExecption {
 		int re = 0;
 		
-		ArrayListWrapper<Connection> connections = getWriteConnections();
+		ListWrapper<Connection> connections = getWriteConnections();
 		if (connections.self.size() == 1) {
 			try {
 			re += SqlCommon.executeBatch(connections.self.get(0), sql, params);
@@ -538,7 +552,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	public  int putEntity(Entity entity) throws CommandExecuteExecption,DuplicateKeyException {
 		int re = 0;
 		Class<? extends Entity> cls = entity.getClass();
-		Table table = this.getTable(cls);
+		TableTemplate table = this.getTable(cls);
 		
 		re=table.insert(entity);
 		return re;
@@ -551,12 +565,10 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	public int addEntity(Entity entity) throws CommandExecuteExecption {
 		int re = 0;
 		Class<? extends Entity> cls = entity.getClass();
-		Table table = this.getTable(cls);
-		if(entity.thisPk()==null) {
-		  re += table.insertWithoutPk(entity);
-		}else {
-		  re += table.insert(entity);	
-		}
+		TableTemplate table = this.getTable(cls);
+		
+		re += table.insert(entity);	
+		
 		putCache(entity);
 		return re;
 	}
@@ -564,10 +576,10 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	public <E extends Entity> int addEntities(Collection<E> entites) throws CommandExecuteExecption {
 		int re = 0;
 		Class cls = entites.stream().findFirst().getClass();
-		Table table = this.getTable(cls);
+		TableTemplate table = this.getTable(cls);
 		
 		
-		re += table.insert(entites);
+		re += table.insertBatch(entites);
 		
 		//entity._updateTime = now();
 		return re;
@@ -582,7 +594,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 		int re = 0;
 
 		Class cls = entity.getClass();
-		Table table = this.getTable(cls);
+		TableTemplate table = this.getTable(cls);
 		
 		re += table.update(entity);
 		
@@ -595,9 +607,9 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	public <E extends Entity> int updateEntities(Collection<E> entites) throws CommandExecuteExecption {
 		int re = 0;
 		Class cls = entites.stream().findFirst().getClass();
-		Table table = this.getTable(cls);
+		TableTemplate table = this.getTable(cls);
 		
-		re += table.update(entites);
+		re += table.updateBatch(entites);
 		
 
 		return re;
@@ -609,7 +621,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 		int re = 0;
 
 		Class cls = entity.getClass();
-		Table table = this.getTable(cls);
+		TableTemplate table = this.getTable(cls);
 		
 	    re += table.delete(entity);
 		
@@ -621,10 +633,10 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 		int re = 0;
         
 		Class cls = entites.stream().findFirst().getClass();
-		Table table = this.getTable(cls);
+		TableTemplate table = this.getTable(cls);
 		
 		
-	    re += table.delete(entites);
+	    re += table.deleteBatch(entites);
 		
 
 		return re;
@@ -692,7 +704,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	}
 	
 	public Checkpoint[] executeSetCheckpoint(String... points) throws CommandExecuteExecption {
-		ArrayListWrapper<Connection> connections=writeConnection.get();
+		ListWrapper<Connection> connections=writeConnection.get();
 		Savepoint[] ret0=new Savepoint[connections.self.size()];
 		Checkpoint[] ret=new Checkpoint[ret0.length];
 			
@@ -719,8 +731,8 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 		return ret;
 	}
 
-	private  ArrayListWrapper<Connection> getReadConnections() throws CommandExecuteExecption{
-       ArrayListWrapper<Connection> connections = readConnection.get();
+	private  ListWrapper<Connection> getReadConnections() throws CommandExecuteExecption{
+       ListWrapper<Connection> connections = readConnection.get();
 		
 		if(connections==null) {
 			 DataSource[] dss=getReadDataSources();
@@ -741,7 +753,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	
 	@SuppressWarnings("resource")
 	protected final Connection getReadConnection() throws CommandExecuteExecption {
-		ArrayListWrapper<Connection> connections = getReadConnections();
+		ListWrapper<Connection> connections = getReadConnections();
 		
 		Connection ret = connections.getNext();
 		
@@ -749,8 +761,8 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	}
 
 	
-	private  ArrayListWrapper<Connection> getWriteConnections() throws CommandExecuteExecption{
-	       ArrayListWrapper<Connection> connections = writeConnection.get();
+	private  ListWrapper<Connection> getWriteConnections() throws CommandExecuteExecption{
+	       ListWrapper<Connection> connections = writeConnection.get();
 			
 			if(connections==null) {
 				 DataSource[] dss=getWriteDataSources();
@@ -771,7 +783,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 		
 		@SuppressWarnings("resource")
 		protected final Connection getWriteConnection() throws CommandExecuteExecption {
-			ArrayListWrapper<Connection> connections = getWriteConnections();
+			ListWrapper<Connection> connections = getWriteConnections();
 			
 			Connection ret = connections.getNext();
 			

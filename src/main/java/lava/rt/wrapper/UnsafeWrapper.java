@@ -7,7 +7,7 @@ import java.util.Map.Entry;
 import java.util.stream.Stream;
 
 import lava.rt.common.ReflectCommon;
-import lava.rt.linq.sql.Table;
+import lava.rt.linq.sql.TableTemplate;
 import sun.misc.Unsafe;
 
 public class UnsafeWrapper extends BaseWrapper<Unsafe>{

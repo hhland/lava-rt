@@ -12,6 +12,7 @@ import lava.rt.rpc.rmi.RmiRpcServer;
 public class RpcServerMain {
 
 	
+	static SampleService impl;
 	
 	public enum Server{
 		
@@ -36,8 +37,8 @@ public class RpcServerMain {
 
 	public static void main(String[] args) throws RemoteException, Exception {
 		// TODO Auto-generated method stub
-
-		startOioServer();
+		impl=new SampleServiceImpl();
+		startNioServer();
 		//startAioServer();
 		
 		
@@ -45,14 +46,14 @@ public class RpcServerMain {
 
 	private static void startNioServer() throws Exception{
 		// TODO Auto-generated method stub
-		 SampleService impl=new SampleServiceImpl();
+		 
 		 Server.nio.getServer().registerService(SampleService.class, impl);
 		 Server.nio.getServer().start();
 	}
 
 	private static void startAioServer() throws Exception {
 		// TODO Auto-generated method stub
-        SampleService impl=new SampleServiceImpl();
+       
 		
 		Server.aio.getServer().registerService(SampleService.class,impl);
 		Server.aio.getServer().start();
@@ -61,7 +62,7 @@ public class RpcServerMain {
 	
 	private static void startOioServer() throws Exception {
 		// TODO Auto-generated method stub
-        SampleService impl=new SampleServiceImpl();
+        
 		
 		Server.oio.getServer().registerService(SampleService.class,impl);
 		Server.oio.getServer().start();

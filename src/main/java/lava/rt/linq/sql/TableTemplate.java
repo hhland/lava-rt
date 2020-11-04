@@ -18,7 +18,7 @@ import lava.rt.linq.CommandExecuteExecption;
 import lava.rt.linq.Entity;
 
 
-public abstract class Table<M extends Entity> extends View<M> {
+public abstract class TableTemplate<M extends Entity> extends ViewTemplate<M> {
 
 	
 	
@@ -34,7 +34,7 @@ public abstract class Table<M extends Entity> extends View<M> {
 
 	protected final String sqlInsert,sqlInsertWithoutPk, sqlUpdate, sqlDelete,sqlLoad,sqlColumns;
 
-	public Table(DataSourceContext dataContext, Class<M> entryClass, String tableName, String pkName) {
+	public TableTemplate(DataSourceContext dataContext, Class<M> entryClass, String tableName, String pkName) {
 		super(dataContext, entryClass, tableName);
 		this.pkName = pkName;
 
@@ -125,7 +125,7 @@ public abstract class Table<M extends Entity> extends View<M> {
 		return ret;
 	}
 
-	public <E extends M> int insert(Collection<E> entrys) throws CommandExecuteExecption {
+	public <E extends M> int insertBatch(Collection<E> entrys) throws CommandExecuteExecption {
 		if (entrys.size() == 0)
 			return 0;
 		String  sql = sqlInsert;
@@ -135,15 +135,14 @@ public abstract class Table<M extends Entity> extends View<M> {
 		Object[][] params = new Object[entrys.size()][insertsize + 1];
 		try {
 			int i=0;
-			//for (int i = 0; i < entrys.length; i++) {
+			
 			for(M obj : entrys) {
-				//M obj = entrys[i];
-				//params[i][0] =unsafeAdapter.getObject(obj, pkFieldOffset);
-				params[i][0]=pkField.get(obj);
+				
+				params[i][0]=obj.thisPk();
 				for (int j = 0; j < insertsize; j++) {
 					Field field = insertFields[j];
 					params[i][j + 1] = field.get(obj);
-					//params[i][j + 1] =unsafeAdapter.getObject(obj, insertFieldOffsets[j]);
+					
 				}
 				i++;
 			}
@@ -166,59 +165,50 @@ public abstract class Table<M extends Entity> extends View<M> {
 		
 		int re = 0, insertsize = insertFields.length;
 
-		Object[] param = new Object[insertsize + 1];
-		try {
+		
+		if(entry.thisPk()==null) {
+			Object[] param = new Object[insertsize];
+			try {
+			for (int j = 0; j < insertsize; j++) {
+				Field field = insertFields[j];
+				param[j] = field.get(entry);
+			}
 			
-				param[0] = pkField.get(entry);
-		        //param[0] = getPk(entry);
-				for (int j = 0; j < insertsize; j++) {
-					Field field = insertFields[j];
-					param[j + 1] = field.get(entry);
-					//param[j+1]=unsafeAdapter.getObject(entry, insertFieldOffsets[j]);
-				}
-		} catch (Exception e) {
-		//	throw new ExecuteExecption(e);
+			}catch(Exception ex) {}
+			int pk = dataContext.executeInsertReturnPk(sqlInsertWithoutPk, param);
+			try {
+				pkField.set(entry, pk);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				throw CommandExecuteExecption.forSql(e, sqlInsert, param);
+			} 
+		}else {
+			
+			Object[] param = new Object[insertsize + 1];
+			try {
+				    
+					param[0] = entry.thisPk();
+			        //param[0] = getPk(entry);
+					for (int j = 0; j < insertsize; j++) {
+						Field field = insertFields[j];
+						param[j + 1] = field.get(entry);
+						//param[j+1]=unsafeAdapter.getObject(entry, insertFieldOffsets[j]);
+					}
+			} catch (Exception e) {
+			//	throw new ExecuteExecption(e);
+			}
+			re = dataContext.executeUpdate(sqlInsert, param);
 		}
-		re = dataContext.executeUpdate(sqlInsert, param);
+		
+		
 		
 
 		return re;
 
 	}
-
-	public <E extends M> int insertWithoutPk(E... entrys) throws CommandExecuteExecption {
-        AtomicInteger re=new AtomicInteger(0);
-        AtomicReference<CommandExecuteExecption> sex=new AtomicReference<>();
-		String sql=sqlInsertWithoutPk;
-		
-		int insertsize = insertFields.length;
-
-		Object[] param = new Object[insertsize];
-
-		Stream.of(entrys).parallel().forEach(entry->{
-			try {
-				for (int j = 0; j < insertsize; j++) {
-					Field field = insertFields[j];
-					param[j] = field.get(entry);
-				}
-				int pk = dataContext.executeInsertReturnPk(sql, param);
-				pkField.set(entry, pk);
-			    re.getAndIncrement();
-			} catch (Exception se) {
-				
-				
-				sex.set(CommandExecuteExecption.forSql(se, sql, param));
-			} 
-		});
-		
-		if(sex.get()!=null) {
-			throw sex.get();
-		}
-		
-		
-		return re.get();
-
-	}
+	
+	
+	
 
 	
 	public <E extends M> int update(E entry) throws CommandExecuteExecption {
@@ -235,7 +225,7 @@ public abstract class Table<M extends Entity> extends View<M> {
         }catch(Exception ex) {
         	//throw new ExecuteExecption(ex);
         }
-		param[updatesize] = getPk(entry);
+		param[updatesize] = entry.thisPk();
 
 			
 		int re = dataContext.executeUpdate(sqlUpdate, param);
@@ -245,7 +235,7 @@ public abstract class Table<M extends Entity> extends View<M> {
 	}
 	
 	
-	public <E extends M> int update(Collection<E> entrys) throws CommandExecuteExecption {
+	public <E extends M> int updateBatch(Collection<E> entrys) throws CommandExecuteExecption {
 		if (entrys.size() == 0)
 			return 0;
 		
@@ -263,7 +253,7 @@ public abstract class Table<M extends Entity> extends View<M> {
 					params[i][j] = field.get(obj);
 					//params[i][j]=unsafeAdapter.getObject(obj, updateFieldOffsets[j]);
 				}
-				params[i][updatesize] = getPk(obj);
+				params[i][updatesize] = obj.thisPk();
                 i++;
 			}
 		} catch (Exception e) {
@@ -277,7 +267,7 @@ public abstract class Table<M extends Entity> extends View<M> {
 	}
 	
 	
-	public <E extends M> int delete(Collection<E> entrys) throws CommandExecuteExecption {
+	public <E extends M> int deleteBatch(Collection<E> entrys) throws CommandExecuteExecption {
 		int re = 0;
 		if (entrys.size() == 0)
 			return re;
@@ -288,7 +278,7 @@ public abstract class Table<M extends Entity> extends View<M> {
 		Object[][] params = new Object[dlength][1];
         int i=0;
 		for(M entry :entrys) {
-			params[i][0] = getPk(entry);
+			params[i][0] = entry.thisPk();
 			i++;
 		}
 
@@ -301,14 +291,14 @@ public abstract class Table<M extends Entity> extends View<M> {
 		
 		
 		
-		Object[] param = new Object[] {getPk(entry)};
+		Object[] param = new Object[] {entry.thisPk()};
 
-		int re = 0;
-		
-		re = dataContext.executeUpdate(sqlDelete, param);
+		int re =  dataContext.executeUpdate(sqlDelete, param);
 		
 		return re;
 	}
+	
+	
 	
 	
 	 public int delete(String where,Object...params) throws CommandExecuteExecption{
@@ -346,23 +336,31 @@ public abstract class Table<M extends Entity> extends View<M> {
 		return re;
 	}
 
-	public int drop() throws CommandExecuteExecption {
-		String sql = "drop table " + tableName;
-		int re = dataContext.executeUpdate(sql);
+	
+	
+    public  int remove(Object pk) throws CommandExecuteExecption {
+		int re = 0;
+		re = dataContext.executeUpdate(sqlDelete, pk);
 		return re;
 	}
 	
-	public <E extends M,R> R getPk(E entry) {
-		R ret = null;
-		try {
-			ret = (R)pkField.get(entry);
-		   // ret=(R)unsafeAdapter.getObject(entry, pkFieldOffset);
-		} catch (IllegalArgumentException | IllegalAccessException e) {
+    public <P> int removeBatch(Collection<P> pks) throws CommandExecuteExecption {
+		int re = 0;
+		if (pks.size() == 0)
+			return re;
+		
+		int dlength = pks.size();
+		Object[][] params = new Object[dlength][1];
+        int i=0;
+		for(P pk :pks) {
+			params[i][0] = pk;
+			i++;
 		}
-		return ret;
+
+		re = dataContext.executeBatch(sqlDelete, params);
+		
+		return re;
 	}
-	
-	
 	
 	
 	

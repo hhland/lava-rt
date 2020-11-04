@@ -10,10 +10,12 @@ import java.util.function.BiFunction;
 import lava.rt.common.ReflectCommon;
 import lava.rt.linq.CommandExecuteExecption;
 import lava.rt.linq.Entity;
+import lava.rt.linq.sql.SelectCommand.PagingSelectCommand;
+import lava.rt.wrapper.ListWrapper;
 
 
 
-public abstract  class  View<M extends Entity> {
+public abstract  class  ViewTemplate<M extends Entity> {
 
 	protected final DataSourceContext dataContext;
 	
@@ -21,7 +23,7 @@ public abstract  class  View<M extends Entity> {
 	protected final Class<M> entryClass;
 	protected final Map<String,Field> entityFieldMap=new HashMap<>();
 	
-	protected static Map<Class,List<Column>> clsColumns=new HashMap<>();
+	
 	
 	//protected final Map<String,Long> entryFieldOffsetMap=new HashMap<>();
 	
@@ -31,7 +33,7 @@ public abstract  class  View<M extends Entity> {
 	
 	//protected static UnsafeAdapter unsafeAdapter= UnsafeAdapter.getInstance();
 	
-	protected View (DataSourceContext dataContext,Class<M> entryClass,String tableName) {
+	protected ViewTemplate (DataSourceContext dataContext,Class<M> entryClass,String tableName) {
 		this.dataContext=dataContext;
 		this.tableName=tableName;
 		this.entryClass=entryClass;
@@ -55,26 +57,24 @@ public abstract  class  View<M extends Entity> {
 	
 	
 	
-   public void foreach(BiFunction<Integer,M,Integer> handler,String where,String orderBy,Object...params) throws CommandExecuteExecption{
-    	SelectCommand cmd=new SelectCommand(null, "*", tableName, where, orderBy);
+   public void select(BiFunction<Integer,M,Integer> handler,String where,String orderBy,Object...params) throws CommandExecuteExecption{
+    	SelectCommand cmd=new SelectCommand("*", tableName, where, orderBy);
     	
-		dataContext.foreachEntities(entryClass,handler,cmd,params);
+		dataContext.listEntities(handler,entryClass,cmd,params);
 	}
     
     
      public List<M> select(String where,String orderBy,Object...params) throws CommandExecuteExecption{
-    	 SelectCommand cmd=new SelectCommand(null, "*", tableName, where, orderBy);
+    	 SelectCommand cmd=new SelectCommand( "*", tableName, where, orderBy);
     	 List<M> ret=dataContext.listEntities(entryClass,cmd,params);
     	 return ret;
 	}
     
     
-    public List<M> select(Criterias criterias,int start,int limit,String where,String orderBy,Object...params) throws CommandExecuteExecption{
-    	
-    	SelectCommand cmd=new SelectCommand(criterias, "*", tableName, where, orderBy);
-    	cmd.setStart(start);
-    	cmd.setLimit(limit);
-		return dataContext.listEntities(entryClass,cmd,params);
+    public ListWrapper<M> select(Criterias criterias,int start,int limit,String where,String orderBy,Object...params) throws CommandExecuteExecption{
+    	SelectCommand cmd=new SelectCommand( "*", tableName, where, orderBy);
+    	PagingSelectCommand pcmd=cmd.createPagingSelectCommand(criterias,start,limit);
+		return dataContext.listEntities(entryClass,pcmd,params);
 	}
 	
 	

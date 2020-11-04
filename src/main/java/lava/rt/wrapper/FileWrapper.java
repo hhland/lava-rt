@@ -1,4 +1,4 @@
-package lava.rt.common;
+package lava.rt.wrapper;
 
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 
@@ -24,108 +24,58 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
-public final class IoCommon {
+public class FileWrapper extends BaseWrapper<File>{
 
 	
-	public static List<String> readLines(File file ) throws FileNotFoundException, IOException{
-		 List<String> ret=new ArrayList<>();
-		   
-		   try(    
-				   FileReader fileReader=new FileReader(file);
-				   BufferedReader reader = new BufferedReader(fileReader);){//换成你的文件名 
-          
-         String line = null;  
-         while((line=reader.readLine())!=null){  
+	
+	
+	public FileWrapper(File self) {
+		super(self);
+		// TODO Auto-generated constructor stub
+	}
+
+	
+	
+   
+    
+    
+    
+	
+	
+	public Thread startWatchingDir(boolean subDir,
+			final Function<File, Void> onEntryCreate,final Function<File, Void> onEntryModify,final Function<File, Void> onEntryDelete) throws Exception {
+		if (!self.isDirectory())
+            throw new Exception(self.getAbsolutePath() + "is not a directory!");
+ 
+		final WatchService watcher = FileSystems.getDefault().newWatchService();
+		final Map<WatchKey, Path> keys = new HashMap<WatchKey, Path>();
+       
+ 
+        Path dir = Paths.get(self.getAbsolutePath());
+ 
+        if (subDir) {
+            registerAll(dir,watcher,keys);
+        } else {
+            register(dir,watcher,keys);
+        }
         
-             ret.add(line);  
-             
-          }
-		   }
-		   
-		   return ret;
-	}
-	
-	
-	public static void readLines(File file,BiFunction<Integer,String,Integer> handler) throws FileNotFoundException, IOException{
-		 
-		   
-		   try(    
-				   FileReader fileReader=new FileReader(file);
-				   BufferedReader reader = new BufferedReader(fileReader);){//换成你的文件名 
-         
-        String line = null;  
-        int lineIndex=0,lineStep=1;
-        while((line=reader.readLine())!=null&&lineStep>=1){  
-               if(lineStep>1) {
-            	   lineStep--;
-            	   continue;
-               }
-               lineStep=handler.apply(lineIndex,line);
-            
-         }
-		}
-		   
-		   
-	}
-	
-	
-	public static DirWatcher watchDir(File dir) {
-		DirWatcher ret=null;
-		
-		return ret;
-	}
-	
-	
-	public static Runnable runWatchingDir(DirWatcher dirWatcher) throws Exception {
-		Runnable ret=new Thread() {
+        Thread ret=new Thread() {
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
-				dirWatcher.listen();
+				listen(subDir,watcher,keys,onEntryCreate,onEntryModify,onEntryDelete);
 			}
 		    	
 		};
 		return ret;
+        
 	}
 	
 	
 	
-	public static abstract class DirWatcher {
-
-		
-		
-		private final WatchService watcher;
-	    private final Map<WatchKey, Path> keys;
-	    private final boolean subDir;
-	 
-	    /**
-	     * 构造方法
-	     * 
-	     * @param file
-	     *            文件目录，不可以是文件
-	     * @param subDir
-	     * @throws Exception
-	     */
-	    public DirWatcher(File file, boolean subDir ) throws Exception {
-	        if (!file.isDirectory())
-	            throw new Exception(file.getAbsolutePath() + "is not a directory!");
-	 
-	        this.watcher = FileSystems.getDefault().newWatchService();
-	        this.keys = new HashMap<WatchKey, Path>();
-	        this.subDir = subDir;
-	 
-	        Path dir = Paths.get(file.getAbsolutePath());
-	 
-	        if (subDir) {
-	            registerAll(dir);
-	        } else {
-	            register(dir);
-	        }
-	       
-	    }
-	 
-	    @SuppressWarnings("unchecked")
+	 @SuppressWarnings("unchecked")
 	    static <T> WatchEvent<T> cast(WatchEvent<?> event) {
 	        return (WatchEvent<T>) event;
 	    }
@@ -134,9 +84,11 @@ public final class IoCommon {
 	     * 观察指定的目录
 	     * 
 	     * @param dir
+	     * @param watcher 
+	     * @param keys 
 	     * @throws IOException
 	     */
-	    private void register(Path dir) throws IOException {
+	    private void register(Path dir, WatchService watcher, Map<WatchKey, Path> keys) throws IOException {
 	        WatchKey key = dir.register(watcher, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
 	        keys.put(key, dir);
 	    }
@@ -144,11 +96,11 @@ public final class IoCommon {
 	    /**
 	     * 观察指定的目录，并且包括子目录
 	     */
-	    private void registerAll(final Path start) throws IOException {
+	    private void registerAll(final Path start, WatchService watcher,Map<WatchKey, Path> keys) throws IOException {
 	        Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
 	            @Override
 	            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-	                register(dir);
+	                register(dir,watcher,keys);
 	                return FileVisitResult.CONTINUE;
 	            }
 	        });
@@ -156,9 +108,14 @@ public final class IoCommon {
 	 
 	    /**
 	     * 发生文件变化的回调函数
+	     * @param watcher 
+	     * @param keys 
+	     * @param onEntryCreate 
+	     * @param onEntryModify 
+	     * @param onEntryDelete 
 	     */
 	    @SuppressWarnings("rawtypes")
-	    public void listen() {
+	    private void listen(boolean subDir, WatchService watcher, Map<WatchKey, Path> keys, Function<File, Void> onEntryCreate, Function<File, Void> onEntryModify, Function<File, Void> onEntryDelete) {
 	        for (;;) {
 	            WatchKey key;
 	            try {
@@ -188,13 +145,13 @@ public final class IoCommon {
 	                switch (kind.name()) {
 	                
 	                case "ENTRY_DELETE" : 
-	                    onEntryDelete(file);
+	                    onEntryDelete.apply(file);
 	                    break;
 	                case "ENTRY_CREATE" : 
-	                    onEntryCreate(file);
+	                    onEntryCreate.apply(file);
 	                    break;
 	                case "ENTRY_MODIFY" :
-	                    onEntryModify(file);
+	                    onEntryModify.apply(file);
 	                    break;
 	                default : break;
 	                }
@@ -204,7 +161,7 @@ public final class IoCommon {
 	                if (subDir && (kind == StandardWatchEventKinds.ENTRY_CREATE)) {
 	                    try {
 	                        if (Files.isDirectory(child, NOFOLLOW_LINKS)) {
-	                            registerAll(child);
+	                            registerAll(child,watcher,keys);
 	                        }
 	                    } catch (IOException x) {
 	                        // ignore to keep sample readbale
@@ -224,12 +181,48 @@ public final class IoCommon {
 	            }
 	        }
 	    }
-
-		abstract protected void onEntryModify(File file);
-
-		abstract protected void onEntryCreate(File file);
-
-		abstract protected void onEntryDelete(File file);
+	    
+	    
+	    public  List<String> readLines() throws FileNotFoundException, IOException{
+			 List<String> ret=new ArrayList<>();
+			   
+			   try(    
+					   FileReader fileReader=new FileReader(self);
+					   BufferedReader reader = new BufferedReader(fileReader);){//换成你的文件名 
+	          
+	         String line = null;  
+	         while((line=reader.readLine())!=null){  
+	        
+	             ret.add(line);  
+	             
+	          }
+			   }
+			   
+			   return ret;
+		}
+		
+		
+		public void readLines(BiFunction<Integer,String,Integer> handler) throws FileNotFoundException, IOException{
+			 
+			   
+			   try(    
+					   FileReader fileReader=new FileReader(self);
+					   BufferedReader reader = new BufferedReader(fileReader);){//换成你的文件名 
+	         
+	        String line = null;  
+	        int lineIndex=0,lineStep=0;
+	        while((line=reader.readLine())!=null&&lineStep>=0){  
+	               if(lineStep>0) {
+	            	   lineStep--;
+	            	   continue;
+	               }
+	               lineStep=handler.apply(lineIndex,line);
+	            
+	         }
+			}
+			   
+			   
+		}
+	    
 	
-	}
 }

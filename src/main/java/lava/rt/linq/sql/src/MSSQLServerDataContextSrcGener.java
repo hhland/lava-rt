@@ -89,7 +89,7 @@ public class MSSQLServerDataContextSrcGener extends DataContextSrcGener {
 		while(resultSet.next()) {
 		   String name=resultSet.getString("PROC_NAME");
 		   if(name==null)continue;
-		   
+		   else if(!isObjectName(name))continue;
 		   String key=name;
 		   if(!ret.containsKey(key)) {
 			   ret.put(key, new ArrayList<DataContextSrcGener.ProcedureParamSrc>());
@@ -117,6 +117,8 @@ public class MSSQLServerDataContextSrcGener extends DataContextSrcGener {
 		return ret;
 	}
 
+	
+
 	@Override
 	protected Class<? extends DataContextSrcGener> thisClass() {
 		// TODO Auto-generated method stub
@@ -127,7 +129,7 @@ public class MSSQLServerDataContextSrcGener extends DataContextSrcGener {
 	public Map<String, String[]> loadColumnMetas(String databaseName) throws SQLException {
 		// TODO Auto-generated method stub
 		String sql="SELECT [TableName] = [Tables].name ,[ColumnName] = [Columns].name ,\n" + 
-				"        [Description] = [Properties].value,\n" + 
+				"        [Description] = CONVERT(varchar(200), [Properties].value),\n" + 
 				"        [SystemTypeName] = [Types].name ,\n" + 
 				"        [Precision] = [Columns].precision ,\n" + 
 				"        [Scale] = [Columns].scale ,\n" + 

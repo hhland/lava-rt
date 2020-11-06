@@ -73,10 +73,11 @@ public abstract class DataContextSrcGener   {
     	srcIntf.delete();
     	srcIntf.createNewFile();
     	srcIntf.setWritable(true);
+    	
 		try(FileWriter fw=new FileWriter(srcIntf)){
 			fw.write(src);
 		}catch(IOException ioe) {
-			log.equals(srcIntf);
+			
 			ioe.printStackTrace();
 			throw ioe;
 		}
@@ -84,7 +85,7 @@ public abstract class DataContextSrcGener   {
 		
 	}
     
-     public  void saveBaseSrcTo(Class clsIntf,File srcBase,Class clsBase,String databaseName) throws SQLException, IOException {
+     public  void saveBaseSrcTo(File srcBase,Class clsIntf,Class clsBase,String databaseName) throws SQLException, IOException {
 		
     	 String src=toBaseSrc(clsBase,clsIntf, databaseName);
     	 srcBase.delete();
@@ -93,7 +94,7 @@ public abstract class DataContextSrcGener   {
 		try(FileWriter fw=new FileWriter(srcBase)){
 			fw.write(src);
 		}catch(IOException ioe) {
-			log.equals(srcBase);
+			
 			ioe.printStackTrace();
 			throw ioe;
 		}
@@ -116,7 +117,7 @@ public abstract class DataContextSrcGener   {
 		}
 		
 		src
-		.append("import "+CommandExecuteExecption.class.getPackage().getName()+".*; \n")
+		
 		.append("import "+DataContext.class.getPackage().getName()+".*; \n")
 		.append("import "+DataSourceContext.class.getPackage().getName()+".*; \n")
 		
@@ -125,7 +126,7 @@ public abstract class DataContextSrcGener   {
 		.append("import "+ SQLException.class.getPackage().getName()+".*; \n")
 		.append("import "+BigDecimal.class.getPackage().getName()+".*; \n\n\n")
 		.append("import "+Serializable.class.getPackage().getName()+".*; \n\n\n")
-		.append("import "+Date.class.getName()+"; \n\n\n")
+		
 		;
 		
 		
@@ -228,7 +229,7 @@ public abstract class DataContextSrcGener   {
 		
 		
 		src
-		//.append("import "+DataContext.class.getPackage().getName()+".*; \n")
+		.append("import "+DataContext.class.getPackage().getName()+".*; \n")
 		//.append("import "+CommandExecuteExecption.class.getPackage().getName()+".*; \n")
 		.append("import "+DataSourceContext.class.getPackage().getName()+".*; \n")
 		//.append("import "+Column.class.getPackage().getName()+".*; \n")
@@ -288,7 +289,7 @@ public abstract class DataContextSrcGener   {
 			srcEvent.onTableSrcAppend(src, tableSrc);
 			ColumnSrc columnSrc=new ColumnSrc(tableSrc.pkName, toPropName(tableSrc.pkName));
 			srcEvent.onColumnSrcAppend(src, columnSrc);
-			src.append("\t public final Table<"+tableSrc.entityName+"> "+tableSrc.tableName+"=createTable("+tableSrc.entityName+".class,"+CRITERIA+"."+tableSrc.entityName+","+CRITERIA+"."+columnSrc.className+".toString(),()->new "+tableSrc.entityName+"());\n");
+			src.append("\t public final "+TableTemplate.class.getSimpleName()+"<"+tableSrc.entityName+"> "+tableSrc.tableName+"=createTable("+tableSrc.entityName+".class,"+CRITERIA+"."+tableSrc.entityName+","+CRITERIA+"."+columnSrc.className+".toString(),()->new "+tableSrc.entityName+"());\n");
 		}
 		
 		src.append("\n\n");
@@ -301,7 +302,7 @@ public abstract class DataContextSrcGener   {
 					;
 			TableSrc tableSrc=new TableSrc(tn,null);
 			srcEvent.onViewSrcAppend(src, tableSrc);
-			src.append("\t public final View<"+tableSrc.entityName+"> "+tableSrc.tableName+"=createView("+tableSrc.entityName+".class,"+CRITERIA+"."+tableSrc.entityName+",()->new "+tableSrc.entityName+"());\n");
+			src.append("\t public final "+ViewTemplate.class.getSimpleName()+"<"+tableSrc.entityName+"> "+tableSrc.tableName+"=createView("+tableSrc.entityName+".class,"+CRITERIA+"."+tableSrc.entityName+",()->new "+tableSrc.entityName+"());\n");
 		}
 		
 		src.append("\n\n");
@@ -537,11 +538,15 @@ public abstract class DataContextSrcGener   {
 			.append("\t\t@"+Override.class.getSimpleName()+"\n")
 			.append("\t\tpublic Object thisPk() {return "+(this.pkName==null?"null":this.pkName)+";}")
 			.append("\n\n")
-			.append("\n\n")
-			.append("\t\t@"+Override.class.getSimpleName()+"\n")
-			.append("\t\tpublic String toString() {return  String.join(\"@\", "+this.entityName+".class.getName() , "+this.pkName+".toString()); }")
-			.append("\n\n")
-			.append("\t\t@"+Override.class.getSimpleName()+"\n")
+			.append("\n\n");
+			
+			if(this.pkName!=null) {
+			src.append("\t\t@"+Override.class.getSimpleName()+"\n")
+			.append("\t\tpublic String toString() {return  String.join(\"@\", "+this.entityName+".class.getName() , thisPk().toString()); }")
+			.append("\n\n");
+			}
+			
+			src.append("\t\t@"+Override.class.getSimpleName()+"\n")
 			.append("\t\tpublic Class<? extends "+Entity.class.getSimpleName()+"> thisClass() {return "+this.entityName+".class;}")
 		    ;
 			
@@ -711,7 +716,7 @@ public abstract class DataContextSrcGener   {
 
 			
 			
-			saveBaseSrcTo(clsIntf, srcImpl, clsImpl, dataBaseName);
+			saveBaseSrcTo(srcImpl,clsIntf,  clsImpl, dataBaseName);
 	}
 
 
@@ -724,6 +729,16 @@ public abstract class DataContextSrcGener   {
 	public static File getFile(String srcDir, Class cls) {
 		// TODO Auto-generated method stub
 		File ret=new File(srcDir,refSrcPath(cls));
+		return ret;
+	}
+	
+	
+	protected boolean isObjectName(String name) {
+		// TODO Auto-generated method stub
+		boolean ret=true;
+		if(name.contains("(")||name.contains(")")||name.contains("-")) {
+			ret=false;
+		}
 		return ret;
 	}
 	

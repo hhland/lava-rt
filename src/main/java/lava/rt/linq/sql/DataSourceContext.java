@@ -135,7 +135,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 
 
 	public <M extends Entity> ListWrapper<M> listEntities(Class<M> cls, PagingSelectCommand command,Object...param) throws CommandExecuteExecption {
-		List<M> rows=listEntities(cls, command.toSql(),param);
+		List<M> rows=listEntities(cls, command.toPaginSql(),param);
 		ListWrapper<M> ret=new ListWrapper(rows);
 		if(ret.self.size()==command.getLimit()) {
 			String countSql=command.getCountSql();
@@ -194,7 +194,18 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 						
 						Field field = view.entityFieldMap.get(columnName);
 						
-						field.set(m, resultSet.getObject(columnIndex));
+						Object cellValue=resultSet.getObject(columnIndex);
+						if (cellValue instanceof Clob) {
+							Clob clob=(Clob)cellValue;
+							String v=SqlCommon.read(clob);
+							field.set(m, v);
+							
+						}else if(cellValue instanceof Blob) {
+							
+						}else {
+						   field.set(m, cellValue);
+						}
+						
 						
 						
 					}
@@ -249,9 +260,17 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 							continue;
 						
 						Field field = view.entityFieldMap.get(columnName);
-						
-						field.set(m, resultSet.getObject(columnIndex));
-						
+						Object cellValue=resultSet.getObject(columnIndex);
+						if (cellValue instanceof Clob) {
+							Clob clob=(Clob)cellValue;
+							String v=SqlCommon.read(clob);
+							field.set(m, v);
+							
+						}else if(cellValue instanceof Blob) {
+							
+						}else {
+						   field.set(m, cellValue);
+						}
 						
 					}
 
@@ -735,6 +754,8 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
        ListWrapper<Connection> connections = readConnection.get();
 		
 		if(connections==null) {
+			 connections=new ListWrapper<>(new ArrayList<>());
+			 readConnection.set(connections);
 			 DataSource[] dss=getReadDataSources();
 			 try {
 				for(DataSource ds:dss) {
@@ -765,6 +786,8 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	       ListWrapper<Connection> connections = writeConnection.get();
 			
 			if(connections==null) {
+				 connections=new ListWrapper<>(new ArrayList<>());
+				 readConnection.set(connections);
 				 DataSource[] dss=getWriteDataSources();
 				 try {
 					 for(DataSource ds:dss) {

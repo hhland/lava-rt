@@ -135,8 +135,8 @@ public class SelectCommand implements Serializable{
 
 
 
-		@Override
-		protected String toSql() {
+		
+		protected String toPaginSql() {
 			// TODO Auto-generated method stub
 			String ret=sql;
 			

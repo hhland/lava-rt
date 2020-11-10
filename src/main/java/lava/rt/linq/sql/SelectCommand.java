@@ -1,6 +1,9 @@
 package lava.rt.linq.sql;
 
 import java.io.Serializable;
+import java.util.Objects;
+
+import lava.rt.common.LangCommon;
 
 public class SelectCommand implements Serializable{
 
@@ -44,16 +47,26 @@ public class SelectCommand implements Serializable{
 		.append(columns)
 		.append(" from ")
 		.append(from);
-		if(where!=null) {
+		if(!isBlank(where)) {
 		  ret.append(" where ").append(where);
 		}
-		if(orderby!=null) {
+		if(!isBlank(orderby)) {
 		 ret.append(" order by ").append(orderby);
 					
 		}
 		return ret.toString();
 	}
 	
+	private boolean isBlank(String value) {
+		// TODO Auto-generated method stub
+		return LangCommon.isAnyBlank(value);
+	}
+
+
+
+
+
+
 	protected String getSql() {
 		return this.sql;
 	}
@@ -64,7 +77,7 @@ public class SelectCommand implements Serializable{
 		.append(" count(*) ")
 		.append(" from ")
 		.append(from);
-		if(where!=null) {
+		if(!isBlank(where)) {
 		  ret.append(" where ").append(where);
 		}
 		

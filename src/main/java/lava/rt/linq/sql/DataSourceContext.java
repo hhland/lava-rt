@@ -56,7 +56,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	
 	
 	
-	
+	protected abstract  Criterias getCriterias();
 	
 
 	protected abstract  DataSource[] getReadDataSources() ;
@@ -134,7 +134,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	}
 
 
-	public <M extends Entity> ListWrapper<M> listEntities(Class<M> cls, PagingSelectCommand command,Object...param) throws CommandExecuteExecption {
+	public <M extends Entity> ListWrapper<M> pagingEntities(Class<M> cls, PagingSelectCommand command,Object...param) throws CommandExecuteExecption {
 		List<M> rows=listEntities(cls, command.toPaginSql(),param);
 		ListWrapper<M> ret=new ListWrapper(rows);
 		if(ret.self.size()==command.getLimit()) {
@@ -153,7 +153,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 
 	
 
-	public <M extends Entity> void listEntities(BiFunction<Integer,M,Integer> handler,Class<M> cls, SelectCommand command, Object... params) throws CommandExecuteExecption {
+	public <M extends Entity> void cursoringEntities(BiFunction<Integer,M,Integer> cursor,Class<M> cls, SelectCommand command, Object... params) throws CommandExecuteExecption {
 		
 		Connection connection = getReadConnection();
 		String sql=command.toSql();
@@ -162,7 +162,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 			for (int i = 0; i < params.length; i++) {
 				preparedStatement.setObject(i + 1, params[i]);
 			}
-            preparedStatement.setFetchSize(Integer.MIN_VALUE);
+            preparedStatement.setFetchSize(0);
 			try (ResultSet resultSet = preparedStatement.executeQuery();) {
 
 				ResultSetMetaData metaData = resultSet.getMetaData();
@@ -174,14 +174,14 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 
 				ViewTemplate<M> view = getView(cls);
 				
-				int hre=1,rowIndex=0;
+				int hre=0,rowIndex=0;
 				M m= view.newEntity();
 				while (resultSet.next()) {
 					rowIndex++;
-					if(hre>1) {
+					if(hre>0) {
 						hre--;
 						continue;
-					}else if(hre<=0) {
+					}else if(hre<0) {
 						break;
 					}
 					
@@ -210,7 +210,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 						
 					}
 
-					hre=handler.apply(rowIndex, m);
+					hre=cursor.apply(rowIndex, m);
 				}
 			}
 		}catch(Exception ex) {
@@ -541,7 +541,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 				
 				logExecptioin(seq);
 				logError("sql:"+sql+"\nparams:");
-				logError(params);
+				logError(params[0]);
 				throw CommandExecuteExecption.forSql(seq, sql, params);
 			}
 		} else if (connections.self.size() > 1) {

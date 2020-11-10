@@ -31,7 +31,7 @@ public interface SqlDataContext extends DataContext {
 
 	public String executeQueryJsonList(PagingSelectCommand command,Object... param) throws CommandExecuteExecption;
 	
-	public <M extends Entity> ListWrapper<M> listEntities(Class<M> cls, PagingSelectCommand command ,Object... param) throws CommandExecuteExecption ;
+	public <M extends Entity> ListWrapper<M> pagingEntities(Class<M> cls, PagingSelectCommand command ,Object... param) throws CommandExecuteExecption ;
 	
 	public <M extends Entity> List<M> listEntities(Class<M> cls, SelectCommand command ,Object... param) throws CommandExecuteExecption ;
 	
@@ -81,7 +81,7 @@ public interface SqlDataContext extends DataContext {
 				ColumnMeta columnMeta = field.getAnnotation(ColumnMeta.class);
 				ret++;
 				if(field.getType().equals(String.class)) {
-					String val=LangCommon.createRandomEn(RANDOM,columnMeta.dataLength());
+					String val=LangCommon.createRandomEn(RANDOM,columnMeta.dataLength()-5);
 					field.set(entity, val);
 				}else if(field.getType().equals(Integer.class)) {
 					field.set(entity, RANDOM.nextInt());
@@ -103,7 +103,7 @@ public interface SqlDataContext extends DataContext {
 				
 
 			}
-		} catch (IllegalArgumentException |IllegalAccessException e) {}
+		} catch (Exception e) {}
         return ret;		
 	}
 

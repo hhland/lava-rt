@@ -57,63 +57,53 @@ public abstract  class  ViewTemplate<M extends Entity> {
 	
 	
 	
-   public void select(BiFunction<Integer,M,Integer> handler,String where,String orderBy,Object...params) throws CommandExecuteExecption{
+   public void cursoring(BiFunction<Integer,M,Integer> cursor,String where,String orderBy,Object...params) throws CommandExecuteExecption{
     	SelectCommand cmd=new SelectCommand("*", tableName, where, orderBy);
-    	
-		dataContext.listEntities(handler,entryClass,cmd,params);
+    
+		dataContext.cursoringEntities(cursor,entryClass,cmd,params);
 	}
     
     
-     public List<M> select(String where,String orderBy,Object...params) throws CommandExecuteExecption{
+    public List<M> selectList(String where,String orderBy,Object...params) throws CommandExecuteExecption{
     	 SelectCommand cmd=new SelectCommand( "*", tableName, where, orderBy);
-    	 List<M> ret=dataContext.listEntities(entryClass,cmd,params);
+    	 List<M> ret=selectList(cmd,params);
+    	
     	 return ret;
 	}
     
+    public List<M> selectList(SelectCommand cmd,Object...params) throws CommandExecuteExecption{
+   	 
+   	 List<M> ret=dataContext.listEntities(entryClass,cmd,params);
+   	
+   	 return ret;
+	}
+     
+     
+     public List<M> selectList(String where,String orderBy,int start,int limit,Object...params) throws CommandExecuteExecption{
+    	 SelectCommand cmd=new SelectCommand( "*", tableName, where, orderBy);
+    	 PagingSelectCommand pcmd=cmd.createPagingSelectCommand(dataContext.getCriterias(),start,limit);
+    	 List<M> ret=selectList(pcmd,params);
+    	 return ret;
+	}
+     
+     public List<M> selectList(PagingSelectCommand pcmd,Object...params) throws CommandExecuteExecption{
+    	 ListWrapper<M> ret=dataContext.pagingEntities(entryClass,pcmd,params);
+    	 return ret.self;
+	}
     
-    public ListWrapper<M> select(Criterias criterias,int start,int limit,String where,String orderBy,Object...params) throws CommandExecuteExecption{
+    
+    public ListWrapper<M> selectPaging(String where,String orderBy,int start,int limit,Object...params) throws CommandExecuteExecption{
     	SelectCommand cmd=new SelectCommand( "*", tableName, where, orderBy);
-    	PagingSelectCommand pcmd=cmd.createPagingSelectCommand(criterias,start,limit);
-		return dataContext.listEntities(entryClass,pcmd,params);
+    	PagingSelectCommand pcmd=cmd.createPagingSelectCommand(dataContext.getCriterias(),start,limit);
+    	ListWrapper<M> ret= dataContext.pagingEntities(entryClass,pcmd,params);
+    	return ret;
 	}
 	
-	
-    public int createTable(String newTableName,String where,Object... param) throws CommandExecuteExecption{
-		StringBuffer sql=new StringBuffer(" CREATE TABLE ");
-		sql
-		.append(newTableName)
-		.append(" SELECT * FROM ")
-		.append(this.tableName)
-		;
-		if(where!=null) {
-			sql.append(" where ").append(where);
-		}
-		int ret=dataContext.executeUpdate(sql.toString(), param);
-		return ret;
+    public ListWrapper<M> selectPaging(PagingSelectCommand pcmd,Object...params) throws CommandExecuteExecption{
+    	ListWrapper<M> ret=dataContext.pagingEntities(entryClass,pcmd,params);
+    	return ret;
 	}
-
-
-    public int insertInto(String newTableName,String where,Object...param) throws CommandExecuteExecption{
-		//Table<M> ret=null;
-		StringBuffer sql=new StringBuffer(" insert into ");
-		sql.append(newTableName)
-		
-		.append(" select * from ")
-		.append(tableName);
-		if(where!=null) {
-			sql.append(" where ").append(where);
-		}
-		int ret= dataContext.executeUpdate(sql.toString(), param);
-		//ret=new Table<>(this.dataContext, this.entryClass, newTableName, pkName);
-		return ret;
-	}
-
 	
-
-
-
-    
-
 
 	public abstract M newEntity() throws Exception;
 }

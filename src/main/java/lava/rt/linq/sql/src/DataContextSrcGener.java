@@ -574,6 +574,7 @@ public abstract class DataContextSrcGener   {
 		    	int colType=resultSetMetaData.getColumnType(i);
 		    	Class colClass=ColumnStruct.toClass(colType);
 		    	
+		    	
 		        String colClsName=colClass.getSimpleName();
 		        String propName0=DataContextSrcGener.toClassName(colName),
 				propName1=propName0.substring(0,1).toLowerCase()+propName0.substring(1);

@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Reader;
+import java.io.Serializable;
 import java.io.Writer;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -70,7 +71,7 @@ public final class SqlCommon {
 		return re;
 	}
 
-	public static int executeUpdate(Connection connection, String sql, Object... params) throws SQLException {
+	public static int executeUpdate(Connection connection, String sql, Serializable... params) throws SQLException {
 
 		int re = 0;
 		try (PreparedStatement preparedStatement = connection.prepareStatement(sql);) {
@@ -86,7 +87,7 @@ public final class SqlCommon {
 	}
 
 	
-	public static void executeQueryForeach(Connection connection,BiFunction<Integer,Object[],Integer> rowHandler, String sql, Object... params)
+	public static void executeQueryForeach(Connection connection,BiFunction<Integer,Object[],Integer> rowHandler, String sql, Serializable... params)
 			throws SQLException {
 		int cc = 0;
 		
@@ -122,7 +123,7 @@ public final class SqlCommon {
 	}
 	
 	
-	public static Object[][] executeQueryArray(Connection connection, String sql, Object... params)
+	public static Object[][] executeQueryArray(Connection connection, String sql, Serializable... params)
 			throws SQLException {
 		int cc = 0;
 		List<Object[]> list = new ArrayList<Object[]>();
@@ -146,7 +147,7 @@ public final class SqlCommon {
 		return list.toArray(new Object[list.size()][cc]);
 	}
 
-	public static List<Map<String, Object>> executeQueryListMap(Connection connection, String sql, Object... params)
+	public static List<Map<String, Object>> executeQueryListMap(Connection connection, String sql, Serializable... params)
 			throws SQLException {
 
 		List<Map<String, Object>> list = new ArrayList<>();
@@ -171,7 +172,7 @@ public final class SqlCommon {
 		return list;
 	}
 
-	public static String executeQueryListJson(Connection connection, String sql, Object... params) throws SQLException {
+	public static String executeQueryListJson(Connection connection, String sql, Serializable... params) throws SQLException {
 		StringBuffer ret = new StringBuffer("[");
 
 		try (PreparedStatement preparedStatement = connection.prepareStatement(sql);) {

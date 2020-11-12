@@ -1,6 +1,7 @@
 package lava.rt.linq;
 
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
@@ -14,17 +15,17 @@ public interface  DataContext  {
 	
 	
 	
-	public <M extends Entity> List<M> listEntities(Class<M> cls, String cmd, Object... params) throws CommandExecuteExecption ;
+	public <M extends Entity> List<M> listEntities(Class<M> cls, String cmd, Serializable... params) throws CommandExecuteExecption ;
 
-	public Object[][] executeQueryArray(String cmd, Object... params) throws CommandExecuteExecption ;
+	public Object[][] executeQueryArray(String cmd, Serializable... params) throws CommandExecuteExecption ;
 
 	
 	
-	public String executeQueryJsonList(String cmd, Object... params) throws CommandExecuteExecption ;
+	public String executeQueryJsonList(String cmd, Serializable... params) throws CommandExecuteExecption ;
 	
 	
 	
-	public <E extends Entity> E getEntity(Class<E> cls,Object pk) throws CommandExecuteExecption;
+	public <E extends Entity> E getEntity(Class<E> cls,Serializable pk) throws CommandExecuteExecption;
 
 	public <E extends Entity> int addEntities(Collection<E> entities) throws CommandExecuteExecption ;
 

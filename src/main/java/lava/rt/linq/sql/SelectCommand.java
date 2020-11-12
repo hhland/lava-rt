@@ -16,7 +16,7 @@ public class SelectCommand implements Serializable{
 	private final String columns, from,where, orderby;
 	
 	
-	
+	private Serializable[] params=new Serializable[0];
 	
 	
 	protected  String sql,countSql;
@@ -31,17 +31,6 @@ public class SelectCommand implements Serializable{
 		this.where=where;
 		this.orderby = orderby;
 		
-		this.sql=toSql();
-		this.countSql=toCountSql();
-		
-	}
-	
-	
-	
-	
-
-	
-	protected String toSql() {
 		StringBuffer ret=new StringBuffer();
 		ret.append("select ")
 		.append(columns)
@@ -54,8 +43,44 @@ public class SelectCommand implements Serializable{
 		 ret.append(" order by ").append(orderby);
 					
 		}
-		return ret.toString();
+		
+		this.sql=ret.toString();
+		
+		
+		ret=new StringBuffer();
+		ret.append("select ")
+		.append(" count(*) ")
+		.append(" from ")
+		.append(from);
+		if(!isBlank(where)) {
+		  ret.append(" where ").append(where);
+		}
+		
+		this.countSql=ret.toString();
+		
 	}
+	
+	
+	
+	
+
+	
+	public void setParams(Serializable... params) {
+		this.params = params;
+	}
+
+
+
+
+
+
+	public Serializable[] getParams() {
+		return params;
+	}
+
+
+
+
 	
 	private boolean isBlank(String value) {
 		// TODO Auto-generated method stub
@@ -71,19 +96,7 @@ public class SelectCommand implements Serializable{
 		return this.sql;
 	}
 	
-	protected String toCountSql() {
-		StringBuffer ret=new StringBuffer();
-		ret.append("select ")
-		.append(" count(*) ")
-		.append(" from ")
-		.append(from);
-		if(!isBlank(where)) {
-		  ret.append(" where ").append(where);
-		}
-		
-		return ret.toString();
-	}
-
+	
 	
 
 
@@ -148,23 +161,12 @@ public class SelectCommand implements Serializable{
 
 
 
-		
-		protected String toPaginSql() {
-			// TODO Auto-generated method stub
-			String ret=sql;
-			
-			ret=criterias.toPaging(sql, start, limit);
-			return ret.toString();
-			
-		}
-
-
-
-
 		@Override
 		protected String getSql() {
 			// TODO Auto-generated method stub
-			return super.getSql();
+            String ret=sql;
+			ret=criterias.toPaging(sql, start, limit);
+			return ret.toString();
 		}
 		
 	}

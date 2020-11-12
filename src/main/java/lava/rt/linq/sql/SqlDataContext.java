@@ -29,14 +29,18 @@ import lava.rt.wrapper.ListWrapper;
 
 public interface SqlDataContext extends DataContext {
 
-	public String executeQueryJsonList(PagingSelectCommand command,Object... param) throws CommandExecuteExecption;
-	
-	public <M extends Entity> ListWrapper<M> pagingEntities(Class<M> cls, PagingSelectCommand command ,Object... param) throws CommandExecuteExecption ;
-	
-	public <M extends Entity> List<M> listEntities(Class<M> cls, SelectCommand command ,Object... param) throws CommandExecuteExecption ;
 	
 	
-	public Object[][] executeQueryArray(SelectCommand command,Object... param) throws CommandExecuteExecption ;
+	public <M extends Entity> ListWrapper<M> listEntities(Class<M> cls, PagingSelectCommand command ) throws CommandExecuteExecption ;
+	
+	public <M extends Entity> List<M> listEntities(Class<M> cls, SelectCommand command) throws CommandExecuteExecption ;
+	
+	
+	public String executeQueryJsonList(PagingSelectCommand command) throws CommandExecuteExecption;
+	public String executeQueryJsonList(SelectCommand command) throws CommandExecuteExecption;
+	
+	public Object[][] executeQueryArray(PagingSelectCommand command) throws CommandExecuteExecption ;
+	public Object[][] executeQueryArray(SelectCommand command) throws CommandExecuteExecption ;
 	
 	static final Random RANDOM = new Random();
 

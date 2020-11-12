@@ -7,6 +7,7 @@ package lava.rt.linq.sql;
 
 
 import java.io.Closeable;
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.sql.*;
 
@@ -36,6 +37,7 @@ import lava.rt.linq.CommandExecuteExecption.CmdType;
 
 import lava.rt.wrapper.ListWrapper;
 import lava.rt.wrapper.LoggerWrapper;
+
 
 
 
@@ -116,7 +118,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	protected <E extends Entity> void putCache(E entits) {}
 
 	
-	public <E extends Entity> E getEntity(Class<E> cls, Object pk) throws CommandExecuteExecption {
+	public <E extends Entity> E getEntity(Class<E> cls, Serializable pk) throws CommandExecuteExecption {
 		// TODO Auto-generated method stub
 		CacheItem<E> cache=getCache(cls, pk);
 		E ret=null;
@@ -134,8 +136,9 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	}
 
 
-	public <M extends Entity> ListWrapper<M> pagingEntities(Class<M> cls, PagingSelectCommand command,Object...param) throws CommandExecuteExecption {
-		List<M> rows=listEntities(cls, command.toPaginSql(),param);
+	public <M extends Entity> ListWrapper<M> listEntities(Class<M> cls, PagingSelectCommand command) throws CommandExecuteExecption {
+		Serializable param=command.getParams();
+		List<M> rows=listEntities(cls, command.getSql(),param);
 		ListWrapper<M> ret=new ListWrapper(rows);
 		if(ret.self.size()==command.getLimit()) {
 			String countSql=command.getCountSql();
@@ -147,17 +150,18 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 
 
 	
-	public <M extends Entity> List<M> listEntities(Class<M> cls, SelectCommand command,Object...param) throws CommandExecuteExecption {
-		return listEntities(cls, command.toSql(),param);
+	public <M extends Entity> List<M> listEntities(Class<M> cls, SelectCommand command) throws CommandExecuteExecption {
+		return listEntities(cls, command.getSql(),command.getParams());
 	}
 
 	
 
-	public <M extends Entity> void cursoringEntities(BiFunction<Integer,M,Integer> cursor,Class<M> cls, SelectCommand command, Object... params) throws CommandExecuteExecption {
+	public <M extends Entity> void cursoringEntities(BiFunction<Integer,M,Integer> cursor,Class<M> cls, SelectCommand command) throws CommandExecuteExecption {
 		
 		Connection connection = getReadConnection();
-		String sql=command.toSql();
+		String sql=command.getSql();
 		
+		Serializable[] params=command.getParams();
 		try (PreparedStatement preparedStatement = connection.prepareStatement(sql);) {
 			for (int i = 0; i < params.length; i++) {
 				preparedStatement.setObject(i + 1, params[i]);
@@ -226,7 +230,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	}
 
 
-	public <M extends Entity> List<M> listEntities(Class<M> cls, String sql, Object... params) throws CommandExecuteExecption {
+	public <M extends Entity> List<M> listEntities(Class<M> cls, String sql, Serializable... params) throws CommandExecuteExecption {
 		
 		Connection connection = getReadConnection();
 		
@@ -290,7 +294,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	}
 
 	@Override
-	public Object[][] executeQueryArray(String cmd, Object... params) throws CommandExecuteExecption {
+	public Object[][] executeQueryArray(String cmd, Serializable... params) throws CommandExecuteExecption {
 		// TODO Auto-generated method stub
         Connection connection= getReadConnection();
 		
@@ -309,12 +313,33 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 		return re;
 	}
 	
-	public Object[][] executeQueryArray(SelectCommand command, Object... params) throws CommandExecuteExecption {
+	public Object[][] executeQueryArray(SelectCommand command) throws CommandExecuteExecption {
 		
 		Connection connection= getReadConnection();
 		
 		Object[][] re =null;
 		String sql=command.getSql();
+		Serializable[] params=command.getParams();
+		try {
+		re=SqlCommon.executeQueryArray(connection, sql, params);
+		}
+		catch(SQLException seq) {
+			
+			logExecptioin(seq);
+			logError("sql:"+sql+"\nparams:");
+			logError(params);
+			throw CommandExecuteExecption.forSql(seq, sql, params);
+		}
+		return re;
+	}
+	
+public Object[][] executeQueryArray(PagingSelectCommand command) throws CommandExecuteExecption {
+		
+		Connection connection= getReadConnection();
+		
+		Object[][] re =null;
+		String sql=command.getSql();
+		Serializable[] params=command.getParams();
 		try {
 		re=SqlCommon.executeQueryArray(connection, sql, params);
 		}
@@ -344,7 +369,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	}
 
 	
-	public String executeQueryJsonList(String sql, Object... params) throws CommandExecuteExecption {
+	public String executeQueryJsonList(String sql, Serializable... params) throws CommandExecuteExecption {
 		
 		StringBuffer ret = new StringBuffer("[");
 		int size=0;
@@ -428,13 +453,23 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	
 
 
+	@Override
+	public String executeQueryJsonList(SelectCommand command)
+			throws CommandExecuteExecption {
+			
+       Object[] param=command.getParams();
+	   StringBuffer ret=new StringBuffer(executeQueryJsonList(command.getSql(),param));
+	
+		return ret.toString();
+	}
 
 
 	@Override
-	public String executeQueryJsonList(PagingSelectCommand command,Object... param)
+	public String executeQueryJsonList(PagingSelectCommand command)
 			throws CommandExecuteExecption {
 			
-       StringBuffer ret=new StringBuffer(executeQueryJsonList(command.getSql(),param));
+       Object[] param=command.getParams();
+	StringBuffer ret=new StringBuffer(executeQueryJsonList(command.getSql(),param));
 		
 		long size=Integer.parseInt(
 				  ret.substring(ret.lastIndexOf("size:")+5)
@@ -459,7 +494,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 
 
 
-	public int executeUpdate(String sql, Object... param) throws CommandExecuteExecption {
+	public int executeUpdate(String sql, Serializable... param) throws CommandExecuteExecption {
 		int re = 0;
 		
 		ListWrapper<Connection> connections = getWriteConnections();
@@ -500,7 +535,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 		return re;
 	}
 
-	public int executeInsertReturnPk(String sql, Object... param) throws CommandExecuteExecption {
+	public int executeInsertReturnPk(String sql, Serializable... param) throws CommandExecuteExecption {
 		int pk = 0;
 		
 		Connection connection = getWriteConnection();
@@ -530,7 +565,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 
 	
 	
-	public int executeBatch(String sql, Object[]... params) throws CommandExecuteExecption {
+	public int executeBatch(String sql, Serializable[]... params) throws CommandExecuteExecption {
 		int re = 0;
 		
 		ListWrapper<Connection> connections = getWriteConnections();
@@ -584,6 +619,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	public int addEntity(Entity entity) throws CommandExecuteExecption {
 		int re = 0;
 		Class<? extends Entity> cls = entity.getClass();
+		
 		TableTemplate table = this.getTable(cls);
 		
 		re += table.insert(entity);	
@@ -623,6 +659,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	}
 
 
+	
 	public <E extends Entity> int updateEntities(Collection<E> entites) throws CommandExecuteExecption {
 		int re = 0;
 		Class cls = entites.stream().findFirst().getClass();

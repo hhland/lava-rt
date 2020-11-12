@@ -1,5 +1,6 @@
 package lava.rt.linq.sql;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 
 
@@ -57,50 +58,59 @@ public abstract  class  ViewTemplate<M extends Entity> {
 	
 	
 	
-   public void cursoring(BiFunction<Integer,M,Integer> cursor,String where,String orderBy,Object...params) throws CommandExecuteExecption{
+   public void selectCursoring(BiFunction<Integer,M,Integer> cursor,String where,String orderBy,Serializable...params) throws CommandExecuteExecption{
     	SelectCommand cmd=new SelectCommand("*", tableName, where, orderBy);
-    
-		dataContext.cursoringEntities(cursor,entryClass,cmd,params);
+        cmd.setParams(params);
+        selectCursoring(cursor,cmd);
+	}
+   
+   
+   public void selectCursoring(BiFunction<Integer,M,Integer> cursor,SelectCommand cmd) throws CommandExecuteExecption{
+   	
+		dataContext.cursoringEntities(cursor,entryClass,cmd);
 	}
     
     
-    public List<M> selectList(String where,String orderBy,Object...params) throws CommandExecuteExecption{
+    public List<M> selectList(String where,String orderBy,Serializable...params) throws CommandExecuteExecption{
     	 SelectCommand cmd=new SelectCommand( "*", tableName, where, orderBy);
-    	 List<M> ret=selectList(cmd,params);
+    	 cmd.setParams(params);
+    	 List<M> ret=selectList(cmd);
     	
     	 return ret;
 	}
     
-    public List<M> selectList(SelectCommand cmd,Object...params) throws CommandExecuteExecption{
+    public List<M> selectList(SelectCommand cmd) throws CommandExecuteExecption{
    	 
-   	 List<M> ret=dataContext.listEntities(entryClass,cmd,params);
+   	 List<M> ret=dataContext.listEntities(entryClass,cmd);
    	
    	 return ret;
 	}
      
      
-     public List<M> selectList(String where,String orderBy,int start,int limit,Object...params) throws CommandExecuteExecption{
+     public List<M> selectList(String where,String orderBy,int start,int limit,Serializable...params) throws CommandExecuteExecption{
     	 SelectCommand cmd=new SelectCommand( "*", tableName, where, orderBy);
     	 PagingSelectCommand pcmd=cmd.createPagingSelectCommand(dataContext.getCriterias(),start,limit);
-    	 List<M> ret=selectList(pcmd,params);
+    	 pcmd.setParams(params);
+    	 List<M> ret=selectList(pcmd);
     	 return ret;
 	}
      
-     public List<M> selectList(PagingSelectCommand pcmd,Object...params) throws CommandExecuteExecption{
-    	 ListWrapper<M> ret=dataContext.pagingEntities(entryClass,pcmd,params);
+     public List<M> selectList(PagingSelectCommand pcmd) throws CommandExecuteExecption{
+    	 ListWrapper<M> ret=dataContext.listEntities(entryClass,pcmd);
     	 return ret.self;
 	}
     
     
-    public ListWrapper<M> selectPaging(String where,String orderBy,int start,int limit,Object...params) throws CommandExecuteExecption{
+    public ListWrapper<M> selectPaging(String where,String orderBy,int start,int limit,Serializable...params) throws CommandExecuteExecption{
     	SelectCommand cmd=new SelectCommand( "*", tableName, where, orderBy);
     	PagingSelectCommand pcmd=cmd.createPagingSelectCommand(dataContext.getCriterias(),start,limit);
-    	ListWrapper<M> ret= dataContext.pagingEntities(entryClass,pcmd,params);
+    	pcmd.setParams(params);
+    	ListWrapper<M> ret= dataContext.listEntities(entryClass,pcmd);
     	return ret;
 	}
 	
-    public ListWrapper<M> selectPaging(PagingSelectCommand pcmd,Object...params) throws CommandExecuteExecption{
-    	ListWrapper<M> ret=dataContext.pagingEntities(entryClass,pcmd,params);
+    public ListWrapper<M> selectPaging(PagingSelectCommand pcmd) throws CommandExecuteExecption{
+    	ListWrapper<M> ret=dataContext.listEntities(entryClass,pcmd);
     	return ret;
 	}
 	

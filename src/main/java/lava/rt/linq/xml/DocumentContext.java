@@ -6,7 +6,7 @@ import lava.rt.linq.DataContext;
 import lava.rt.linq.Entity;
 
 import java.io.IOException;
-import java.io.Serializable;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -39,7 +39,7 @@ public abstract class DocumentContext implements XmlDataContext{
 	
 	
 	@Override
-	public <M extends Entity> List<M> listEntities(Class<M> cls, String cmd, Serializable... params)
+	public <M extends Entity> List<M> listEntities(Class<M> cls, String cmd, Object... params)
 			throws CommandExecuteExecption {
 		// TODO Auto-generated method stub
 		List<M> ret=new ArrayList<>();
@@ -61,19 +61,19 @@ public abstract class DocumentContext implements XmlDataContext{
 	}
 
 	@Override
-	public Object[][] executeQueryArray(String cmd, Serializable... params) throws CommandExecuteExecption {
+	public Object[][] executeQueryArray(String cmd, Object... params) throws CommandExecuteExecption {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public String executeQueryJsonList(String cmd, Serializable... params) throws CommandExecuteExecption {
+	public String executeQueryJsonList(String cmd, Object... params) throws CommandExecuteExecption {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public <E extends Entity> E getEntity(Class<E> cls, Serializable pk) throws CommandExecuteExecption {
+	public <E extends Entity> E getEntity(Class<E> cls, Object pk) throws CommandExecuteExecption {
 		// TODO Auto-generated method stub
 		return null;
 	}

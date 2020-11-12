@@ -1,6 +1,6 @@
 package lava.rt.linq.sql;
 
-import java.io.Serializable;
+
 import java.lang.reflect.Field;
 
 import java.text.MessageFormat;
@@ -8,10 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
-import java.util.stream.Stream;
 
 import lava.rt.common.ReflectCommon;
 import lava.rt.common.LangCommon;
@@ -114,7 +111,7 @@ public abstract class TableTemplate<M extends Entity> extends ViewTemplate<M> {
 			sqlLoad = MessageFormat.format("select * from {0} where {1}= ? ", this.tableName, this.pkName);
 	}
 
-	public M load(Serializable pk) throws CommandExecuteExecption {
+	public M load(Object pk) throws CommandExecuteExecption {
 
 		String sql = sqlLoad;
 		
@@ -302,7 +299,7 @@ public abstract class TableTemplate<M extends Entity> extends ViewTemplate<M> {
 	
 	
 	
-	 public int delete(String where,Serializable...params) throws CommandExecuteExecption{
+	 public int delete(String where,Object...params) throws CommandExecuteExecption{
 		 StringBuffer sql = new StringBuffer("delete from ");
 		 sql
 		 .append(tableName);
@@ -314,7 +311,7 @@ public abstract class TableTemplate<M extends Entity> extends ViewTemplate<M> {
 	}
 	 
 	
-	 public int update(String set,String where,Serializable...params) throws CommandExecuteExecption{
+	 public int update(String set,String where,Object...params) throws CommandExecuteExecption{
 		 
 		 StringBuffer sql = new StringBuffer("update ");
 		 sql
@@ -339,13 +336,13 @@ public abstract class TableTemplate<M extends Entity> extends ViewTemplate<M> {
 
 	
 	
-    public  int remove(Serializable pk) throws CommandExecuteExecption {
+    public  int remove(Object pk) throws CommandExecuteExecption {
 		int re = 0;
 		re = dataContext.executeUpdate(sqlDelete, pk);
 		return re;
 	}
 	
-    public <P extends Serializable> int removeBatch(Collection<P> pks) throws CommandExecuteExecption {
+    public <P> int removeBatch(Collection<P> pks) throws CommandExecuteExecption {
 		int re = 0;
 		if (pks.size() == 0)
 			return re;

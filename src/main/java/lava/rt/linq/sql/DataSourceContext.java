@@ -7,7 +7,7 @@ package lava.rt.linq.sql;
 
 
 import java.io.Closeable;
-import java.io.Serializable;
+
 import java.lang.reflect.Field;
 import java.sql.*;
 
@@ -118,7 +118,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	protected <E extends Entity> void putCache(E entits) {}
 
 	
-	public <E extends Entity> E getEntity(Class<E> cls, Serializable pk) throws CommandExecuteExecption {
+	public <E extends Entity> E getEntity(Class<E> cls, Object pk) throws CommandExecuteExecption {
 		// TODO Auto-generated method stub
 		CacheItem<E> cache=getCache(cls, pk);
 		E ret=null;
@@ -137,7 +137,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 
 
 	public <M extends Entity> ListWrapper<M> listEntities(Class<M> cls, PagingSelectCommand command) throws CommandExecuteExecption {
-		Serializable param=command.getParams();
+		Object param=command.getParams();
 		List<M> rows=listEntities(cls, command.getSql(),param);
 		ListWrapper<M> ret=new ListWrapper(rows);
 		if(ret.self.size()==command.getLimit()) {
@@ -161,7 +161,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 		Connection connection = getReadConnection();
 		String sql=command.getSql();
 		
-		Serializable[] params=command.getParams();
+		Object[] params=command.getParams();
 		try (PreparedStatement preparedStatement = connection.prepareStatement(sql);) {
 			for (int i = 0; i < params.length; i++) {
 				preparedStatement.setObject(i + 1, params[i]);
@@ -230,7 +230,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	}
 
 
-	public <M extends Entity> List<M> listEntities(Class<M> cls, String sql, Serializable... params) throws CommandExecuteExecption {
+	public <M extends Entity> List<M> listEntities(Class<M> cls, String sql, Object... params) throws CommandExecuteExecption {
 		
 		Connection connection = getReadConnection();
 		
@@ -294,7 +294,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 	}
 
 	@Override
-	public Object[][] executeQueryArray(String cmd, Serializable... params) throws CommandExecuteExecption {
+	public Object[][] executeQueryArray(String cmd, Object... params) throws CommandExecuteExecption {
 		// TODO Auto-generated method stub
         Connection connection= getReadConnection();
 		
@@ -319,7 +319,7 @@ public abstract class DataSourceContext  implements SqlDataContext,Closeable {
 		
 		Object[][] re =null;
 		String sql=command.getSql();
-		Serializable[] params=command.getParams();
+		Object[] params=command.getParams();
 		try {
 		re=SqlCommon.executeQueryArray(connection, sql, params);
 		}
@@ -339,7 +339,7 @@ public Object[][] executeQueryArray(PagingSelectCommand command) throws CommandE
 		
 		Object[][] re =null;
 		String sql=command.getSql();
-		Serializable[] params=command.getParams();
+		Object[] params=command.getParams();
 		try {
 		re=SqlCommon.executeQueryArray(connection, sql, params);
 		}
@@ -369,7 +369,7 @@ public Object[][] executeQueryArray(PagingSelectCommand command) throws CommandE
 	}
 
 	
-	public String executeQueryJsonList(String sql, Serializable... params) throws CommandExecuteExecption {
+	public String executeQueryJsonList(String sql, Object... params) throws CommandExecuteExecption {
 		
 		StringBuffer ret = new StringBuffer("[");
 		int size=0;
@@ -494,7 +494,7 @@ public Object[][] executeQueryArray(PagingSelectCommand command) throws CommandE
 
 
 
-	public int executeUpdate(String sql, Serializable... param) throws CommandExecuteExecption {
+	public int executeUpdate(String sql, Object... param) throws CommandExecuteExecption {
 		int re = 0;
 		
 		ListWrapper<Connection> connections = getWriteConnections();
@@ -535,7 +535,7 @@ public Object[][] executeQueryArray(PagingSelectCommand command) throws CommandE
 		return re;
 	}
 
-	public int executeInsertReturnPk(String sql, Serializable... param) throws CommandExecuteExecption {
+	public int executeInsertReturnPk(String sql, Object... param) throws CommandExecuteExecption {
 		int pk = 0;
 		
 		Connection connection = getWriteConnection();
@@ -565,7 +565,7 @@ public Object[][] executeQueryArray(PagingSelectCommand command) throws CommandE
 
 	
 	
-	public int executeBatch(String sql, Serializable[]... params) throws CommandExecuteExecption {
+	public int executeBatch(String sql, Object[]... params) throws CommandExecuteExecption {
 		int re = 0;
 		
 		ListWrapper<Connection> connections = getWriteConnections();

@@ -1,7 +1,8 @@
 package lava.rt.linq.sql;
 
+
 import java.io.Serializable;
-import java.util.Objects;
+
 
 import lava.rt.common.LangCommon;
 
@@ -16,7 +17,7 @@ public class SelectCommand implements Serializable{
 	private final String columns, from,where, orderby;
 	
 	
-	private Serializable[] params=new Serializable[0];
+	private Object[] params=new Object[0];
 	
 	
 	protected  String sql,countSql;
@@ -65,7 +66,7 @@ public class SelectCommand implements Serializable{
 	
 
 	
-	public void setParams(Serializable... params) {
+	public void setParams(Object... params) {
 		this.params = params;
 	}
 
@@ -74,7 +75,7 @@ public class SelectCommand implements Serializable{
 
 
 
-	public Serializable[] getParams() {
+	public Object[] getParams() {
 		return params;
 	}
 

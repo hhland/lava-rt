@@ -1,6 +1,6 @@
 package lava.rt.linq.sql;
 
-import java.io.Serializable;
+
 import java.lang.reflect.Field;
 
 
@@ -58,7 +58,7 @@ public abstract  class  ViewTemplate<M extends Entity> {
 	
 	
 	
-   public void selectCursoring(BiFunction<Integer,M,Integer> cursor,String where,String orderBy,Serializable...params) throws CommandExecuteExecption{
+   public void selectCursoring(BiFunction<Integer,M,Integer> cursor,String where,String orderBy,Object...params) throws CommandExecuteExecption{
     	SelectCommand cmd=new SelectCommand("*", tableName, where, orderBy);
         cmd.setParams(params);
         selectCursoring(cursor,cmd);
@@ -71,7 +71,7 @@ public abstract  class  ViewTemplate<M extends Entity> {
 	}
     
     
-    public List<M> selectList(String where,String orderBy,Serializable...params) throws CommandExecuteExecption{
+    public List<M> selectList(String where,String orderBy,Object...params) throws CommandExecuteExecption{
     	 SelectCommand cmd=new SelectCommand( "*", tableName, where, orderBy);
     	 cmd.setParams(params);
     	 List<M> ret=selectList(cmd);
@@ -87,7 +87,7 @@ public abstract  class  ViewTemplate<M extends Entity> {
 	}
      
      
-     public List<M> selectList(String where,String orderBy,int start,int limit,Serializable...params) throws CommandExecuteExecption{
+     public List<M> selectList(String where,String orderBy,int start,int limit,Object...params) throws CommandExecuteExecption{
     	 SelectCommand cmd=new SelectCommand( "*", tableName, where, orderBy);
     	 PagingSelectCommand pcmd=cmd.createPagingSelectCommand(dataContext.getCriterias(),start,limit);
     	 pcmd.setParams(params);
@@ -101,7 +101,7 @@ public abstract  class  ViewTemplate<M extends Entity> {
 	}
     
     
-    public ListWrapper<M> selectPaging(String where,String orderBy,int start,int limit,Serializable...params) throws CommandExecuteExecption{
+    public ListWrapper<M> selectPaging(String where,String orderBy,int start,int limit,Object...params) throws CommandExecuteExecption{
     	SelectCommand cmd=new SelectCommand( "*", tableName, where, orderBy);
     	PagingSelectCommand pcmd=cmd.createPagingSelectCommand(dataContext.getCriterias(),start,limit);
     	pcmd.setParams(params);

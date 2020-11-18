@@ -1,4 +1,4 @@
-package lava.rt.rpc.oio;
+package lava.rt.rpc.bio;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

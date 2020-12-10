@@ -5,8 +5,11 @@ import java.rmi.RemoteException;
 
 import lava.rt.rpc.RpcServer;
 import lava.rt.rpc.aio.AioRpcServer;
+import lava.rt.rpc.bio.SocketRpcServer;
+import lava.rt.rpc.nio.NaRPCMessage;
+import lava.rt.rpc.nio.NaRPCServerChannel;
+import lava.rt.rpc.nio.NaRPCServerEndpoint;
 import lava.rt.rpc.nio.NioRpcServer;
-import lava.rt.rpc.oio.SocketRpcServer;
 import lava.rt.rpc.rmi.RmiRpcServer;
 
 public class RpcServerMain {
@@ -16,7 +19,40 @@ public class RpcServerMain {
 	
 	public enum Server{
 		
-		nio(new NioRpcServer(port)),aio(new AioRpcServer(port)),oio(new SocketRpcServer(port) );
+		nio(new NioRpcServer(port) {
+
+			@Override
+			public NaRPCMessage createRequest() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public NaRPCMessage processRequest(NaRPCMessage request) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public void addEndpoint(NaRPCServerChannel newConnection) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void removeEndpoint(NaRPCServerChannel closedConnection) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public NaRPCServerEndpoint createServerEndpoint() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+			
+			
+		}),aio(new AioRpcServer(port)),oio(new SocketRpcServer(port) );
 		
 		final RpcServer server;
 

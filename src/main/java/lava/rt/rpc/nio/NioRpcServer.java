@@ -24,7 +24,7 @@ extends RpcServer implements NaRPCService<REQ, RES>{
 			NaRPCServerEndpoint<REQ, RES> serverEndpoint = createServerEndpoint();
 			serverEndpoint.bind(this.addr);			
 			
-			while(true){
+			while(isRunning){
 				NaRPCServerChannel endpoint = serverEndpoint.accept();
 				System.out.println("new RPC connection, address " + endpoint.address());
 			}
